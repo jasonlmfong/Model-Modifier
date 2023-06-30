@@ -49,7 +49,6 @@ Generated\ Files/
 *_h.h
 *.ilk
 *.meta
-*.obj
 *.iobj
 *.pch
 *.pdb
@@ -187,7 +186,6 @@ MigrationBackup/
 *.slo
 *.lo
 *.o
-*.obj
 
 # Precompiled Headers
 *.gch
