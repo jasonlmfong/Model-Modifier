@@ -77,6 +77,10 @@ int main()
     bool wireframe = false;
     // framerate mode
     bool framerate = false;
+    // lighting controls
+    bool lighting = false;
+    // material controls
+    bool mat = false;
 
     GLFWwindow* windowID = window.GetID();
     // input initialization & input callbacks
@@ -103,6 +107,8 @@ int main()
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(windowID))
     {
+        ////////// input controls //////////
+
         lastTime = currentTime;
         currentTime = glfwGetTime();
         deltaTime = float(currentTime - lastTime);
@@ -153,15 +159,16 @@ int main()
         shader.SetUniformMat4f("u_Projection", projMatrix);
         Input::ResetScroll();
 
-        // clearing per frame
+        ////////// clearing per frame //////////
         glClearColor(0.80f, 0.90f, 0.96f, 1.00f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        /* Render here */
+        ////////// Render here //////////
         objectVA.Bind();
         shader.Bind();
         glDrawElements(GL_TRIANGLES, objectIB.GetCount(), GL_UNSIGNED_INT, 0);
 
+        ////////// UI controls //////////
         // imgui new frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -181,33 +188,36 @@ int main()
         {
             ImGui::Text("Application average %.1f FPS", ImGui::GetIO().Framerate);
         }
+        ImGui::Checkbox("Material controls", &mat);
+        if (mat)
+        {
+            ImGui::ColorEdit3("ambient", meshMat.m_Ambient);
+            ImGui::ColorEdit3("diffuse", meshMat.m_Diffuse);
+            ImGui::ColorEdit3("specular", meshMat.m_Specular);
+            ImGui::SliderFloat("shine", &meshMat.m_Shine, 10, 100);
+        }
+        ImGui::Checkbox("Lighting controls", &lighting);
+        if (lighting)
+        {
+            for (int l = 0; l < 3; l++)
+            {
+                ImGui::PushID(l);
+                ImGui::Text("Light #%d", l + 1);
+                ImGui::SliderFloat3("position", &light.m_Pos[3 * l], -10, 10);
+                ImGui::ColorEdit3("color", &light.m_Col[3 * l]);
+
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::PopID();
+            }
+        }
         ImGui::End();
 
-        ImGui::Begin("Material");
-        ImGui::ColorEdit3("ambient", meshMat.m_Ambient);
-        ImGui::ColorEdit3("diffuse", meshMat.m_Diffuse);
-        ImGui::ColorEdit3("specular", meshMat.m_Specular);
-        ImGui::SliderFloat("shine", &meshMat.m_Shine, 10, 100);
-        ImGui::End();
-
+        ////////// upload uniforms //////////
         shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient);
         shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
         shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
         shader.SetUniform1f("shine", meshMat.m_Shine);
-
-        ImGui::Begin("Lighting");
-        for (int l = 0; l < 3; l++)
-        {
-            ImGui::PushID(l);
-            ImGui::Text("Light #%d", l + 1);
-            ImGui::SliderFloat3("position", &light.m_Pos[3 * l], -10, 10);
-            ImGui::ColorEdit3("color", &light.m_Col[3 * l]);
-
-            ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::PopID();
-        }
-        ImGui::End();
         
         shader.SetUniform3fv("light_pos", 3, light.m_Pos);
         shader.SetUniform3fv("light_col", 3, light.m_Col);
