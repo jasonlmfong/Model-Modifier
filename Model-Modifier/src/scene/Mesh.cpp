@@ -10,12 +10,28 @@ Mesh::~Mesh()
     Destroy();
 }
 
+void customSplit(std::string str, char separator, std::vector<std::string> &strings) {
+    int startIndex = 0, endIndex = 0;
+    for (int i = 0; i <= str.size(); i++) 
+    {
+        // If we reached the end of the word or the end of the input.
+        if (str[i] == separator || i == str.size()) 
+        {
+            endIndex = i;
+            std::string temp;
+            temp.append(str, startIndex, endIndex - startIndex);
+            strings.push_back(temp);
+            startIndex = endIndex + 1;
+        }
+    }
+}
+
 void Mesh::loadOBJ(const char* filename)
 {
     std::ifstream in(filename);
     if (!in)
     {
-        std::cerr << "Cannot open " << filename << std::endl; 
+        std::cerr << "Cannot open " << filename << std::endl;
         exit(1);
     }
 
@@ -30,12 +46,20 @@ void Mesh::loadOBJ(const char* filename)
         }
         else if (line.substr(0, 2) == "f ")
         {
-            std::istringstream s(line.substr(2));
-            unsigned int a, b, c;
-            s >> a; s >> b; s >> c;
-            a--; b--; c--;
+            std::string s(line.substr(2));
+            std::vector<std::string> face;
+            customSplit(s, ' ', face);
             std::vector<unsigned int> faceIndices;
-            faceIndices.push_back(a); faceIndices.push_back(b); faceIndices.push_back(c);
+            for (std::string corner : face) 
+            {
+                std::vector<std::string> vertex;
+                customSplit(corner, '/', vertex);
+                // take the first position, regardless of the format (f v v v, f v/vt v/vt v/vt, f v/vt/vn v/vt/vn v/vt/vn)
+                unsigned int vertIdx = stoul(vertex[0]); 
+                vertIdx--; // change from obj index to c++ index
+                
+                faceIndices.push_back(vertIdx);
+            }
             m_Elements.push_back(faceIndices);
         }
     }
@@ -105,8 +129,15 @@ void Mesh::loadOBJ(const char* filename)
 void Mesh::Destroy()
 {
     m_VertexPos.clear();
+    m_Elements.clear();
     delete[] m_Indices;
     m_FaceNormals.clear();
     m_VertexNormals.clear();
     delete[] m_Vertices;
+}
+
+void Mesh::Reload(const char* filename)
+{
+    Destroy();
+    loadOBJ(filename);
 }

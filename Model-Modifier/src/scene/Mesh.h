@@ -21,6 +21,7 @@ public:
 
 	void loadOBJ(const char* filename);
 	void Destroy();
+	void Reload(const char* filename);
 
 public:
 	std::vector<glm::vec3> m_VertexPos;
