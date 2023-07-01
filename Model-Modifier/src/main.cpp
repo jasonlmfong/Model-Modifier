@@ -17,7 +17,10 @@ enum object
 {
     BUNNY,
     ICOSA,
-    SUZANNE
+    SHUTTLE,
+    SUZANNE,
+    TEAPOT,
+    TEDDY
 };
 
 int main()
@@ -82,6 +85,8 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    // object selection
+    bool objSelect = false;
     // wireframe mode
     bool wireframe = false;
     // framerate mode
@@ -223,10 +228,16 @@ int main()
         ImGui::NewFrame();
 
         ImGui::Begin("Display parameters");
-        ImGui::Text("Object");
-        ImGui::RadioButton("Bunny", &nextObject, BUNNY);
-        ImGui::RadioButton("Icosahedron", &nextObject, ICOSA);
-        ImGui::RadioButton("Suzanne", &nextObject, SUZANNE);
+        ImGui::Checkbox("Objection Selection", &objSelect);
+        if (objSelect)
+        {
+            ImGui::RadioButton("Bunny", &nextObject, BUNNY);
+            ImGui::RadioButton("Icosahedron", &nextObject, ICOSA);
+            ImGui::RadioButton("Shuttle", &nextObject, SHUTTLE);
+            ImGui::RadioButton("Suzanne", &nextObject, SUZANNE);
+            ImGui::RadioButton("Teapot", &nextObject, TEAPOT);
+            ImGui::RadioButton("Teddy", &nextObject, TEDDY);
+        }
 
         ImGui::Spacing();
         ImGui::Separator();
@@ -248,7 +259,7 @@ int main()
         ImGui::Spacing();
         ImGui::Separator();
 
-        ImGui::Checkbox("Material controls", &mat);
+        ImGui::Checkbox("Material Controls", &mat);
         if (mat)
         {
             ImGui::ColorEdit3("ambient", meshMat.m_Ambient);
@@ -260,7 +271,7 @@ int main()
         ImGui::Spacing();
         ImGui::Separator();
 
-        ImGui::Checkbox("Lighting controls", &lighting);
+        ImGui::Checkbox("Lighting Controls", &lighting);
         if (lighting)
         {
             for (int l = 0; l < 3; l++)
@@ -307,9 +318,24 @@ int main()
                     mesh.Reload("res/objects/ico.obj");
                     break;
                 }
+                case SHUTTLE:
+                {
+                    mesh.Reload("res/objects/shuttle.obj");
+                    break;
+                }
                 case SUZANNE:
                 {
                     mesh.Reload("res/objects/suzanne.obj");
+                    break;
+                }
+                case TEAPOT:
+                {
+                    mesh.Reload("res/objects/teapot.obj");
+                    break;
+                }
+                case TEDDY:
+                {
+                    mesh.Reload("res/objects/teddy.obj");
                     break;
                 }
             }
