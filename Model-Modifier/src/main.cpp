@@ -23,6 +23,12 @@ enum object
     TEDDY
 };
 
+enum shading
+{
+    PHONG,
+    NORMAL
+};
+
 int main()
 {
     unsigned int screenWidth = 1440;
@@ -48,16 +54,23 @@ int main()
     IndexBuffer objectIB(mesh.m_Indices, 3 * mesh.m_Elements.size(), DRAW_MODE::STATIC);
 
     // shaders
-    std::string vertexFilepath = "res/shaders/phong.vert";
-    std::string fragmentFilepath = "res/shaders/phong.frag";
+    std::string phongVertexPath = "res/shaders/phong.vert";
+    std::string phongFragmentPath = "res/shaders/phong.frag";
+    Shader phongShader(phongVertexPath, phongFragmentPath);
 
-    Shader shader(vertexFilepath, fragmentFilepath);
+    std::string normalVertexPath = "res/shaders/normal.vert";
+    std::string normalFragmentPath = "res/shaders/normal.frag";
+    Shader normalShader(normalVertexPath, normalFragmentPath);
+
+    int currShader = NORMAL;
+    int nextShader;
+    Shader shader = normalShader;
 
     // camera setup
-    float FOV = 30.0f;
+    float FOV = 65.0f;
     double yaw = -90.0;
     double pitch = -30.0;
-    glm::vec3 cameraPosition = { 0.0f, 0.65f, 1.0f };
+    glm::vec3 cameraPosition = { 0.0f, 1.75f, 2.0f };
     Camera camera(cameraPosition, yaw, pitch);
 
     float rotationAngle = 0.0f; // rotation angle of the object mesh
@@ -73,12 +86,16 @@ int main()
     shader.SetUniformMat4f("u_Model", modelMatrix);
     shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
     shader.SetUniformMat4f("u_Projection", projMatrix);
-    shader.SetUniform3fv("light_pos", 3, light.m_Pos);
-    shader.SetUniform3fv("light_col", 3, light.m_Col);
-    shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient);
-    shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
-    shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
-    shader.SetUniform1f("shine", meshMat.m_Shine);
+    if (currShader == PHONG)
+    {
+        shader.SetUniform3fv("light_pos", 3, light.m_Pos);
+        shader.SetUniform3fv("light_col", 3, light.m_Col);
+
+        shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient);
+        shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
+        shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
+        shader.SetUniform1f("shine", meshMat.m_Shine);
+    }
 
     // openGL settings
     glEnable(GL_DEPTH_TEST);
@@ -121,8 +138,9 @@ int main()
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(windowID))
     {
-        // reset object
+        // reset object and shader per frame
         nextObject = currObject;
+        nextShader = currShader;
 
         ////////// input controls //////////
         lastTime = currentTime;
@@ -140,7 +158,6 @@ int main()
             rotationAngle = (float)-0.25f;
             rotationAngle > 360.0f ? rotationAngle -= 360.0f : NULL;
             modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-            shader.SetUniformMat4f("u_Model", modelMatrix);
         }
         // rotate right
         if (Input::IsKeyDown(GLFW_KEY_RIGHT))
@@ -148,49 +165,42 @@ int main()
             rotationAngle = (float)0.25f;
             rotationAngle > 360.0f ? rotationAngle -= 360.0f : NULL;
             modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-            shader.SetUniformMat4f("u_Model", modelMatrix);
         }
         // Move forward
         if (Input::IsKeyDown(GLFW_KEY_W))
         {
             camera.MoveCamera(camera.GetCameraFront(), deltaTime * 5.0f);
             camera.SetViewMatrix();
-            shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
         }
         // Move backward
         if (Input::IsKeyDown(GLFW_KEY_S))
         {
             camera.MoveCamera(-camera.GetCameraFront(), deltaTime * 5.0f);
             camera.SetViewMatrix();
-            shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
         }
         // Strafe left
         if (Input::IsKeyDown(GLFW_KEY_A))
         {
             camera.MoveCamera(camera.GetCameraRight(), deltaTime * 5.0f);
             camera.SetViewMatrix();
-            shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
         }
         // Strafe right
         if (Input::IsKeyDown(GLFW_KEY_D))
         {
             camera.MoveCamera(-camera.GetCameraRight(), deltaTime * 5.0f);
             camera.SetViewMatrix();
-            shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
         }
         // fly up
         if (Input::IsKeyDown(GLFW_KEY_SPACE))
         {
             camera.MoveCamera(camera.GetCameraUp(), deltaTime * 5.0f);
             camera.SetViewMatrix();
-            shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
         }
         // drop down
         if (Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
         {
             camera.MoveCamera(-camera.GetCameraUp(), deltaTime * 5.0f);
             camera.SetViewMatrix();
-            shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
         }
         
         // mouse movement
@@ -206,15 +216,13 @@ int main()
             rotationAngle = (float)deltaX * sens;
             rotationAngle > 360.0f ? rotationAngle -= 360.0f : NULL;
             modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-            shader.SetUniformMat4f("u_Model", modelMatrix);
         }
 
         // adjust FOV using vertical scroll
         FOV -= Input::GetScrollY() * 2.0f;
-        FOV < 10.0f ? FOV = 10.0f : NULL;
+        FOV < 20.0f ? FOV = 20.0f : NULL;
         FOV > 110.0f ? FOV = 110.0f : NULL;
         projMatrix = glm::perspective(glm::radians(FOV), aspectRatio, 0.1f, 1000.0f);
-        shader.SetUniformMat4f("u_Projection", projMatrix);
         Input::ResetScroll();
 
         ////////// clearing per frame //////////
@@ -259,47 +267,75 @@ int main()
         ImGui::Spacing();
         ImGui::Separator();
 
-        ImGui::Checkbox("Material Controls", &mat);
-        if (mat)
-        {
-            ImGui::ColorEdit3("ambient", meshMat.m_Ambient);
-            ImGui::ColorEdit3("diffuse", meshMat.m_Diffuse);
-            ImGui::ColorEdit3("specular", meshMat.m_Specular);
-            ImGui::SliderFloat("shine", &meshMat.m_Shine, 10, 100);
-        }
-
+        ImGui::Text("Shader:");
+        ImGui::RadioButton("Normal Shader", &nextShader, NORMAL);
+        ImGui::RadioButton("Phong Shader", &nextShader, PHONG);
         ImGui::Spacing();
         ImGui::Separator();
-
-        ImGui::Checkbox("Lighting Controls", &lighting);
-        if (lighting)
+        if (nextShader == PHONG)
         {
-            for (int l = 0; l < 3; l++)
+            ImGui::Checkbox("Material Controls", &mat);
+            if (mat)
             {
-                ImGui::PushID(l);
-                ImGui::Text("Light #%d", l + 1);
-                ImGui::SliderFloat3("position", &light.m_Pos[3 * l], -10, 10);
-                ImGui::ColorEdit3("color", &light.m_Col[3 * l]);
+                ImGui::ColorEdit3("ambient", meshMat.m_Ambient);
+                ImGui::ColorEdit3("diffuse", meshMat.m_Diffuse);
+                ImGui::ColorEdit3("specular", meshMat.m_Specular);
+                ImGui::SliderFloat("shine", &meshMat.m_Shine, 10, 100);
+            }
 
-                ImGui::Spacing();
-                ImGui::Separator();
-                ImGui::PopID();
+            ImGui::Spacing();
+            ImGui::Separator();
+
+            ImGui::Checkbox("Lighting Controls", &lighting);
+            if (lighting)
+            {
+                for (int l = 0; l < 3; l++)
+                {
+                    ImGui::PushID(l);
+                    ImGui::Text("Light #%d", l + 1);
+                    ImGui::SliderFloat3("position", &light.m_Pos[3 * l], -10, 10);
+                    ImGui::ColorEdit3("color", &light.m_Col[3 * l]);
+
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::PopID();
+                }
             }
         }
-        ImGui::End();
 
-        ////////// upload uniforms //////////
-        shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient);
-        shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
-        shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
-        shader.SetUniform1f("shine", meshMat.m_Shine);
-        
-        shader.SetUniform3fv("light_pos", 3, light.m_Pos);
-        shader.SetUniform3fv("light_col", 3, light.m_Col);
+        ImGui::End();
 
         ImGui::EndFrame();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        ////////// change shader //////////
+        if (nextShader != currShader)
+        {
+            currShader = nextShader;
+
+            if (currShader == PHONG)
+                shader = phongShader;
+            else if (currShader == NORMAL)
+                shader = normalShader;
+
+            shader.Bind();
+        }
+
+        ////////// upload uniforms //////////
+        shader.SetUniformMat4f("u_Model", modelMatrix);
+        shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
+        shader.SetUniformMat4f("u_Projection", projMatrix);
+        if (currShader == PHONG)
+        {
+            shader.SetUniform3fv("light_pos", 3, light.m_Pos);
+            shader.SetUniform3fv("light_col", 3, light.m_Col);
+
+            shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient);
+            shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
+            shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
+            shader.SetUniform1f("shine", meshMat.m_Shine);
+        }
 
         ////////// regenerate object //////////
         if (nextObject != currObject)
@@ -346,8 +382,6 @@ int main()
         }
 
         ////////// Render here //////////
-        objectVA.Bind();
-        shader.Bind();
         glDrawElements(GL_TRIANGLES, objectIB.GetCount(), GL_UNSIGNED_INT, 0);
 
         /* Swap front and back buffers */
