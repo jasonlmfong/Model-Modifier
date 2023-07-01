@@ -13,6 +13,13 @@
 #include "scene/Material.h"
 #include "scene/Light.h"
 
+enum object
+{
+    BUNNY,
+    ICOSA,
+    SUZANNE
+};
+
 int main()
 {
     unsigned int screenWidth = 1440;
@@ -21,6 +28,8 @@ int main()
     Window window(screenWidth, screenHeight, "Model Modifier", NULL);
 
     // build mesh from obj file
+    int currObject = BUNNY;
+    int nextObject;
     Mesh mesh("res/objects/bunny.obj");
     Material meshMat;
 
@@ -107,14 +116,16 @@ int main()
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(windowID))
     {
-        ////////// input controls //////////
+        // reset object
+        nextObject = currObject;
 
+        ////////// input controls //////////
         lastTime = currentTime;
         currentTime = glfwGetTime();
         deltaTime = float(currentTime - lastTime);
 
         // close the window
-        if (Input::IsKeyDown(GLFW_KEY_Q))
+        if (Input::IsKeyDown(GLFW_KEY_ESCAPE))
         {
             exit(0);
         }
@@ -134,7 +145,49 @@ int main()
             modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
             shader.SetUniformMat4f("u_Model", modelMatrix);
         }
-
+        // Move forward
+        if (Input::IsKeyDown(GLFW_KEY_W))
+        {
+            camera.MoveCamera(camera.GetCameraFront(), deltaTime * 5.0f);
+            camera.SetViewMatrix();
+            shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
+        }
+        // Move backward
+        if (Input::IsKeyDown(GLFW_KEY_S))
+        {
+            camera.MoveCamera(-camera.GetCameraFront(), deltaTime * 5.0f);
+            camera.SetViewMatrix();
+            shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
+        }
+        // Strafe left
+        if (Input::IsKeyDown(GLFW_KEY_A))
+        {
+            camera.MoveCamera(camera.GetCameraRight(), deltaTime * 5.0f);
+            camera.SetViewMatrix();
+            shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
+        }
+        // Strafe right
+        if (Input::IsKeyDown(GLFW_KEY_D))
+        {
+            camera.MoveCamera(-camera.GetCameraRight(), deltaTime * 5.0f);
+            camera.SetViewMatrix();
+            shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
+        }
+        // fly up
+        if (Input::IsKeyDown(GLFW_KEY_SPACE))
+        {
+            camera.MoveCamera(camera.GetCameraUp(), deltaTime * 5.0f);
+            camera.SetViewMatrix();
+            shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
+        }
+        // drop down
+        if (Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
+        {
+            camera.MoveCamera(-camera.GetCameraUp(), deltaTime * 5.0f);
+            camera.SetViewMatrix();
+            shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
+        }
+        
         // mouse movement
         glfwGetCursorPos(windowID, &currXpos, &currYpos);
         deltaX = (currXpos - lastXpos) / screenWidth;  // it is bounded by -1 and 1
@@ -154,7 +207,7 @@ int main()
         // adjust FOV using vertical scroll
         FOV -= Input::GetScrollY() * 2.0f;
         FOV < 10.0f ? FOV = 10.0f : NULL;
-        FOV > 65.0f ? FOV = 65.0f : NULL;
+        FOV > 110.0f ? FOV = 110.0f : NULL;
         projMatrix = glm::perspective(glm::radians(FOV), aspectRatio, 0.1f, 1000.0f);
         shader.SetUniformMat4f("u_Projection", projMatrix);
         Input::ResetScroll();
@@ -163,11 +216,6 @@ int main()
         glClearColor(0.80f, 0.90f, 0.96f, 1.00f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        ////////// Render here //////////
-        objectVA.Bind();
-        shader.Bind();
-        glDrawElements(GL_TRIANGLES, objectIB.GetCount(), GL_UNSIGNED_INT, 0);
-
         ////////// UI controls //////////
         // imgui new frame
         ImGui_ImplOpenGL3_NewFrame();
@@ -175,6 +223,14 @@ int main()
         ImGui::NewFrame();
 
         ImGui::Begin("Display parameters");
+        ImGui::Text("Object");
+        ImGui::RadioButton("Bunny", &nextObject, BUNNY);
+        ImGui::RadioButton("Icosahedron", &nextObject, ICOSA);
+        ImGui::RadioButton("Suzanne", &nextObject, SUZANNE);
+
+        ImGui::Spacing();
+        ImGui::Separator();
+
         ImGui::Text("Options:");
         if (ImGui::Checkbox("Wireframe Mode", &wireframe))
         {
@@ -188,6 +244,10 @@ int main()
         {
             ImGui::Text("Application average %.1f FPS", ImGui::GetIO().Framerate);
         }
+
+        ImGui::Spacing();
+        ImGui::Separator();
+
         ImGui::Checkbox("Material controls", &mat);
         if (mat)
         {
@@ -196,6 +256,10 @@ int main()
             ImGui::ColorEdit3("specular", meshMat.m_Specular);
             ImGui::SliderFloat("shine", &meshMat.m_Shine, 10, 100);
         }
+
+        ImGui::Spacing();
+        ImGui::Separator();
+
         ImGui::Checkbox("Lighting controls", &lighting);
         if (lighting)
         {
@@ -225,6 +289,40 @@ int main()
         ImGui::EndFrame();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        ////////// regenerate object //////////
+        if (nextObject != currObject)
+        {
+            currObject = nextObject;
+
+            switch (currObject)
+            {
+                case BUNNY:
+                {
+                    mesh.Reload("res/objects/bunny.obj");
+                    break;
+                }
+                case ICOSA:
+                {
+                    mesh.Reload("res/objects/ico.obj");
+                    break;
+                }
+                case SUZANNE:
+                {
+                    mesh.Reload("res/objects/suzanne.obj");
+                    break;
+                }
+            }
+
+            objectVA.Bind();
+            objectVB.AssignData(mesh.m_Vertices, 2 * 3 * mesh.m_VertexPos.size() * sizeof(float), DRAW_MODE::STATIC);
+            objectIB.AssignData(mesh.m_Indices, 3 * mesh.m_Elements.size(), DRAW_MODE::STATIC);
+        }
+
+        ////////// Render here //////////
+        objectVA.Bind();
+        shader.Bind();
+        glDrawElements(GL_TRIANGLES, objectIB.GetCount(), GL_UNSIGNED_INT, 0);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(windowID);
