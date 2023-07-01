@@ -1,6 +1,10 @@
+#include <iostream>
+#include <ctime>
+
 #include "external/imgui/imgui.h"
 #include "external/imgui/imgui_impl_glfw.h"
 #include "external/imgui/imgui_impl_opengl3.h"
+#include "external/stb/stb_image_write.h"
 
 #include "renderer/Window.h"
 #include "renderer/Input.h"
@@ -28,6 +32,21 @@ enum shading
     PHONG,
     NORMAL
 };
+
+void saveImage(const char* filepath, GLFWwindow* window) 
+{
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    GLsizei stride = 3 * width;
+    stride += (stride % 4) ? (4 - stride % 4) : 0;
+    GLsizei bufferSize = stride * height;
+    std::vector<char> buffer(bufferSize);
+    glPixelStorei(GL_PACK_ALIGNMENT, 4);
+    glReadBuffer(GL_FRONT);
+    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer.data());
+    stbi_flip_vertically_on_write(true);
+    stbi_write_png(filepath, width, height, 3, buffer.data(), stride);
+}
 
 int main()
 {
@@ -262,6 +281,23 @@ int main()
         if (framerate)
         {
             ImGui::Text("Application average %.1f FPS", ImGui::GetIO().Framerate);
+        }
+        if (ImGui::Button("Screenshot")) 
+        {
+            struct tm newtime;
+            time_t now = time(0);
+            localtime_s(&newtime, &now);
+
+            // print various components of tm structure.
+            std::string year = std::to_string(1900 + newtime.tm_year);
+            std::string month = std::to_string(1 + newtime.tm_mon);
+            std::string day = std::to_string(newtime.tm_mday);
+            std::string hour = std::to_string(newtime.tm_hour);
+            std::string min = std::to_string(newtime.tm_min);
+            std::string sec = std::to_string(newtime.tm_sec);
+
+            std::string path = "gallery/Screenshot " + year + "-" + month + "-" + day + " " + hour + min + sec + ".png";
+            saveImage(path.c_str(), windowID);
         }
 
         ImGui::Spacing();
