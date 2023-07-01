@@ -29,7 +29,6 @@
     <ClCompile Include="src\external\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\scene\Light.cpp" />
     <ClCompile Include="src\scene\Material.cpp" />
-    <ClCompile Include="src\scene\Mesh.cpp" />
     <ClCompile Include="src\renderer\Input.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\renderer\Camera.cpp" />
@@ -38,6 +37,8 @@
     <ClCompile Include="src\renderer\VertexArray.cpp" />
     <ClCompile Include="src\renderer\VertexBuffer.cpp" />
     <ClCompile Include="src\renderer\Window.cpp" />
+    <ClCompile Include="src\scene\Mesh.cpp" />
+    <ClCompile Include="src\scene\Mesh.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\external\glm\common.hpp" />
@@ -335,7 +336,6 @@
     <ClInclude Include="src\HeightMapUniform.h" />
     <ClInclude Include="src\scene\Light.h" />
     <ClInclude Include="src\scene\Material.h" />
-    <ClInclude Include="src\scene\Mesh.h" />
     <ClInclude Include="src\renderer\Input.h" />
     <ClInclude Include="src\renderer\Camera.h" />
     <ClInclude Include="src\renderer\IndexBuffer.h" />
