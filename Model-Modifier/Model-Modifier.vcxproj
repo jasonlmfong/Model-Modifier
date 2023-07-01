@@ -28,6 +28,7 @@
     <ClCompile Include="src\external\imgui\imgui_tables.cpp" />
     <ClCompile Include="src\external\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\scene\Light.cpp" />
+    <ClCompile Include="src\scene\Material.cpp" />
     <ClCompile Include="src\scene\Mesh.cpp" />
     <ClCompile Include="src\renderer\Input.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -333,6 +334,7 @@
     <ClInclude Include="src\HeightMap.h" />
     <ClInclude Include="src\HeightMapUniform.h" />
     <ClInclude Include="src\scene\Light.h" />
+    <ClInclude Include="src\scene\Material.h" />
     <ClInclude Include="src\scene\Mesh.h" />
     <ClInclude Include="src\renderer\Input.h" />
     <ClInclude Include="src\renderer\Camera.h" />

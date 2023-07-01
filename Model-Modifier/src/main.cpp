@@ -10,6 +10,7 @@
 #include "renderer/Shader.h"
 #include "renderer/Camera.h"
 #include "scene/Mesh.h"
+#include "scene/Material.h"
 #include "scene/Light.h"
 
 int main()
@@ -21,6 +22,7 @@ int main()
 
     // build mesh from obj file
     Mesh mesh("res/objects/bunny.obj");
+    Material meshMat;
 
     VertexBufferLayout layout;
     layout.Push<float>(3); // 3d coordinates
@@ -59,8 +61,12 @@ int main()
     shader.SetUniformMat4f("u_Model", modelMatrix);
     shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
     shader.SetUniformMat4f("u_Projection", projMatrix);
-    shader.SetUniform3f("light_pos", light.m_Pos[0], light.m_Pos[1], light.m_Pos[2]);
-    shader.SetUniform3f("light_col", light.m_Col[0], light.m_Col[1], light.m_Col[2]);
+    shader.SetUniform3fv("light_pos", 1, light.m_Pos);
+    shader.SetUniform3fv("light_col", 1, light.m_Col);
+    shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient);
+    shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
+    shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
+    shader.SetUniform1f("shine", meshMat.m_Shine);
 
     // openGL settings
     glEnable(GL_DEPTH_TEST);
@@ -177,13 +183,25 @@ int main()
         }
         ImGui::End();
 
+        ImGui::Begin("Material");
+        ImGui::ColorEdit3("ambient", meshMat.m_Ambient);
+        ImGui::ColorEdit3("diffuse", meshMat.m_Diffuse);
+        ImGui::ColorEdit3("specular", meshMat.m_Specular);
+        ImGui::SliderFloat("shine", &meshMat.m_Shine, 10, 100);
+        ImGui::End();
+
+        shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient);
+        shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
+        shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
+        shader.SetUniform1f("shine", meshMat.m_Shine);
+
         ImGui::Begin("Lighting");
-        ImGui::SliderFloat3("LIGHT 1 pos", light.m_Pos, 0, 10);
+        ImGui::SliderFloat3("LIGHT 1 pos", light.m_Pos, -10, 10);
         ImGui::ColorEdit3("LIGHT 1 col", light.m_Col);
         ImGui::End();
 
-        shader.SetUniform3f("light_pos", light.m_Pos[0], light.m_Pos[1], light.m_Pos[2]);
-        shader.SetUniform3f("light_col", light.m_Col[0], light.m_Col[1], light.m_Col[2]);
+        shader.SetUniform3fv("light_pos", 1, light.m_Pos);
+        shader.SetUniform3fv("light_col", 1, light.m_Col);
 
         ImGui::EndFrame();
         ImGui::Render();
