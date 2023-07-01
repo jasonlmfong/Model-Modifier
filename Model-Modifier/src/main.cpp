@@ -61,8 +61,8 @@ int main()
     shader.SetUniformMat4f("u_Model", modelMatrix);
     shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
     shader.SetUniformMat4f("u_Projection", projMatrix);
-    shader.SetUniform3fv("light_pos", 1, light.m_Pos);
-    shader.SetUniform3fv("light_col", 1, light.m_Col);
+    shader.SetUniform3fv("light_pos", 3, light.m_Pos);
+    shader.SetUniform3fv("light_col", 3, light.m_Col);
     shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient);
     shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
     shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
@@ -196,12 +196,21 @@ int main()
         shader.SetUniform1f("shine", meshMat.m_Shine);
 
         ImGui::Begin("Lighting");
-        ImGui::SliderFloat3("LIGHT 1 pos", light.m_Pos, -10, 10);
-        ImGui::ColorEdit3("LIGHT 1 col", light.m_Col);
-        ImGui::End();
+        for (int l = 0; l < 3; l++)
+        {
+            ImGui::PushID(l);
+            ImGui::Text("Light #%d", l + 1);
+            ImGui::SliderFloat3("position", &light.m_Pos[3 * l], -10, 10);
+            ImGui::ColorEdit3("color", &light.m_Col[3 * l]);
 
-        shader.SetUniform3fv("light_pos", 1, light.m_Pos);
-        shader.SetUniform3fv("light_col", 1, light.m_Col);
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::PopID();
+        }
+        ImGui::End();
+        
+        shader.SetUniform3fv("light_pos", 3, light.m_Pos);
+        shader.SetUniform3fv("light_col", 3, light.m_Col);
 
         ImGui::EndFrame();
         ImGui::Render();
