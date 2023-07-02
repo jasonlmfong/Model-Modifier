@@ -60,16 +60,16 @@ void Mesh::loadOBJ(const char* filename)
                 
                 faceIndices.push_back(vertIdx);
             }
-            m_Elements.push_back(faceIndices);
+            m_FaceIndices.push_back(faceIndices);
         }
     }
 
-    m_FaceNormals.resize(m_Elements.size());
-    for (int i = 0; i < m_Elements.size(); i++)
+    m_FaceNormals.resize(m_FaceIndices.size());
+    for (int i = 0; i < m_FaceIndices.size(); i++)
     {
-        unsigned int ia = m_Elements[i][0];
-        unsigned int ib = m_Elements[i][1];
-        unsigned int ic = m_Elements[i][2];
+        unsigned int ia = m_FaceIndices[i][0];
+        unsigned int ib = m_FaceIndices[i][1];
+        unsigned int ic = m_FaceIndices[i][2];
         glm::vec3 normal = glm::normalize(
             glm::cross(
                 m_VertexPos[ib] - m_VertexPos[ia],
@@ -79,65 +79,114 @@ void Mesh::loadOBJ(const char* filename)
         m_FaceNormals[i] = normal;
     }
 
-    // TODO: USE VN FOR VERTEX NORMALS
-    // TODO: IMPLEMENT "PER-CORNER" NORMALS
-    m_VertexNormals.resize(m_VertexPos.size());
+    m_SmoothVertexNormals.resize(m_VertexPos.size());
     for (int i = 0; i < m_VertexPos.size(); i++)
     {
         glm::vec3 currVertNormal = glm::vec3(0, 0, 0);
 
-        for (int face = 0; face < m_Elements.size(); face++)
+        for (int face = 0; face < m_FaceIndices.size(); face++)
         {
-            if (i == m_Elements[face][0] || i == m_Elements[face][1] || i == m_Elements[face][2])
+            if (i == m_FaceIndices[face][0] || i == m_FaceIndices[face][1] || i == m_FaceIndices[face][2])
             {
                 currVertNormal += m_FaceNormals[face];
             }
         }
 
-        m_VertexNormals[i] = glm::normalize(currVertNormal);
+        m_SmoothVertexNormals[i] = glm::normalize(currVertNormal);
+    }
+
+    ////////// OUTPUTS TO OPENGL /////////
+    // 3D pos and normal of each vertex
+    m_FlatNumVert = 2 * 3 * 3 * m_FaceIndices.size();
+    m_FlatVertices = new float[m_FlatNumVert] {};
+    for (int i = 0; i < m_FaceIndices.size(); i++) 
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            // ith face, jth corner, xyz coordinates and normals
+            m_FlatVertices[18 * i + 6 * j + 0] = m_VertexPos[m_FaceIndices[i][j]].x;
+            m_FlatVertices[18 * i + 6 * j + 1] = m_VertexPos[m_FaceIndices[i][j]].y;
+            m_FlatVertices[18 * i + 6 * j + 2] = m_VertexPos[m_FaceIndices[i][j]].z;
+
+            m_FlatVertices[18 * i + 6 * j + 3] = m_FaceNormals[i].x;
+            m_FlatVertices[18 * i + 6 * j + 4] = m_FaceNormals[i].y;
+            m_FlatVertices[18 * i + 6 * j + 5] = m_FaceNormals[i].z;
+        }
     }
 
 
+    m_FlatNumIdx = 3 * 3 * m_FaceIndices.size();
+    m_FlatIndices = new unsigned int[m_FlatNumIdx];
+    for (int i = 0; i < m_FlatNumIdx; i++)
+    {
+        m_FlatIndices[i] = i;
+    }
+
+    ////////// OUTPUTS TO OPENGL /////////
     // 3D pos and normal of each vertex
-    m_Vertices = new float[2 * 3 * m_VertexPos.size()] {};
+    m_SmoothNumVert = 2 * 3 * m_VertexPos.size();
+    m_SmoothVertices = new float[m_SmoothNumVert] {};
     for (int i = 0; i < m_VertexPos.size(); i++)
     {
         // x value of the vertex
-        m_Vertices[6 * i + 0] = m_VertexPos[i].x;
+        m_SmoothVertices[6 * i + 0] = m_VertexPos[i].x;
         // y value of the vertex
-        m_Vertices[6 * i + 1] = m_VertexPos[i].y;
+        m_SmoothVertices[6 * i + 1] = m_VertexPos[i].y;
         // z value of the vertex
-        m_Vertices[6 * i + 2] = m_VertexPos[i].z;
+        m_SmoothVertices[6 * i + 2] = m_VertexPos[i].z;
 
         // x value of the normal
-        m_Vertices[6 * i + 3] = m_VertexNormals[i].x;
+        m_SmoothVertices[6 * i + 3] = m_SmoothVertexNormals[i].x;
         // y value of the normal
-        m_Vertices[6 * i + 4] = m_VertexNormals[i].y;
+        m_SmoothVertices[6 * i + 4] = m_SmoothVertexNormals[i].y;
         // z value of the normal
-        m_Vertices[6 * i + 5] = m_VertexNormals[i].z;
+        m_SmoothVertices[6 * i + 5] = m_SmoothVertexNormals[i].z;
     }
 
-    m_Indices = new unsigned int[3 * m_Elements.size()];
-    for (int i = 0; i < m_Elements.size(); i++)
+    m_SmoothNumIdx = 3 * m_FaceIndices.size();
+    m_SmoothIndices = new unsigned int[m_SmoothNumIdx];
+    for (int i = 0; i < m_FaceIndices.size(); i++)
     {
-        m_Indices[3 * i + 0] = m_Elements[i][0];
-        m_Indices[3 * i + 1] = m_Elements[i][1];
-        m_Indices[3 * i + 2] = m_Elements[i][2];
+        m_SmoothIndices[3 * i + 0] = m_FaceIndices[i][0];
+        m_SmoothIndices[3 * i + 1] = m_FaceIndices[i][1];
+        m_SmoothIndices[3 * i + 2] = m_FaceIndices[i][2];
     }
 }
 
 void Mesh::Destroy()
 {
     m_VertexPos.clear();
-    m_Elements.clear();
-    delete[] m_Indices;
+    m_FaceIndices.clear();
     m_FaceNormals.clear();
-    m_VertexNormals.clear();
-    delete[] m_Vertices;
+
+    delete[] m_FlatVertices;
+    delete[] m_FlatIndices;
+
+    m_SmoothVertexNormals.clear();
+    delete[] m_SmoothVertices;
+    delete[] m_SmoothIndices;
 }
 
 void Mesh::Reload(const char* filename)
 {
     Destroy();
     loadOBJ(filename);
+}
+
+void Mesh::preRender(int shading)
+{
+    if (shading == FLAT)
+    {
+        m_OutNumVert = m_FlatNumVert;
+        m_OutVertices = m_FlatVertices;
+        m_OutNumIdx = m_FlatNumIdx;
+        m_OutIndices = m_FlatIndices;
+    }
+    else if (shading == SMOOTH)
+    {
+        m_OutNumVert = m_SmoothNumVert;
+        m_OutVertices = m_SmoothVertices;
+        m_OutNumIdx = m_SmoothNumIdx;
+        m_OutIndices = m_SmoothIndices;
+    }
 }
