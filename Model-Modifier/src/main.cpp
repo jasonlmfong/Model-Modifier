@@ -27,7 +27,7 @@ enum object
     TEDDY
 };
 
-enum shading
+enum shader
 {
     PHONG,
     NORMAL
@@ -65,12 +65,17 @@ int main()
     layout.Push<float>(3); // 3d coordinates
     layout.Push<float>(3); // normals
 
+    // shading type
+    int currShadingType = FLAT;
+    int nextShadingType;
+    mesh.preRender(currObject);
+
     // build openGL objects using mesh
     VertexArray objectVA;
-    VertexBuffer objectVB(mesh.m_Vertices, 2 * 3 * mesh.m_VertexPos.size() * sizeof(float), DRAW_MODE::STATIC);
+    VertexBuffer objectVB(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
     // bind vertex buffer to vertex array
     objectVA.AddBuffer(objectVB, layout);
-    IndexBuffer objectIB(mesh.m_Indices, 3 * mesh.m_Elements.size(), DRAW_MODE::STATIC);
+    IndexBuffer objectIB(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
 
     // shaders
     std::string phongVertexPath = "res/shaders/phong.vert";
@@ -159,6 +164,7 @@ int main()
     {
         // reset object and shader per frame
         nextObject = currObject;
+        nextShadingType = currShadingType;
         nextShader = currShader;
 
         ////////// input controls //////////
@@ -269,43 +275,17 @@ int main()
         ImGui::Spacing();
         ImGui::Separator();
 
-        ImGui::Text("Options:");
-        if (ImGui::Checkbox("Wireframe Mode", &wireframe))
-        {
-            if (wireframe)
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
-            else
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // surface mode
-        }
-        ImGui::Checkbox("Framerate Tracker", &framerate);
-        if (framerate)
-        {
-            ImGui::Text("Application average %.1f FPS", ImGui::GetIO().Framerate);
-        }
-        if (ImGui::Button("Screenshot")) 
-        {
-            struct tm newtime;
-            time_t now = time(0);
-            localtime_s(&newtime, &now);
-
-            // print various components of tm structure.
-            std::string year = std::to_string(1900 + newtime.tm_year);
-            std::string month = std::to_string(1 + newtime.tm_mon);
-            std::string day = std::to_string(newtime.tm_mday);
-            std::string hour = std::to_string(newtime.tm_hour);
-            std::string min = std::to_string(newtime.tm_min);
-            std::string sec = std::to_string(newtime.tm_sec);
-
-            std::string path = "gallery/Screenshot " + year + "-" + month + "-" + day + " " + hour + min + sec + ".png";
-            saveImage(path.c_str(), windowID);
-        }
+        ImGui::Text("Shading Type");
+        ImGui::RadioButton("Flat Shading", &nextShadingType, FLAT);
+        ImGui::RadioButton("Smooth Shading", &nextShadingType, SMOOTH);
 
         ImGui::Spacing();
         ImGui::Separator();
 
-        ImGui::Text("Shader:");
+        ImGui::Text("Shader Selection");
         ImGui::RadioButton("Normal Shader", &nextShader, NORMAL);
         ImGui::RadioButton("Phong Shader", &nextShader, PHONG);
+
         ImGui::Spacing();
         ImGui::Separator();
         if (nextShader == PHONG)
@@ -333,10 +313,43 @@ int main()
                     ImGui::ColorEdit3("color", &light.m_Col[3 * l]);
 
                     ImGui::Spacing();
-                    ImGui::Separator();
                     ImGui::PopID();
                 }
             }
+        }
+
+        ImGui::Spacing();
+        ImGui::Separator();
+
+        ImGui::Text("Options:");
+        if (ImGui::Checkbox("Wireframe Mode", &wireframe))
+        {
+            if (wireframe)
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
+            else
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // surface mode
+        }
+        ImGui::Checkbox("Framerate Tracker", &framerate);
+        if (framerate)
+        {
+            ImGui::Text("Application average %.1f FPS", ImGui::GetIO().Framerate);
+        }
+        if (ImGui::Button("Screenshot"))
+        {
+            struct tm newtime;
+            time_t now = time(0);
+            localtime_s(&newtime, &now);
+
+            // print various components of tm structure.
+            std::string year = std::to_string(1900 + newtime.tm_year);
+            std::string month = std::to_string(1 + newtime.tm_mon);
+            std::string day = std::to_string(newtime.tm_mday);
+            std::string hour = std::to_string(newtime.tm_hour);
+            std::string min = std::to_string(newtime.tm_min);
+            std::string sec = std::to_string(newtime.tm_sec);
+
+            std::string path = "gallery/Screenshot " + year + "-" + month + "-" + day + " " + hour + min + sec + ".png";
+            saveImage(path.c_str(), windowID);
         }
 
         ImGui::End();
@@ -371,6 +384,18 @@ int main()
             shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
             shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
             shader.SetUniform1f("shine", meshMat.m_Shine);
+        }
+
+        ////////// regenerate object //////////
+        if (nextShadingType != currShadingType)
+        {
+            currShadingType = nextShadingType;
+
+            mesh.preRender(currShadingType);
+
+            objectVA.Bind();
+            objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
+            objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
         }
 
         ////////// regenerate object //////////
@@ -412,9 +437,10 @@ int main()
                 }
             }
 
+            mesh.preRender(currShadingType);
             objectVA.Bind();
-            objectVB.AssignData(mesh.m_Vertices, 2 * 3 * mesh.m_VertexPos.size() * sizeof(float), DRAW_MODE::STATIC);
-            objectIB.AssignData(mesh.m_Indices, 3 * mesh.m_Elements.size(), DRAW_MODE::STATIC);
+            objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
+            objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
         }
 
         ////////// Render here //////////
