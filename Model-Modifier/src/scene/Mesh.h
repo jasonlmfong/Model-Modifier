@@ -13,6 +13,12 @@
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
 
+enum shading
+{
+	FLAT,
+	SMOOTH
+};
+
 class Mesh
 {
 public:
@@ -23,11 +29,26 @@ public:
 	void Destroy();
 	void Reload(const char* filename);
 
+	void preRender(int shading);
+
 public:
 	std::vector<glm::vec3> m_VertexPos;
-	std::vector<std::vector<unsigned int>> m_Elements;
-	unsigned int* m_Indices;
+	std::vector<std::vector<unsigned int>> m_FaceIndices;
 	std::vector<glm::vec3> m_FaceNormals;
-	std::vector<glm::vec3> m_VertexNormals;
-	float* m_Vertices;
+
+	unsigned int m_FlatNumVert;
+	float* m_FlatVertices;
+	unsigned int m_FlatNumIdx;
+	unsigned int* m_FlatIndices;
+
+	std::vector<glm::vec3> m_SmoothVertexNormals;
+	unsigned int m_SmoothNumVert;
+	float* m_SmoothVertices;
+	unsigned int m_SmoothNumIdx;
+	unsigned int* m_SmoothIndices;
+
+	unsigned int m_OutNumVert;
+	float* m_OutVertices;
+	unsigned int m_OutNumIdx;
+	unsigned int* m_OutIndices;
 };
