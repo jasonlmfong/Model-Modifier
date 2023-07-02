@@ -6,5 +6,9 @@ in vec3 normal_vec;
 
 void main()
 {
-	color = vec4(normal_vec, 1.0);
+	// normal vector can have components ranging from -1 to 1, normalize to 0 to 1 for colors
+	vec3 normal = normal_vec / 2;
+	normal += (0.5, 0.5, 0.5);
+
+	color = vec4(normal, 1.0);
 };
