@@ -20,11 +20,18 @@
 enum object
 {
     BUNNY,
+    COWHEAD,
+    DOUBLETORUS,
+    FACE,
+    GARGOYLE,
     ICOSA,
+    KITTEN,
     SHUTTLE,
+    SPHERE,
     SUZANNE,
     TEAPOT,
-    TEDDY
+    TEDDY,
+    TORUS
 };
 
 enum shader
@@ -265,11 +272,18 @@ int main()
         if (objSelect)
         {
             ImGui::RadioButton("Bunny", &nextObject, BUNNY);
+            ImGui::RadioButton("Cow head", &nextObject, COWHEAD);
+            ImGui::RadioButton("Double torus", &nextObject, DOUBLETORUS);
+            ImGui::RadioButton("Face", &nextObject, FACE);
+            ImGui::RadioButton("Gargoyle", &nextObject, GARGOYLE);
             ImGui::RadioButton("Icosahedron", &nextObject, ICOSA);
+            ImGui::RadioButton("Kitten", &nextObject, KITTEN);
             ImGui::RadioButton("Shuttle", &nextObject, SHUTTLE);
+            ImGui::RadioButton("Sphere", &nextObject, SPHERE);
             ImGui::RadioButton("Suzanne", &nextObject, SUZANNE);
             ImGui::RadioButton("Teapot", &nextObject, TEAPOT);
             ImGui::RadioButton("Teddy", &nextObject, TEDDY);
+            ImGui::RadioButton("Torus", &nextObject, TORUS);
         }
 
         ImGui::Spacing();
@@ -286,8 +300,6 @@ int main()
         ImGui::RadioButton("Normal Shader", &nextShader, NORMAL);
         ImGui::RadioButton("Phong Shader", &nextShader, PHONG);
 
-        ImGui::Spacing();
-        ImGui::Separator();
         if (nextShader == PHONG)
         {
             ImGui::Checkbox("Material Controls", &mat);
@@ -410,14 +422,44 @@ int main()
                     mesh.Reload("res/objects/bunny.obj");
                     break;
                 }
+                case COWHEAD:
+                {
+                    mesh.Reload("res/objects/cowhead.obj");
+                    break;
+                }
+                case DOUBLETORUS:
+                {
+                    mesh.Reload("res/objects/double-torus.obj");
+                    break;
+                }
+                case FACE:
+                {
+                    mesh.Reload("res/objects/face.obj");
+                    break;
+                }
+                case GARGOYLE:
+                {
+                    mesh.Reload("res/objects/gargoyle.obj");
+                    break;
+                }
                 case ICOSA:
                 {
                     mesh.Reload("res/objects/ico.obj");
                     break;
                 }
+                case KITTEN:
+                {
+                    mesh.Reload("res/objects/kitten.obj");
+                    break;
+                }
                 case SHUTTLE:
                 {
                     mesh.Reload("res/objects/shuttle.obj");
+                    break;
+                }
+                case SPHERE:
+                {
+                    mesh.Reload("res/objects/spheree.obj");
                     break;
                 }
                 case SUZANNE:
@@ -433,6 +475,11 @@ int main()
                 case TEDDY:
                 {
                     mesh.Reload("res/objects/teddy.obj");
+                    break;
+                }
+                case TORUS:
+                {
+                    mesh.Reload("res/objects/torus.obj");
                     break;
                 }
             }
