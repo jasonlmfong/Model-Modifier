@@ -459,7 +459,7 @@ int main()
                 }
                 case SPHERE:
                 {
-                    mesh.Reload("res/objects/spheree.obj");
+                    mesh.Reload("res/objects/sphere.obj");
                     break;
                 }
                 case SUZANNE:

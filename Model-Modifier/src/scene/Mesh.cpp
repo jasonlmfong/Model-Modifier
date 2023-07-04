@@ -52,6 +52,8 @@ void Mesh::loadOBJ(const char* filename)
             std::vector<unsigned int> faceIndices;
             for (std::string corner : face) 
             {
+                if (corner == "")
+                    continue;
                 std::vector<std::string> vertex;
                 customSplit(corner, '/', vertex);
                 // take the first position, regardless of the format (f v v v, f v/vt v/vt v/vt, f v/vt/vn v/vt/vn v/vt/vn)
