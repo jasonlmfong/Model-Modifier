@@ -3,10 +3,10 @@
 layout(location = 0) out vec4 color;
 
 in vec3 pos;
-in vec4 view_pos;
+in vec3 view_pos;
 in vec3 view_pos_normal;
 
-in vec4 proj_light_pos[3];
+in vec3 proj_light_pos[3];
 
 uniform vec3 light_col[3]; // light color
 uniform int light_toggled[3]; // light on/off
@@ -16,11 +16,11 @@ uniform vec3 diffuse; // diffuse constant
 uniform vec3 specular; // specular constnat
 uniform float shine; // phong exponent
 
-vec3 compute_light(vec4 lightpos, vec3 lightcol)
+vec3 compute_light(vec3 lightpos, vec3 lightcol)
 {
 	vec3 n = normalize(view_pos_normal);
-	vec3 v = normalize(-view_pos.xyz);
-	vec3 l = normalize(lightpos.xyz - view_pos.xyz);
+	vec3 v = normalize(-view_pos);
+	vec3 l = normalize(lightpos - view_pos);
 	vec3 h = normalize(v + l);
 	
 	vec3 diffuse_light = diffuse * lightcol * max(0.0, dot(n, l));
