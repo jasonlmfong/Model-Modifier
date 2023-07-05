@@ -10,4 +10,7 @@ Material::Material()
 
 Material::~Material()
 {
+	delete[] m_Ambient;
+	delete[] m_Diffuse;
+	delete[] m_Specular;
 }
