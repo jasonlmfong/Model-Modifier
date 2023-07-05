@@ -229,7 +229,7 @@ int main()
             camera.SetViewMatrix();
         }
         // drop down
-        if (Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
+        if (Input::IsKeyDown(GLFW_KEY_LEFT_CONTROL))
         {
             camera.MoveCamera(-camera.GetCameraUp(), deltaTime * 5.0f);
             camera.SetViewMatrix();
@@ -364,7 +364,6 @@ int main()
 
         ImGui::EndFrame();
         ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         ////////// change shader //////////
         if (nextShader != currShader)
@@ -494,8 +493,11 @@ int main()
             objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
         }
 
-        ////////// Render here //////////
+        ////////// Render object here //////////
         glDrawElements(GL_TRIANGLES, objectIB.GetCount(), GL_UNSIGNED_INT, 0);
+
+        ////////// Render Imgui here //////////
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         /* Swap front and back buffers */
         glfwSwapBuffers(windowID);
