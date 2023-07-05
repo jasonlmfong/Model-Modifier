@@ -6,8 +6,7 @@ in vec3 pos;
 in vec3 view_pos;
 in vec3 view_pos_normal;
 
-in vec3 proj_light_pos[3];
-
+uniform vec3 light_pos[3];
 uniform vec3 light_col[3]; // light color
 uniform int light_toggled[3]; // light on/off
 
@@ -35,7 +34,7 @@ void main()
 	for (int i = 0; i < 3; i++)
     {
 		if (light_toggled[i] == 1)
-			total_light += compute_light(proj_light_pos[i], light_col[i]);
+			total_light += compute_light(light_pos[i], light_col[i]);
     }
 	color = vec4(total_light, 1.0);
 };
