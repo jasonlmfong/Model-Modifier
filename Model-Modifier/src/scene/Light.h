@@ -6,10 +6,11 @@
 class Light
 {
 public:
-	Light(glm::vec3 pos, glm::vec3 col);
+	Light();
 	~Light();
 
 public:
+	bool* m_LightsToggled;
 	float* m_Pos;
 	float* m_Col;
 };

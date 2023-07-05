@@ -110,7 +110,8 @@ int main()
     glm::mat4 projMatrix = glm::perspective(glm::radians(FOV), aspectRatio, 0.1f, 1000.0f);
 
     // lighting
-    Light light = Light(glm::vec3(0, 10, 0), glm::vec3(1.0f, 1.0f, 1.0f));
+    Light light = Light();
+    float* lightColors = new float[3];
 
     // upload uniforms
     shader.Bind();
@@ -306,10 +307,14 @@ int main()
                     {
                         ImGui::PushID(l);
                         ImGui::Text("Light #%d", l + 1);
-                        ImGui::SliderFloat3("position", &light.m_Pos[3 * l], -10, 10);
-                        ImGui::ColorEdit3("color", &light.m_Col[3 * l]);
+                        ImGui::Checkbox("Toggle light", &light.m_LightsToggled[l]);
+                        if (light.m_LightsToggled[l])
+                        {
+                            ImGui::SliderFloat3("position", &light.m_Pos[3 * l], -10, 10);
+                            ImGui::ColorEdit3("color", &light.m_Col[3 * l]);
 
-                        ImGui::Spacing();
+                            ImGui::Spacing();
+                        }
                         ImGui::PopID();
                     }
                 }
@@ -318,14 +323,14 @@ int main()
 
         if (ImGui::CollapsingHeader("Display options:"))
         {
-            if (ImGui::Checkbox("Wireframe Mode", &wireframe))
+            if (ImGui::Checkbox("Wireframe mode", &wireframe))
             {
                 if (wireframe)
                     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
                 else
                     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // surface mode
             }
-            ImGui::Checkbox("Framerate Tracker", &framerate);
+            ImGui::Checkbox("Framerate tracker", &framerate);
             if (framerate)
             {
                 ImGui::Text("Application average %.1f FPS", ImGui::GetIO().Framerate);
@@ -368,6 +373,23 @@ int main()
             shader.Bind();
         }
 
+        ////////// check if lights are on/off /////////
+        for (int i = 0; i < 3; i++)
+        {
+            if (light.m_LightsToggled[i])
+            {
+                lightColors[3 * i + 0] = light.m_Col[3 * i + 0];
+                lightColors[3 * i + 1] = light.m_Col[3 * i + 1];
+                lightColors[3 * i + 2] = light.m_Col[3 * i + 2];
+            }
+            else
+            {
+                lightColors[3 * i + 0] = 0;
+                lightColors[3 * i + 1] = 0;
+                lightColors[3 * i + 2] = 0;
+            }
+        }
+
         ////////// upload uniforms //////////
         shader.SetUniformMat4f("u_Model", modelMatrix);
         shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
@@ -375,7 +397,7 @@ int main()
         if (currShader == PHONG)
         {
             shader.SetUniform3fv("light_pos", 3, light.m_Pos);
-            shader.SetUniform3fv("light_col", 3, light.m_Col);
+            shader.SetUniform3fv("light_col", 3, lightColors); // upload the lights with toggle option
 
             shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient);
             shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
@@ -486,6 +508,8 @@ int main()
     }
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
+
+    delete[] lightColors;
 
     window.~Window();
     return 0;

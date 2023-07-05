@@ -1,11 +1,27 @@
 #include "Light.h"
 
-Light::Light(glm::vec3 pos, glm::vec3 col)
+Light::Light()
 {
-	m_Pos = new float[9] {pos.x, pos.y, pos.z};
-	m_Col = new float[9] {col.x, col.y, col.z};
+	m_LightsToggled = new bool[3] { true, false, false };
+
+	m_Pos = new float[9] 
+	{
+		-10, 5, 0, // top left
+		10, 5, 0, // top right
+		0, -10, 0 // bottom
+	};
+
+	m_Col = new float[9] 
+	{
+		0.498f, 0.522f, 0.333f, // olive
+		1.0f, 0.466f, 1.0f, // pink
+		0.259f, 0.522f, 0.967f // blue
+	};
 }
 
 Light::~Light()
 {
+	delete[] m_LightsToggled;
+	delete[] m_Pos;
+	delete[] m_Col;
 }
