@@ -111,7 +111,7 @@ int main()
 
     // lighting
     Light light = Light();
-    float* lightColors = new float[3];
+    int* toggled = new int[3];
 
     // upload uniforms
     shader.Bind();
@@ -373,23 +373,6 @@ int main()
             shader.Bind();
         }
 
-        ////////// check if lights are on/off /////////
-        for (int i = 0; i < 3; i++)
-        {
-            if (light.m_LightsToggled[i])
-            {
-                lightColors[3 * i + 0] = light.m_Col[3 * i + 0];
-                lightColors[3 * i + 1] = light.m_Col[3 * i + 1];
-                lightColors[3 * i + 2] = light.m_Col[3 * i + 2];
-            }
-            else
-            {
-                lightColors[3 * i + 0] = 0;
-                lightColors[3 * i + 1] = 0;
-                lightColors[3 * i + 2] = 0;
-            }
-        }
-
         ////////// upload uniforms //////////
         shader.SetUniformMat4f("u_Model", modelMatrix);
         shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
@@ -397,7 +380,13 @@ int main()
         if (currShader == PHONG)
         {
             shader.SetUniform3fv("light_pos", 3, light.m_Pos);
-            shader.SetUniform3fv("light_col", 3, lightColors); // upload the lights with toggle option
+            shader.SetUniform3fv("light_col", 3, light.m_Col); 
+            ////////// cast bool to int /////////
+            for (int i = 0; i < 3; i++)
+            {
+                toggled[i] = light.m_LightsToggled[i];
+            }
+            shader.SetUniform1iv("light_toggled", 3, toggled); // upload the lights toggle option
 
             shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient);
             shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
@@ -509,7 +498,7 @@ int main()
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
 
-    delete[] lightColors;
+    delete[] toggled;
 
     window.~Window();
     return 0;
