@@ -36,8 +36,9 @@ enum object
 
 enum shader
 {
-    PHONG,
-    NORMAL
+    GOURAND,
+    NORMAL,
+    PHONG
 };
 
 void saveImage(const char* filepath, GLFWwindow* window) 
@@ -93,6 +94,10 @@ int main()
     std::string normalFragmentPath = "res/shaders/normal.frag";
     Shader normalShader(normalVertexPath, normalFragmentPath);
 
+    std::string gourandVertexPath = "res/shaders/gourand.vert";
+    std::string gourandFragmentPath = "res/shaders/gourand.frag";
+    Shader gourandShader(gourandVertexPath, gourandFragmentPath);
+
     int currShader = NORMAL;
     int nextShader;
     Shader shader = normalShader;
@@ -118,7 +123,7 @@ int main()
     shader.SetUniformMat4f("u_Model", modelMatrix);
     shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
     shader.SetUniformMat4f("u_Projection", projMatrix);
-    if (currShader == PHONG)
+    if (currShader == GOURAND || currShader == PHONG)
     {
         shader.SetUniform3fv("light_pos", 3, light.m_Pos);
         shader.SetUniform3fv("light_col", 3, light.m_Col);
@@ -289,9 +294,10 @@ int main()
         if (ImGui::CollapsingHeader("Shader selection"))
         {
             ImGui::RadioButton("Normal shader", &nextShader, NORMAL);
+            ImGui::RadioButton("Gourand shader", &nextShader, GOURAND);
             ImGui::RadioButton("Phong shader", &nextShader, PHONG);
         
-            if (nextShader == PHONG)
+            if (nextShader == GOURAND || nextShader == PHONG)
             {
                 if (ImGui::CollapsingHeader("Material controls"))
                 {
@@ -367,6 +373,8 @@ int main()
 
             if (currShader == PHONG)
                 shader = phongShader;
+            else if (currShader == GOURAND)
+                shader = gourandShader;
             else if (currShader == NORMAL)
                 shader = normalShader;
 
@@ -377,7 +385,7 @@ int main()
         shader.SetUniformMat4f("u_Model", modelMatrix);
         shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
         shader.SetUniformMat4f("u_Projection", projMatrix);
-        if (currShader == PHONG)
+        if (currShader == GOURAND || currShader == PHONG)
         {
             shader.SetUniform3fv("light_pos", 3, light.m_Pos);
             shader.SetUniform3fv("light_col", 3, light.m_Col); 

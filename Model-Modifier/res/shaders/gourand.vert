@@ -1,9 +1,16 @@
 #version 460 core
 
-layout(location = 0) out vec4 color;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 normal;
 
-in vec3 view_pos;
-in vec3 view_pos_normal;
+out vec3 total_color;
+
+uniform mat4 u_Model;
+uniform mat4 u_View;
+uniform mat4 u_Projection;
+
+vec3 view_pos;
+vec3 view_pos_normal;
 
 uniform vec3 light_pos[3];
 uniform vec3 light_col[3]; // light color
@@ -26,14 +33,20 @@ vec3 compute_light(vec3 lightpos, vec3 lightcol)
 	return diffuse_light + spec_light;
 }
 
-
 void main()
 {
-	vec3 total_light = ambient * 0.2;
+    vec4 view_pos4 = u_View * u_Model * vec4(position, 1.0);
+    vec3 view_pos = view_pos4.xyz / view_pos4.w;
+
+    mat3 normalmatrix = transpose(inverse(mat3(u_View * u_Model)));
+    view_pos_normal = normalmatrix * normal;
+
+    gl_Position = u_Projection * view_pos4;
+
+	total_color = ambient * 0.2;
 	for (int i = 0; i < 3; i++)
     {
 		if (light_toggled[i] == 1)
-			total_light += compute_light(light_pos[i], light_col[i]);
+			total_color += compute_light(light_pos[i], light_col[i]);
     }
-	color = vec4(total_light, 1.0);
 };
