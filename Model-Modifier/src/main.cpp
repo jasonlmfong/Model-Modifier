@@ -133,16 +133,10 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // object selection
-    bool objSelect = false;
     // wireframe mode
     bool wireframe = false;
     // framerate mode
     bool framerate = false;
-    // lighting controls
-    bool lighting = false;
-    // material controls
-    bool mat = false;
 
     GLFWwindow* windowID = window.GetID();
     // input initialization & input callbacks
@@ -268,8 +262,7 @@ int main()
         ImGui::NewFrame();
 
         ImGui::Begin("Display parameters");
-        ImGui::Checkbox("Objection Selection", &objSelect);
-        if (objSelect)
+        if (ImGui::CollapsingHeader("Objection selection"))
         {
             ImGui::RadioButton("Bunny", &nextObject, BUNNY);
             ImGui::RadioButton("Cow head", &nextObject, COWHEAD);
@@ -286,82 +279,74 @@ int main()
             ImGui::RadioButton("Torus", &nextObject, TORUS);
         }
 
-        ImGui::Spacing();
-        ImGui::Separator();
-
-        ImGui::Text("Shading Type");
-        ImGui::RadioButton("Flat Shading", &nextShadingType, FLAT);
-        ImGui::RadioButton("Smooth Shading", &nextShadingType, SMOOTH);
-
-        ImGui::Spacing();
-        ImGui::Separator();
-
-        ImGui::Text("Shader Selection");
-        ImGui::RadioButton("Normal Shader", &nextShader, NORMAL);
-        ImGui::RadioButton("Phong Shader", &nextShader, PHONG);
-
-        if (nextShader == PHONG)
+        if (ImGui::CollapsingHeader("Shading type"))
         {
-            ImGui::Checkbox("Material Controls", &mat);
-            if (mat)
-            {
-                ImGui::ColorEdit3("ambient", meshMat.m_Ambient);
-                ImGui::ColorEdit3("diffuse", meshMat.m_Diffuse);
-                ImGui::ColorEdit3("specular", meshMat.m_Specular);
-                ImGui::SliderFloat("shine", &meshMat.m_Shine, 10, 100);
-            }
+            ImGui::RadioButton("Flat shading", &nextShadingType, FLAT);
+            ImGui::RadioButton("Smooth shading", &nextShadingType, SMOOTH);
+        }
 
-            ImGui::Spacing();
-            ImGui::Separator();
-
-            ImGui::Checkbox("Lighting Controls", &lighting);
-            if (lighting)
+        if (ImGui::CollapsingHeader("Shader selection"))
+        {
+            ImGui::RadioButton("Normal shader", &nextShader, NORMAL);
+            ImGui::RadioButton("Phong shader", &nextShader, PHONG);
+        
+            if (nextShader == PHONG)
             {
-                for (int l = 0; l < 3; l++)
+                if (ImGui::CollapsingHeader("Material controls"))
                 {
-                    ImGui::PushID(l);
-                    ImGui::Text("Light #%d", l + 1);
-                    ImGui::SliderFloat3("position", &light.m_Pos[3 * l], -10, 10);
-                    ImGui::ColorEdit3("color", &light.m_Col[3 * l]);
+                    ImGui::ColorEdit3("Ambient color", meshMat.m_Ambient);
+                    ImGui::ColorEdit3("Diffuse color", meshMat.m_Diffuse);
+                    ImGui::ColorEdit3("Specular color", meshMat.m_Specular);
+                    ImGui::SliderFloat("Shine constant", &meshMat.m_Shine, 10, 100);
+                }
 
-                    ImGui::Spacing();
-                    ImGui::PopID();
+                if (ImGui::CollapsingHeader("Lighting controls"))
+                {
+                    for (int l = 0; l < 3; l++)
+                    {
+                        ImGui::PushID(l);
+                        ImGui::Text("Light #%d", l + 1);
+                        ImGui::SliderFloat3("position", &light.m_Pos[3 * l], -10, 10);
+                        ImGui::ColorEdit3("color", &light.m_Col[3 * l]);
+
+                        ImGui::Spacing();
+                        ImGui::PopID();
+                    }
                 }
             }
         }
 
-        ImGui::Spacing();
-        ImGui::Separator();
-
-        ImGui::Text("Options:");
-        if (ImGui::Checkbox("Wireframe Mode", &wireframe))
+        if (ImGui::CollapsingHeader("Display options:"))
         {
-            if (wireframe)
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
-            else
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // surface mode
-        }
-        ImGui::Checkbox("Framerate Tracker", &framerate);
-        if (framerate)
-        {
-            ImGui::Text("Application average %.1f FPS", ImGui::GetIO().Framerate);
-        }
-        if (ImGui::Button("Screenshot"))
-        {
-            struct tm newtime;
-            time_t now = time(0);
-            localtime_s(&newtime, &now);
+            if (ImGui::Checkbox("Wireframe Mode", &wireframe))
+            {
+                if (wireframe)
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
+                else
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // surface mode
+            }
+            ImGui::Checkbox("Framerate Tracker", &framerate);
+            if (framerate)
+            {
+                ImGui::Text("Application average %.1f FPS", ImGui::GetIO().Framerate);
+            }
+            if (ImGui::Button("Screenshot"))
+            {
+                struct tm newtime;
+                time_t now = time(0);
+                localtime_s(&newtime, &now);
 
-            // print various components of tm structure.
-            std::string year = std::to_string(1900 + newtime.tm_year);
-            std::string month = std::to_string(1 + newtime.tm_mon);
-            std::string day = std::to_string(newtime.tm_mday);
-            std::string hour = std::to_string(newtime.tm_hour);
-            std::string min = std::to_string(newtime.tm_min);
-            std::string sec = std::to_string(newtime.tm_sec);
+                // print various components of tm structure.
+                std::string year = std::to_string(1900 + newtime.tm_year);
+                std::string month = std::to_string(1 + newtime.tm_mon);
+                std::string day = std::to_string(newtime.tm_mday);
+                std::string hour = std::to_string(newtime.tm_hour);
+                std::string min = std::to_string(newtime.tm_min);
+                std::string sec = std::to_string(newtime.tm_sec);
 
-            std::string path = "gallery/Screenshot " + year + "-" + month + "-" + day + " " + hour + min + sec + ".png";
-            saveImage(path.c_str(), windowID);
+                std::string path = "gallery/Screenshot " + year + "-" + month + "-" + day + " " + hour + min + sec + ".png";
+                saveImage(path.c_str(), windowID);
+            }
         }
 
         ImGui::End();
