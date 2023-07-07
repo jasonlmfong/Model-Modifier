@@ -106,7 +106,7 @@ int main()
     float FOV = 65.0f;
     double yaw = -90.0;
     double pitch = -30.0;
-    glm::vec3 cameraPosition = { 0.0f, 1.75f, 2.0f };
+    glm::vec3 cameraPosition = { 0.0f, 1.25f, 2.5f };
     Camera camera(cameraPosition, yaw, pitch);
 
     float rotationAngle = 0.0f; // rotation angle of the object mesh
