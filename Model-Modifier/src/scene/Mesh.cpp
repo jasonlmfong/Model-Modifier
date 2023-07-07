@@ -3,6 +3,7 @@
 Mesh::Mesh(const char* filename)
 {
     loadOBJ(filename);
+    Resize();
     BuildVerticesIndices();
 }
 
@@ -29,6 +30,10 @@ void customSplit(std::string str, char separator, std::vector<std::string> &stri
 
 void Mesh::loadOBJ(const char* filename)
 {
+    // initialize the min and max values
+    m_Min = glm::vec3{ 1000000, 1000000, 1000000 };
+    m_Max = glm::vec3{ -1000000, -1000000, -1000000 };
+
     std::ifstream in(filename);
     if (!in)
     {
@@ -44,6 +49,14 @@ void Mesh::loadOBJ(const char* filename)
             std::istringstream s(line.substr(2));
             glm::vec3 v; s >> v.x; s >> v.y; s >> v.z;
             m_VertexPos.push_back(v);
+
+            for (int coord = 0; coord < 3; coord++) // update min and max
+            {
+                if (v[coord] > m_Max[coord])
+                    m_Max[coord] = v[coord];
+                if (v[coord] < m_Min[coord])
+                    m_Min[coord] = v[coord];
+            }
         }
         else if (line.substr(0, 2) == "f ")
         {
@@ -80,6 +93,28 @@ void Mesh::loadOBJ(const char* filename)
             )
         );
         m_FaceNormals[i] = normal;
+    }
+}
+
+void Mesh::Resize()
+{
+    glm::vec3 lengths = m_Max - m_Min;
+    float longest = lengths.x;
+    if (lengths.y > longest)
+        longest = lengths.y;
+    if (lengths.z > longest)
+        longest = lengths.z;
+    glm::vec3 ratios = lengths / longest;
+
+    for (int i = 0; i < m_VertexPos.size(); i++)
+    {
+        glm::vec3 vert = m_VertexPos[i];
+        glm::vec3 newVert { 0, 0, 0 };
+        for (int coord = 0; coord < 3; coord++)
+        {
+            newVert[coord] = ratios[coord] * ((vert[coord] - m_Min[coord]) * 2 / lengths[coord] - 1);
+        }
+        m_VertexPos[i] = newVert;
     }
 }
 
@@ -177,6 +212,7 @@ void Mesh::Reload(const char* filename)
 {
     Destroy();
     loadOBJ(filename);
+    Resize();
     BuildVerticesIndices();
 }
 

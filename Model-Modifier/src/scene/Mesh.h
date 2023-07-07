@@ -25,6 +25,7 @@ public:
 	~Mesh();
 
 	void loadOBJ(const char* filename);
+	void Resize();
 	void BuildVerticesIndices();
 	void Destroy();
 	void Reload(const char* filename);
@@ -32,6 +33,9 @@ public:
 	void preRender(int shading);
 
 public:
+	glm::vec3 m_Min;
+	glm::vec3 m_Max;
+
 	std::vector<glm::vec3> m_VertexPos;
 	std::vector<std::vector<unsigned int>> m_FaceIndices;
 	std::vector<glm::vec3> m_FaceNormals;
