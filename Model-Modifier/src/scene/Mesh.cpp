@@ -3,6 +3,7 @@
 Mesh::Mesh(const char* filename)
 {
     loadOBJ(filename);
+    BuildVerticesIndices();
 }
 
 Mesh::~Mesh()
@@ -80,7 +81,10 @@ void Mesh::loadOBJ(const char* filename)
         );
         m_FaceNormals[i] = normal;
     }
+}
 
+void Mesh::BuildVerticesIndices()
+{
     m_SmoothVertexNormals.resize(m_VertexPos.size());
     for (int i = 0; i < m_VertexPos.size(); i++)
     {
@@ -101,7 +105,7 @@ void Mesh::loadOBJ(const char* filename)
     // 3D pos and normal of each vertex
     m_FlatNumVert = 2 * 3 * 3 * m_FaceIndices.size();
     m_FlatVertices = new float[m_FlatNumVert] {};
-    for (int i = 0; i < m_FaceIndices.size(); i++) 
+    for (int i = 0; i < m_FaceIndices.size(); i++)
     {
         for (int j = 0; j < 3; j++)
         {
@@ -173,6 +177,7 @@ void Mesh::Reload(const char* filename)
 {
     Destroy();
     loadOBJ(filename);
+    BuildVerticesIndices();
 }
 
 void Mesh::preRender(int shading)

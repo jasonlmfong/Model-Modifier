@@ -6,7 +6,6 @@
 #include <sstream>
 #include <vector>
 
-
 #include "../external/glm/ext/vector_float3.hpp"
 #include "../external/glm/geometric.hpp"
 
@@ -26,6 +25,7 @@ public:
 	~Mesh();
 
 	void loadOBJ(const char* filename);
+	void BuildVerticesIndices();
 	void Destroy();
 	void Reload(const char* filename);
 
