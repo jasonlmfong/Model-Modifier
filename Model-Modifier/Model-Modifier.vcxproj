@@ -40,6 +40,8 @@
     <ClCompile Include="src\renderer\Window.cpp" />
     <ClCompile Include="src\scene\Mesh.cpp" />
     <ClCompile Include="src\scene\Mesh.h" />
+    <ClCompile Include="src\scene\Object.cpp" />
+    <ClCompile Include="src\scene\Objects.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\external\glm\common.hpp" />
@@ -346,6 +348,8 @@
     <ClInclude Include="src\renderer\VertexBuffer.h" />
     <ClInclude Include="src\renderer\VertexBufferLayout.h" />
     <ClInclude Include="src\renderer\Window.h" />
+    <ClInclude Include="src\scene\Object.h" />
+    <ClInclude Include="src\scene\Objects.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\external\glm\detail\func_common.inl" />

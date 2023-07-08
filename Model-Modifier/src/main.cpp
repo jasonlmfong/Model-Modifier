@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ctime>
+#include <unordered_map>
 
 #include "external/imgui/imgui.h"
 #include "external/imgui/imgui_impl_glfw.h"
@@ -14,26 +15,10 @@
 #include "renderer/Shader.h"
 #include "renderer/Camera.h"
 #include "scene/Object.h"
+#include "scene/Objects.h"
 #include "scene/Mesh.h"
 #include "scene/Material.h"
 #include "scene/Light.h"
-
-enum object
-{
-    BUNNY,
-    COWHEAD,
-    DOUBLETORUS,
-    FACE,
-    GARGOYLE,
-    ICOSA,
-    KITTEN,
-    SHUTTLE,
-    SPHERE,
-    SUZANNE,
-    TEAPOT,
-    TEDDY,
-    TORUS
-};
 
 enum shader
 {
@@ -65,9 +50,10 @@ int main()
     Window window(screenWidth, screenHeight, "Model Modifier", NULL);
 
     // build object from obj file
+    Objects objects;
     int currObject = BUNNY;
     int nextObject;
-    Object obj("res/objects/bunny.obj");
+    Object obj = objects.findObj(currObject);
     Material meshMat;
 
     VertexBufferLayout layout;
@@ -408,7 +394,7 @@ int main()
         {
             currShadingType = nextShadingType;
 
-            mesh.Rebuild(currShadingType);
+            mesh.Rebuild(currShadingType); // rebuild mesh based on shading type
 
             objectVA.Bind();
             objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -420,76 +406,9 @@ int main()
         {
             currObject = nextObject;
 
-            switch (currObject)
-            {
-                case BUNNY:
-                {
-                    obj.Reload("res/objects/bunny.obj");
-                    break;
-                }
-                case COWHEAD:
-                {
-                    obj.Reload("res/objects/cowhead.obj");
-                    break;
-                }
-                case DOUBLETORUS:
-                {
-                    obj.Reload("res/objects/double-torus.obj");
-                    break;
-                }
-                case FACE:
-                {
-                    obj.Reload("res/objects/face.obj");
-                    break;
-                }
-                case GARGOYLE:
-                {
-                    obj.Reload("res/objects/gargoyle.obj");
-                    break;
-                }
-                case ICOSA:
-                {
-                    obj.Reload("res/objects/ico.obj");
-                    break;
-                }
-                case KITTEN:
-                {
-                    obj.Reload("res/objects/kitten.obj");
-                    break;
-                }
-                case SHUTTLE:
-                {
-                    obj.Reload("res/objects/shuttle.obj");
-                    break;
-                }
-                case SPHERE:
-                {
-                    obj.Reload("res/objects/sphere.obj");
-                    break;
-                }
-                case SUZANNE:
-                {
-                    obj.Reload("res/objects/suzanne.obj");
-                    break;
-                }
-                case TEAPOT:
-                {
-                    obj.Reload("res/objects/teapot.obj");
-                    break;
-                }
-                case TEDDY:
-                {
-                    obj.Reload("res/objects/teddy.obj");
-                    break;
-                }
-                case TORUS:
-                {
-                    obj.Reload("res/objects/torus.obj");
-                    break;
-                }
-            }
-
-            mesh.Rebuild(obj);
+            obj = objects.findObj(currObject); // search for the object requested
+            
+            mesh.Rebuild(obj); // rebuild mesh based on object info
 
             objectVA.Bind();
             objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);

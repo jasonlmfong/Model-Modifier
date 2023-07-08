@@ -78,6 +78,12 @@
     <ClCompile Include="src\external\stb\stb_image_write.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene\Object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Objects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\external\glm\detail\_features.hpp">
@@ -990,6 +996,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\external\stb\stb_image_write.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\Object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\Objects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
