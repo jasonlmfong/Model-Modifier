@@ -11,10 +11,13 @@ Objects::~Objects()
 
 Object Objects::findObj(int obj)
 {
-	if (m_Objects.find(obj) == m_Objects.end())
+	auto search = m_Objects.find(obj);
+	if (search != m_Objects.end())
 	{
-		Object newObj(m_Filepaths[obj]);
-		m_Objects.insert({ obj, newObj });
+		return search->second;
 	}
-	return m_Objects.find(obj)->second;
+	// if search fails, insert it
+	Object newObj(m_Filepaths[obj]);
+	m_Objects.insert({ obj, newObj });
+	return newObj;
 }
