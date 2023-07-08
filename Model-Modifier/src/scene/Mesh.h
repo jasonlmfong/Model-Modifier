@@ -1,16 +1,11 @@
 #pragma once
 
-#include <iostream>
-#include <fstream>
-#include <ios>
-#include <sstream>
 #include <vector>
 
 #include "../external/glm/ext/vector_float3.hpp"
 #include "../external/glm/geometric.hpp"
 
-#include <glad/glad.h>
-#include <glfw/glfw3.h>
+#include "Object.h"
 
 enum shading
 {
@@ -21,35 +16,22 @@ enum shading
 class Mesh
 {
 public:
-	Mesh(const char* filename);
+	Mesh(Object obj, int shading);
 	~Mesh();
 
-	void loadOBJ(const char* filename);
-	void Resize();
 	void BuildVerticesIndices();
+	void BuildVerticesIndices(Object obj);
+	void BuildVerticesIndices(int shading);
 	void Destroy();
-	void Reload(const char* filename);
-
-	void preRender(int shading);
+	void Rebuild();
+	void Rebuild(Object obj);
+	void Rebuild(int shading);
 
 public:
-	glm::vec3 m_Min;
-	glm::vec3 m_Max;
+	Object m_Object;
+	int m_ShadingType;
 
-	std::vector<glm::vec3> m_VertexPos;
-	std::vector<std::vector<unsigned int>> m_FaceIndices;
 	std::vector<glm::vec3> m_FaceNormals;
-
-	unsigned int m_FlatNumVert;
-	float* m_FlatVertices;
-	unsigned int m_FlatNumIdx;
-	unsigned int* m_FlatIndices;
-
-	std::vector<glm::vec3> m_SmoothVertexNormals;
-	unsigned int m_SmoothNumVert;
-	float* m_SmoothVertices;
-	unsigned int m_SmoothNumIdx;
-	unsigned int* m_SmoothIndices;
 
 	unsigned int m_OutNumVert;
 	float* m_OutVertices;

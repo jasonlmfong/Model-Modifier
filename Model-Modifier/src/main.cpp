@@ -13,6 +13,7 @@
 #include "renderer/IndexBuffer.h"
 #include "renderer/Shader.h"
 #include "renderer/Camera.h"
+#include "scene/Object.h"
 #include "scene/Mesh.h"
 #include "scene/Material.h"
 #include "scene/Light.h"
@@ -63,10 +64,10 @@ int main()
     float aspectRatio = (float)screenWidth / screenHeight;
     Window window(screenWidth, screenHeight, "Model Modifier", NULL);
 
-    // build mesh from obj file
+    // build object from obj file
     int currObject = BUNNY;
     int nextObject;
-    Mesh mesh("res/objects/bunny.obj");
+    Object obj("res/objects/bunny.obj");
     Material meshMat;
 
     VertexBufferLayout layout;
@@ -76,7 +77,8 @@ int main()
     // shading type
     int currShadingType = FLAT;
     int nextShadingType;
-    mesh.preRender(currObject);
+
+    Mesh mesh(obj, currShadingType);
 
     // build openGL objects using mesh
     VertexArray objectVA;
@@ -406,7 +408,7 @@ int main()
         {
             currShadingType = nextShadingType;
 
-            mesh.preRender(currShadingType);
+            mesh.Rebuild(currShadingType);
 
             objectVA.Bind();
             objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -422,72 +424,73 @@ int main()
             {
                 case BUNNY:
                 {
-                    mesh.Reload("res/objects/bunny.obj");
+                    obj.Reload("res/objects/bunny.obj");
                     break;
                 }
                 case COWHEAD:
                 {
-                    mesh.Reload("res/objects/cowhead.obj");
+                    obj.Reload("res/objects/cowhead.obj");
                     break;
                 }
                 case DOUBLETORUS:
                 {
-                    mesh.Reload("res/objects/double-torus.obj");
+                    obj.Reload("res/objects/double-torus.obj");
                     break;
                 }
                 case FACE:
                 {
-                    mesh.Reload("res/objects/face.obj");
+                    obj.Reload("res/objects/face.obj");
                     break;
                 }
                 case GARGOYLE:
                 {
-                    mesh.Reload("res/objects/gargoyle.obj");
+                    obj.Reload("res/objects/gargoyle.obj");
                     break;
                 }
                 case ICOSA:
                 {
-                    mesh.Reload("res/objects/ico.obj");
+                    obj.Reload("res/objects/ico.obj");
                     break;
                 }
                 case KITTEN:
                 {
-                    mesh.Reload("res/objects/kitten.obj");
+                    obj.Reload("res/objects/kitten.obj");
                     break;
                 }
                 case SHUTTLE:
                 {
-                    mesh.Reload("res/objects/shuttle.obj");
+                    obj.Reload("res/objects/shuttle.obj");
                     break;
                 }
                 case SPHERE:
                 {
-                    mesh.Reload("res/objects/sphere.obj");
+                    obj.Reload("res/objects/sphere.obj");
                     break;
                 }
                 case SUZANNE:
                 {
-                    mesh.Reload("res/objects/suzanne.obj");
+                    obj.Reload("res/objects/suzanne.obj");
                     break;
                 }
                 case TEAPOT:
                 {
-                    mesh.Reload("res/objects/teapot.obj");
+                    obj.Reload("res/objects/teapot.obj");
                     break;
                 }
                 case TEDDY:
                 {
-                    mesh.Reload("res/objects/teddy.obj");
+                    obj.Reload("res/objects/teddy.obj");
                     break;
                 }
                 case TORUS:
                 {
-                    mesh.Reload("res/objects/torus.obj");
+                    obj.Reload("res/objects/torus.obj");
                     break;
                 }
             }
 
-            mesh.preRender(currShadingType);
+            mesh.Rebuild(obj);
+
             objectVA.Bind();
             objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
             objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
