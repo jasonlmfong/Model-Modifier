@@ -61,8 +61,7 @@ void Mesh::BuildVerticesIndices()
     else if (m_ShadingType == SMOOTH) // smooth shading
     {
         // build smooth vertex normals by average neighbouring faces normals
-        std::vector<glm::vec3> m_SmoothVertexNormals;
-        m_SmoothVertexNormals.resize(m_Object.m_VertexPos.size());
+        std::vector<glm::vec3> smoothVertexNormals(m_Object.m_VertexPos.size());
 
         for (int i = 0; i < m_Object.m_VertexPos.size(); i++)
         {
@@ -76,7 +75,7 @@ void Mesh::BuildVerticesIndices()
                 }
             }
 
-            m_SmoothVertexNormals[i] = glm::normalize(currVertNormal);
+            smoothVertexNormals[i] = glm::normalize(currVertNormal);
         }
 
         // build out the VBO with x,y,z coords of vertices, and normal vectors
@@ -92,11 +91,11 @@ void Mesh::BuildVerticesIndices()
             m_OutVertices[6 * i + 2] = m_Object.m_VertexPos[i].z;
 
             // x value of the normal
-            m_OutVertices[6 * i + 3] = m_SmoothVertexNormals[i].x;
+            m_OutVertices[6 * i + 3] = smoothVertexNormals[i].x;
             // y value of the normal
-            m_OutVertices[6 * i + 4] = m_SmoothVertexNormals[i].y;
+            m_OutVertices[6 * i + 4] = smoothVertexNormals[i].y;
             // z value of the normal
-            m_OutVertices[6 * i + 5] = m_SmoothVertexNormals[i].z;
+            m_OutVertices[6 * i + 5] = smoothVertexNormals[i].z;
         }
 
         // build out IBO indices

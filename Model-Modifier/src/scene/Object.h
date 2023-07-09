@@ -16,7 +16,7 @@ public:
 	~Object();
 
 	void loadOBJ(const char* filename);
-	void Resize();
+	void Rescale();
 	void Destroy();
 	void Reload(const char* filename);
 

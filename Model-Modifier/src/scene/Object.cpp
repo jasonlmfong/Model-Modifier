@@ -3,7 +3,7 @@
 Object::Object(const char* filename)
 {
     loadOBJ(filename);
-    Resize();
+    Rescale();
 }
 
 Object::~Object()
@@ -80,7 +80,7 @@ void Object::loadOBJ(const char* filename)
     }
 }
 
-void Object::Resize()
+void Object::Rescale()
 {
     glm::vec3 lengths = m_Max - m_Min;
     float longest = lengths.x;
@@ -112,5 +112,5 @@ void Object::Reload(const char* filename)
 {
     Destroy();
     loadOBJ(filename);
-    Resize();
+    Rescale();
 }
