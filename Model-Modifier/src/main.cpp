@@ -218,13 +218,13 @@ int main()
         // rotate left
         if (Input::IsKeyDown(GLFW_KEY_LEFT))
         {
-            float deltaYaw = -deltaTime;
+            float deltaYaw = deltaTime;
             camera.RotateCamera(0, deltaYaw, 0);
         }
         // rotate right
         if (Input::IsKeyDown(GLFW_KEY_RIGHT))
         {
-            float deltaYaw = deltaTime;
+            float deltaYaw = -deltaTime;
             camera.RotateCamera(0, deltaYaw, 0);
         }
         // rotate up
