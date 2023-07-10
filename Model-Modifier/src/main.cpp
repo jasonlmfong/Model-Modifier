@@ -91,16 +91,15 @@ int main()
     Shader shader = normalShader;
 
     // camera setup
-    float FOV = 65.0f;
-    double yaw = -90.0;
-    double pitch = -30.0;
-    glm::vec3 cameraPosition = { 0.0f, 1.25f, 2.5f };
-    Camera camera(cameraPosition, yaw, pitch);
+    float yaw = 1.5f; // radians
+    float pitch = 0.3333f; // radians
+    float radius = 3.0f;
+    Camera camera(pitch, yaw, radius);
 
     float rotationAngle = 0.0f; // rotation angle of the object mesh
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projMatrix = glm::perspective(glm::radians(FOV), aspectRatio, 0.1f, 1000.0f);
+    glm::mat4 projMatrix = glm::perspective(glm::radians(camera.m_FOV), aspectRatio, 0.1f, 1000.0f);
 
     // lighting
     Light light = Light();
@@ -172,55 +171,73 @@ int main()
         {
             exit(0);
         }
-        // rotate left
-        if (Input::IsKeyDown(GLFW_KEY_LEFT))
-        {
-            rotationAngle = (float)-0.25f;
-            rotationAngle > 360.0f ? rotationAngle -= 360.0f : NULL;
-            modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-        }
-        // rotate right
-        if (Input::IsKeyDown(GLFW_KEY_RIGHT))
-        {
-            rotationAngle = (float)0.25f;
-            rotationAngle > 360.0f ? rotationAngle -= 360.0f : NULL;
-            modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-        }
+
         // Move forward
         if (Input::IsKeyDown(GLFW_KEY_W))
         {
             camera.MoveCamera(camera.GetCameraFront(), deltaTime * 5.0f);
-            camera.SetViewMatrix();
         }
         // Move backward
         if (Input::IsKeyDown(GLFW_KEY_S))
         {
             camera.MoveCamera(-camera.GetCameraFront(), deltaTime * 5.0f);
-            camera.SetViewMatrix();
         }
         // Strafe left
         if (Input::IsKeyDown(GLFW_KEY_A))
         {
             camera.MoveCamera(camera.GetCameraRight(), deltaTime * 5.0f);
-            camera.SetViewMatrix();
         }
         // Strafe right
         if (Input::IsKeyDown(GLFW_KEY_D))
         {
             camera.MoveCamera(-camera.GetCameraRight(), deltaTime * 5.0f);
-            camera.SetViewMatrix();
         }
         // fly up
         if (Input::IsKeyDown(GLFW_KEY_SPACE))
         {
             camera.MoveCamera(camera.GetCameraUp(), deltaTime * 5.0f);
-            camera.SetViewMatrix();
         }
         // drop down
         if (Input::IsKeyDown(GLFW_KEY_LEFT_CONTROL))
         {
             camera.MoveCamera(-camera.GetCameraUp(), deltaTime * 5.0f);
-            camera.SetViewMatrix();
+        }
+
+        // move closer
+        if (Input::IsKeyDown(GLFW_KEY_K))
+        {
+            float deltaDist = -deltaTime;
+            camera.RotateCamera(0, 0, deltaDist);
+        }
+        // move further
+        if (Input::IsKeyDown(GLFW_KEY_J))
+        {
+            float deltaDist = deltaTime;
+            camera.RotateCamera(0, 0, deltaDist);
+        }
+        // rotate left
+        if (Input::IsKeyDown(GLFW_KEY_LEFT))
+        {
+            float deltaYaw = -deltaTime;
+            camera.RotateCamera(0, deltaYaw, 0);
+        }
+        // rotate right
+        if (Input::IsKeyDown(GLFW_KEY_RIGHT))
+        {
+            float deltaYaw = deltaTime;
+            camera.RotateCamera(0, deltaYaw, 0);
+        }
+        // rotate up
+        if (Input::IsKeyDown(GLFW_KEY_UP))
+        {
+            float deltaPitch = deltaTime;
+            camera.RotateCamera(deltaPitch, 0, 0);
+        }
+        // rotate down
+        if (Input::IsKeyDown(GLFW_KEY_DOWN))
+        {
+            float deltaPitch = -deltaTime;
+            camera.RotateCamera(deltaPitch, 0, 0);
         }
         
         // mouse movement
@@ -239,10 +256,10 @@ int main()
         }
 
         // adjust FOV using vertical scroll
-        FOV -= Input::GetScrollY() * 2.0f;
-        FOV < 20.0f ? FOV = 20.0f : NULL;
-        FOV > 110.0f ? FOV = 110.0f : NULL;
-        projMatrix = glm::perspective(glm::radians(FOV), aspectRatio, 0.1f, 1000.0f);
+        camera.m_FOV -= Input::GetScrollY() * 2.0f;
+        camera.m_FOV < 20.0f ? camera.m_FOV = 20.0f : NULL;
+        camera.m_FOV > 110.0f ? camera.m_FOV = 110.0f : NULL;
+        projMatrix = glm::perspective(glm::radians(camera.m_FOV), aspectRatio, 0.1f, 1000.0f);
         Input::ResetScroll();
 
         ////////// clearing per frame //////////
@@ -328,6 +345,10 @@ int main()
             if (framerate)
             {
                 ImGui::Text("Application average %.1f FPS", ImGui::GetIO().Framerate);
+            }
+            if (ImGui::Button("Reset Camera"))
+            {
+                camera.ResetView();
             }
             if (ImGui::Button("Screenshot"))
             {

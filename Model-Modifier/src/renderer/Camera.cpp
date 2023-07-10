@@ -1,9 +1,11 @@
 #include "Camera.h"
 
-Camera::Camera(glm::vec3 position, double yaw, double pitch)
-	:m_CameraPosition(position)
+Camera::Camera(float pitch, float yaw, float distance)
+    : m_Pitch(pitch), m_Yaw(yaw), m_Dist(distance), m_FOV(65)
 {
-    LookAt(yaw, pitch);
+    glm::vec3 position = GetPosOnSphere();
+    m_CameraPosition = position;
+    m_CameraFront = -position;
 
     SetViewMatrix();
 }
@@ -15,16 +17,51 @@ Camera::~Camera()
 void Camera::MoveCamera(glm::vec3 direction, float speed)
 {
     m_CameraPosition += direction * speed;
+
+    SetViewMatrix();
 }
 
-void Camera::LookAt(double yaw, double pitch)
+void Camera::RotateCamera(float deltaPitch, float deltaYaw, float deltaDist)
 {
-    m_CameraFront =
+    GetYawPitchDist(); // set these properly first
+    m_Pitch += deltaPitch;
+    m_Yaw += deltaYaw;
+    m_Dist += deltaDist;
+
+    glm::vec3 position = GetPosOnSphere();
+    m_CameraPosition = position;
+    m_CameraFront = -position;
+
+    SetViewMatrix();
+}
+
+glm::vec3 Camera::GetPosOnSphere()
+{
+    return m_Dist * glm::vec3 
     {
-        cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
-        sin(glm::radians(pitch)),
-        sin(glm::radians(yaw)) * cos(glm::radians(pitch))
+        cos(m_Yaw) * cos(m_Pitch),
+        sin(m_Pitch),
+        sin(m_Yaw) * cos(m_Pitch)
     };
+}
+
+void Camera::GetYawPitchDist()
+{
+    m_Dist = glm::length(m_CameraPosition);
+    glm::vec3 posSphere = m_CameraPosition / m_Dist;
+
+    m_Pitch = glm::asin(posSphere.y);
+    m_Yaw = glm::atan(posSphere.z, posSphere.x);
+}
+
+void Camera::ResetView()
+{
+    glm::vec3 defaultPos = { 0.0f, 1.25f, 2.5f };
+    m_CameraPosition = defaultPos;
+    m_CameraFront = -defaultPos; // look at the origin (0,0,0)
+    m_FOV = 65;
+
+    SetViewMatrix();
 }
 
 glm::vec3 Camera::GetCameraFront() const

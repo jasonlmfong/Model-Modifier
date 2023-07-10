@@ -1,11 +1,14 @@
 #pragma once
 
 #include "../external/glm/glm.hpp"
+#include "../external/glm/trigonometric.hpp"
 #include "../external/glm/gtc/matrix_transform.hpp"
 
 class Camera
 {
 private:
+	float m_Pitch, m_Yaw, m_Dist;
+
 	glm::vec3 m_CameraPosition;
 	glm::vec3 m_CameraFront;
 	glm::vec3 m_CameraRight;
@@ -13,12 +16,21 @@ private:
 	glm::vec3 m_WorldUp = { 0.0f, 1.0f, 0.0f };
 
 	glm::mat4 m_ViewMatrix;
+
 public:
-	Camera(glm::vec3 position, double yaw, double pitch);
+	float m_FOV;
+
+public:
+	Camera(float pitch, float yaw, float distance);
 	~Camera();
 
-	void MoveCamera(glm::vec3 direction, float speed);
-	void LookAt(double yaw, double pitch);
+	void MoveCamera(glm::vec3 direction, float speed); 
+	void RotateCamera(float deltaPitch, float deltaYaw, float deltaDist);
+
+	glm::vec3 GetPosOnSphere();
+	void GetYawPitchDist();
+
+	void ResetView();
 
 	glm::vec3 GetCameraFront() const;
 	glm::vec3 GetCameraRight() const;

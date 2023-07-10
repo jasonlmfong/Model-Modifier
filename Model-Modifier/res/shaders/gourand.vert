@@ -38,7 +38,7 @@ void main()
     vec4 view_pos4 = u_View * u_Model * vec4(position, 1.0);
     vec3 view_pos = view_pos4.xyz / view_pos4.w;
 
-    mat3 normalmatrix = transpose(inverse(mat3(u_View * u_Model)));
+    mat3 normalmatrix = transpose(inverse(mat3(u_Model)));
     view_pos_normal = normalmatrix * normal;
 
     gl_Position = u_Projection * view_pos4;
