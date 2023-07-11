@@ -191,6 +191,118 @@ Object Surface::Beehive()
     return BHObject;
 }
 
+// My own algorithm
+Object Surface::Snowflake()
+{
+    // calculate the face points
+    std::vector<glm::vec3> facePoints(m_Faces.size());
+    for (int i = 0; i < facePoints.size(); i++)
+    {
+        FaceRecord currFace = m_Faces[i];
+
+        glm::vec3 vertexSum{0};
+        for (int j = 0; j < 3; j++)
+        {
+            vertexSum += m_Vertices[currFace.verticesIdx[j]].position;
+        }
+        facePoints[i] = vertexSum / 3.0f;
+    }
+
+    // calcuate edge points
+    std::vector<glm::vec3> edgePoints(m_Edges.size());
+    for (int i = 0; i < edgePoints.size(); i++)
+    {
+        EdgeRecord currEdge = m_Edges[i];
+        if (currEdge.adjFacesIdx.size() == 1) // boundary edge
+        {
+            // ME point
+            edgePoints[i] = 0.5f * (
+                m_Vertices[currEdge.endPoint1Idx].position +
+                m_Vertices[currEdge.endPoint2Idx].position
+                );
+        }
+        else // edge borders 2 faces
+        {
+            // (AF + ME) / 2 point
+            edgePoints[i] = 0.25f * (
+                m_Vertices[currEdge.endPoint1Idx].position +
+                m_Vertices[currEdge.endPoint2Idx].position +
+                facePoints[currEdge.adjFacesIdx[0]] + facePoints[currEdge.adjFacesIdx[1]]);
+        }
+    }
+
+    // update original vertex positions
+    for (int i = 0; i < m_Vertices.size(); i++)
+    {
+        VertexRecord currVert = m_Vertices[i];
+
+        // calculate F: average of face points 
+        glm::vec3 avgFacePosition{0};
+        for (unsigned int faceIdx : currVert.adjFacesIdx)
+        {
+            avgFacePosition += facePoints[faceIdx];
+        }
+        float numAdjFaces = currVert.adjFacesIdx.size();
+        avgFacePosition /= numAdjFaces;
+
+        // update original vertex point to new position
+        m_Vertices[i].position = avgFacePosition;
+    }
+
+    // build new Object class
+    std::vector<glm::vec3> SFVertexPos;
+    std::vector<std::vector<unsigned int>> SFFaceIndices;
+
+    for (int faceIdx = 0; faceIdx < m_Faces.size(); faceIdx++)
+    {
+        FaceRecord face = m_Faces[faceIdx];
+
+        glm::vec3 vertA = m_Vertices[face.verticesIdx[0]].position;
+        glm::vec3 vertB = m_Vertices[face.verticesIdx[1]].position;
+        glm::vec3 vertC = m_Vertices[face.verticesIdx[2]].position;
+
+        glm::vec3 edgeAB = edgePoints[getEdgeIndex({ face.verticesIdx[0], face.verticesIdx[1] })];
+        glm::vec3 edgeBC = edgePoints[getEdgeIndex({ face.verticesIdx[1], face.verticesIdx[2] })];
+        glm::vec3 edgeCA = edgePoints[getEdgeIndex({ face.verticesIdx[2], face.verticesIdx[0] })];
+
+        glm::vec3 faceABC = facePoints[faceIdx];
+
+        unsigned int vertAIdx = SFVertexPos.size();
+        unsigned int vertBIdx = vertAIdx + 1;
+        unsigned int vertCIdx = vertAIdx + 2;
+
+        unsigned int edgeABIdx = vertAIdx + 3;
+        unsigned int edgeBCIdx = vertAIdx + 4;
+        unsigned int edgeCAIdx = vertAIdx + 5;
+
+        unsigned int faceABCIdx = vertAIdx + 6;
+
+        SFVertexPos.push_back({ vertA });
+        SFVertexPos.push_back({ vertB });
+        SFVertexPos.push_back({ vertC });
+        SFVertexPos.push_back({ edgeAB });
+        SFVertexPos.push_back({ edgeBC });
+        SFVertexPos.push_back({ edgeCA });
+        SFVertexPos.push_back({ faceABC });
+
+        // my variation to return a triangle mesh: connect the original vertex with face point, so the quads will become 2 triangles
+        SFFaceIndices.push_back({ vertAIdx, edgeABIdx, faceABCIdx });
+        SFFaceIndices.push_back({ faceABCIdx, edgeCAIdx, vertAIdx });
+
+        SFFaceIndices.push_back({ vertBIdx, edgeBCIdx, faceABCIdx });
+        SFFaceIndices.push_back({ faceABCIdx, edgeABIdx, vertBIdx });
+
+        SFFaceIndices.push_back({ vertCIdx, edgeCAIdx, faceABCIdx });
+        SFFaceIndices.push_back({ faceABCIdx, edgeBCIdx, vertCIdx });
+    }
+
+    Object SFObject;
+    SFObject.m_Min = m_Min; SFObject.m_Max = m_Max;
+    SFObject.m_VertexPos = SFVertexPos; SFObject.m_FaceIndices = SFFaceIndices;
+
+    return SFObject;
+}
+
 // Catmull Clark subdivision surface algorithm
 Object Surface::CatmullClark()
 {

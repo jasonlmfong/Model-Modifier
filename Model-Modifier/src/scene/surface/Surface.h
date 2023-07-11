@@ -39,6 +39,7 @@ public:
 
 	// Modification algorithms
 	Object Beehive();
+	Object Snowflake();
 	Object CatmullClark();
 
 public:
