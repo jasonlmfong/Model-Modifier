@@ -283,8 +283,10 @@ int main()
             ImGui::RadioButton("Gargoyle", &nextObject, GARGOYLE);
             ImGui::RadioButton("Icosahedron", &nextObject, ICOSA);
             ImGui::RadioButton("Kitten", &nextObject, KITTEN);
+            ImGui::RadioButton("Octahedron", &nextObject, OCTA);
             ImGui::RadioButton("Shuttle", &nextObject, SHUTTLE);
             ImGui::RadioButton("Sphere", &nextObject, SPHERE);
+            ImGui::RadioButton("Star", &nextObject, STAR);
             ImGui::RadioButton("Suzanne", &nextObject, SUZANNE);
             ImGui::RadioButton("Teapot", &nextObject, TEAPOT);
             ImGui::RadioButton("Teddy", &nextObject, TEDDY);
