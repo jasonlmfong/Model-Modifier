@@ -190,3 +190,134 @@ Object Surface::Beehive()
 
     return BHObject;
 }
+
+// Catmull Clark subdivision surface algorithm
+Object Surface::CatmullClark()
+{
+    // calculate the face points
+    std::vector<glm::vec3> facePoints(m_Faces.size());
+    for (int i = 0; i < facePoints.size(); i++)
+    {
+        FaceRecord currFace = m_Faces[i];
+
+        glm::vec3 vertexSum{0};
+        for (int j = 0; j < 3; j++)
+        {
+            vertexSum += m_Vertices[currFace.verticesIdx[j]].position;
+        }
+        facePoints[i] = vertexSum / 3.0f;
+    }
+
+    // calcuate edge points
+    std::vector<glm::vec3> edgePoints(m_Edges.size());
+    for (int i = 0; i < edgePoints.size(); i++)
+    {
+        EdgeRecord currEdge = m_Edges[i];
+        if (currEdge.adjFacesIdx.size() == 1) // boundary edge
+        {
+            // ME point
+            edgePoints[i] = 0.5f * (
+                m_Vertices[currEdge.endPoint1Idx].position +
+                m_Vertices[currEdge.endPoint2Idx].position
+                );
+        }
+        else // edge borders 2 faces
+        {
+            // (AF + ME) / 2 point
+            edgePoints[i] = 0.25f * (
+                m_Vertices[currEdge.endPoint1Idx].position +
+                m_Vertices[currEdge.endPoint2Idx].position +
+                facePoints[currEdge.adjFacesIdx[0]] + facePoints[currEdge.adjFacesIdx[1]]);
+        }
+    }
+
+    // update original vertex positions
+    std::vector<glm::vec3> originalPoints(m_Vertices.size());
+    // store the original positions
+    for (int i = 0; i < m_Vertices.size(); i++)
+    {
+        originalPoints[i] = m_Vertices[i].position;
+    }
+    for (int i = 0; i < m_Vertices.size(); i++)
+    {
+        VertexRecord currVert = m_Vertices[i];
+
+        // calculate F: average of face points 
+        glm::vec3 avgFacePosition{0};
+        for (unsigned int faceIdx : currVert.adjFacesIdx)
+        {
+            avgFacePosition += facePoints[faceIdx];
+        }
+        float numAdjFaces = currVert.adjFacesIdx.size();
+        avgFacePosition /= numAdjFaces;
+
+        // calcalate R: average of edge midpoints
+        glm::vec3 avgMidEdge{0};
+        for (unsigned int edgeIndex : currVert.adjEdgesIdx)
+        {
+            EdgeRecord currEdge = m_Edges[edgeIndex];
+            avgMidEdge += 0.5f * (originalPoints[currEdge.endPoint1Idx] + originalPoints[currEdge.endPoint2Idx]);
+        }
+        float numAdjEdges = currVert.adjEdgesIdx.size();
+        avgMidEdge /= numAdjEdges;
+
+        glm::vec3 newPoint = avgFacePosition + 2.0f * avgMidEdge + (numAdjFaces - 3) * originalPoints[i];
+        newPoint /= numAdjFaces;
+
+        // update original vertex point to new position
+        m_Vertices[i].position = newPoint;
+    }
+
+    // build new Object class
+    std::vector<glm::vec3> CCVertexPos;
+    std::vector<std::vector<unsigned int>> CCFaceIndices;
+
+    for (int faceIdx = 0; faceIdx < m_Faces.size(); faceIdx++)
+    {
+        FaceRecord face = m_Faces[faceIdx];
+
+        glm::vec3 vertA = m_Vertices[face.verticesIdx[0]].position;
+        glm::vec3 vertB = m_Vertices[face.verticesIdx[1]].position;
+        glm::vec3 vertC = m_Vertices[face.verticesIdx[2]].position;
+
+        glm::vec3 edgeAB = edgePoints[getEdgeIndex({ face.verticesIdx[0], face.verticesIdx[1] })];
+        glm::vec3 edgeBC = edgePoints[getEdgeIndex({ face.verticesIdx[1], face.verticesIdx[2] })];
+        glm::vec3 edgeCA = edgePoints[getEdgeIndex({ face.verticesIdx[2], face.verticesIdx[0] })];
+
+        glm::vec3 faceABC = facePoints[faceIdx];
+
+        unsigned int vertAIdx = CCVertexPos.size();
+        unsigned int vertBIdx = vertAIdx + 1;
+        unsigned int vertCIdx = vertAIdx + 2;
+
+        unsigned int edgeABIdx = vertAIdx + 3;
+        unsigned int edgeBCIdx = vertAIdx + 4;
+        unsigned int edgeCAIdx = vertAIdx + 5;
+
+        unsigned int faceABCIdx = vertAIdx + 6;
+
+        CCVertexPos.push_back({ vertA });
+        CCVertexPos.push_back({ vertB });
+        CCVertexPos.push_back({ vertC });
+        CCVertexPos.push_back({ edgeAB });
+        CCVertexPos.push_back({ edgeBC });
+        CCVertexPos.push_back({ edgeCA });
+        CCVertexPos.push_back({ faceABC });
+
+        // my variation to return a triangle mesh: connect the original vertex with face point, so the quads will become 2 triangles
+        CCFaceIndices.push_back({ vertAIdx, edgeABIdx, faceABCIdx });
+        CCFaceIndices.push_back({ faceABCIdx, edgeCAIdx, vertAIdx });
+
+        CCFaceIndices.push_back({ vertBIdx, edgeBCIdx, faceABCIdx });
+        CCFaceIndices.push_back({ faceABCIdx, edgeABIdx, vertBIdx });
+
+        CCFaceIndices.push_back({ vertCIdx, edgeCAIdx, faceABCIdx });
+        CCFaceIndices.push_back({ faceABCIdx, edgeBCIdx, vertCIdx });
+    }
+
+    Object CCObject;
+    CCObject.m_Min = m_Min; CCObject.m_Max = m_Max;
+    CCObject.m_VertexPos = CCVertexPos; CCObject.m_FaceIndices = CCFaceIndices;
+
+    return CCObject;
+}
