@@ -79,6 +79,7 @@ Surface::~Surface()
 {
 }
 
+// My own algorithm
 Object Surface::Beehive()
 {
     // calculate the face points
@@ -88,7 +89,7 @@ Object Surface::Beehive()
         FaceRecord currFace = m_Faces[i];
 
         glm::vec3 vertexSum{0};
-        for (int j = 0; j < 3; ++j)
+        for (int j = 0; j < 3; j++)
         {
             vertexSum += m_Vertices[currFace.verticesIdx[j]].position;
         }
@@ -119,12 +120,6 @@ Object Surface::Beehive()
     }
 
     // update original vertex positions
-    std::vector<glm::vec3> originalPoints(m_Vertices.size());
-    // store the original positions
-    for (VertexRecord originalVertex : m_Vertices)
-    {
-        originalPoints.push_back(originalVertex.position);
-    }
     for (int i = 0; i < m_Vertices.size(); i++)
     {
         VertexRecord currVert = m_Vertices[i];
@@ -135,24 +130,11 @@ Object Surface::Beehive()
         {
             avgFacePosition += facePoints[faceIdx];
         }
-        avgFacePosition /= 3;
-
-        // calcalate R: average of edge midpoints
-        glm::vec3 avgMidEdge{0};
-        for (unsigned int edgeIndex : currVert.adjEdgesIdx)
-        {
-            EdgeRecord currEdge = m_Edges[edgeIndex];
-            avgMidEdge += 0.5f * (originalPoints[currEdge.endPoint1Idx] + originalPoints[currEdge.endPoint2Idx]);
-        }
-        float numAdjEdges = currVert.adjEdgesIdx.size();
-        avgMidEdge /= (numAdjEdges);
-
-        int numAdjFaces = currVert.adjFacesIdx.size();
-        glm::vec3 newPoint = avgFacePosition + 2.0f * avgMidEdge;
-        newPoint /= numAdjFaces;
+        float numAdjFaces = currVert.adjFacesIdx.size();
+        avgFacePosition /= 3 * numAdjFaces;
 
         // update original vertex point to new position
-        m_Vertices[i].position = newPoint;
+        m_Vertices[i].position = avgFacePosition;
     }
 
     // build new Object class
