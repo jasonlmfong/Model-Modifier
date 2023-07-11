@@ -303,6 +303,28 @@ int main()
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
                 objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
             }
+            if (ImGui::Button("Hollow Surface"))
+            {
+                Surface SF(obj);
+                obj = SF.Snowflake();
+                Surface SF2(obj);
+                obj = SF2.Snowflake();
+                mesh.Rebuild(obj); // rebuild mesh based on object info
+
+                objectVA.Bind();
+                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
+                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+            }
+            if (ImGui::Button("Catmull Clark Subdivision Surface"))
+            {
+                Surface CC(obj);
+                obj = CC.CatmullClark();
+                mesh.Rebuild(obj); // rebuild mesh based on object info
+
+                objectVA.Bind();
+                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
+                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+            }
         }
 
         if (ImGui::CollapsingHeader("Shading type"))
