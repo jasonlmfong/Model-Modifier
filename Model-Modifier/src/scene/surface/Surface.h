@@ -30,6 +30,9 @@ struct FaceRecord
 class Surface
 {
 public:
+	// given the position of a vertex, find index in the set inputted
+	// if it does not exist, insert into our map and return
+	unsigned int getVertIndex(glm::vec3 vertPos, std::vector<glm::vec3>& AllVertexPos, std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>>& VertIdxLookup);
 	// given the pair of indices in m_Vertices, find index in m_Edges
 	// if it does not exist, insert into our map and return
 	unsigned int getEdgeIndex(glm::uvec2 vertPair);
