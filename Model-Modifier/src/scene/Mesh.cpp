@@ -60,23 +60,29 @@ void Mesh::BuildVerticesIndices()
     }
     else if (m_ShadingType == SMOOTH) // smooth shading
     {
+        // get vertex-face connectivity: get all faces that touch the a given vertex
+        std::vector<std::vector<unsigned int>> vertAdjFaces(m_Object.m_VertexPos.size());
+        for (int faceIdx = 0; faceIdx < m_Object.m_FaceIndices.size(); faceIdx++)
+        {
+            std::vector<unsigned int> faceVertIdx = m_Object.m_FaceIndices[faceIdx];
+            // add face index to the connecting vertices
+            for (int i = 0; i < 3; i++)
+            {
+                vertAdjFaces[faceVertIdx[i]].push_back(faceIdx);
+            }
+        }
+
         // build smooth vertex normals by average neighbouring faces normals
         std::vector<glm::vec3> smoothVertexNormals(m_Object.m_VertexPos.size());
-
         for (int i = 0; i < m_Object.m_VertexPos.size(); i++)
         {
             glm::vec3 currPos = m_Object.m_VertexPos[i];
             glm::vec3 currVertNormal = glm::vec3(0, 0, 0);
 
-            // check if the face corners are the same as our current vertex
-            for (int face = 0; face < m_Object.m_FaceIndices.size(); face++)
+            // summ through each neighbouring face
+            for (unsigned int adjFace : vertAdjFaces[i])
             {
-                for (int corner = 0; corner < 3; corner++)
-                {
-                    glm::vec3 faceCorner = m_Object.m_VertexPos[m_Object.m_FaceIndices[face][corner]];
-                    if (glm::length(currPos - faceCorner) < 0.00001f) // "same" here is "less than epsilon" away, accounting for float ops
-                        currVertNormal += m_FaceNormals[face];
-                }
+                currVertNormal += m_FaceNormals[adjFace];
             }
 
             smoothVertexNormals[i] = glm::normalize(currVertNormal);
