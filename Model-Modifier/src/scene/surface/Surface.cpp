@@ -33,6 +33,7 @@ unsigned int Surface::getEdgeIndex(glm::uvec2 vertPair)
 }
 
 Surface::Surface(Object obj)
+    : m_Min(obj.m_Min), m_Max(obj.m_Max)
 {
     for (glm::vec3 vertPos : obj.m_VertexPos)
     {
@@ -77,4 +78,5 @@ Surface::Surface(Object obj)
 Surface::~Surface()
 {
 }
+
 

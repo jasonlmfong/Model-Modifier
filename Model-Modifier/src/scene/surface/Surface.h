@@ -1,6 +1,5 @@
 #include <vector>
 #include <unordered_map>
-#include <map>
 
 #include "../../external/glm/ext/vector_float3.hpp"
 #include "../../external/glm/ext/vector_uint2.hpp"
@@ -38,12 +37,14 @@ public:
 	Surface(Object obj);
 	~Surface();
 
-	Object CatmullClark();
 
 public:
 	std::vector<VertexRecord> m_Vertices;
 	std::vector<EdgeRecord> m_Edges;
 	std::vector<FaceRecord> m_Faces;
+
+	glm::vec3 m_Min;
+	glm::vec3 m_Max;
 
 	std::unordered_map<unsigned int, std::unordered_map<unsigned int, unsigned int>> m_EdgeIdxLookup;
 };
