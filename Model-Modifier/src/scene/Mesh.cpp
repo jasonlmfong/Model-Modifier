@@ -65,13 +65,17 @@ void Mesh::BuildVerticesIndices()
 
         for (int i = 0; i < m_Object.m_VertexPos.size(); i++)
         {
+            glm::vec3 currPos = m_Object.m_VertexPos[i];
             glm::vec3 currVertNormal = glm::vec3(0, 0, 0);
 
+            // check if the face corners are the same as our current vertex
             for (int face = 0; face < m_Object.m_FaceIndices.size(); face++)
             {
-                if (i == m_Object.m_FaceIndices[face][0] || i == m_Object.m_FaceIndices[face][1] || i == m_Object.m_FaceIndices[face][2])
+                for (int corner = 0; corner < 3; corner++)
                 {
-                    currVertNormal += m_FaceNormals[face];
+                    glm::vec3 faceCorner = m_Object.m_VertexPos[m_Object.m_FaceIndices[face][corner]];
+                    if (glm::length(currPos - faceCorner) < 0.00001f) // "same" here is "less than epsilon" away, accounting for float ops
+                        currVertNormal += m_FaceNormals[face];
                 }
             }
 
