@@ -39,7 +39,7 @@ public:
 
 	// Modification algorithms
 	Object Beehive();
-	// Object CatmullClark();
+	Object CatmullClark();
 
 public:
 	std::vector<VertexRecord> m_Vertices;
