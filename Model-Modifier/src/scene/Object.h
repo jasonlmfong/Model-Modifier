@@ -12,6 +12,7 @@
 class Object
 {
 public:
+	Object();
 	Object(const char* filename);
 	~Object();
 

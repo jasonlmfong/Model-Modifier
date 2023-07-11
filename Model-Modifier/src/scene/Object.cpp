@@ -1,5 +1,10 @@
 #include "Object.h"
 
+Object::Object()
+    : m_Min(0), m_Max(0)
+{
+}
+
 Object::Object(const char* filename)
 {
     loadOBJ(filename);

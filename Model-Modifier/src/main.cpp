@@ -19,6 +19,7 @@
 #include "scene/Mesh.h"
 #include "scene/Material.h"
 #include "scene/Light.h"
+#include "scene/surface/Surface.h"
 
 enum shader
 {
@@ -288,6 +289,20 @@ int main()
             ImGui::RadioButton("Teapot", &nextObject, TEAPOT);
             ImGui::RadioButton("Teddy", &nextObject, TEDDY);
             ImGui::RadioButton("Torus", &nextObject, TORUS);
+        }
+
+        if (ImGui::CollapsingHeader("Modify Model"))
+        {
+            if (ImGui::Button("Beehive Surface"))
+            {
+                Surface BH(obj);
+                obj = BH.Beehive(); 
+                mesh.Rebuild(obj); // rebuild mesh based on object info
+
+                objectVA.Bind();
+                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
+                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+            }
         }
 
         if (ImGui::CollapsingHeader("Shading type"))

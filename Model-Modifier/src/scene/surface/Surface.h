@@ -37,6 +37,9 @@ public:
 	Surface(Object obj);
 	~Surface();
 
+	// Modification algorithms
+	Object Beehive();
+	// Object CatmullClark();
 
 public:
 	std::vector<VertexRecord> m_Vertices;
