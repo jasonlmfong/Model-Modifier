@@ -119,6 +119,54 @@ Surface::~Surface()
 {
 }
 
+Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
+{
+    // build new Object class (CC style)
+    std::vector<glm::vec3> VertexPos;
+    std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
+    std::vector<std::vector<unsigned int>> FaceIndices;
+
+    for (int faceIdx = 0; faceIdx < m_Faces.size(); faceIdx++)
+    {
+        FaceRecord face = m_Faces[faceIdx];
+
+        glm::vec3 vertA = m_Vertices[face.verticesIdx[0]].position;
+        glm::vec3 vertB = m_Vertices[face.verticesIdx[1]].position;
+        glm::vec3 vertC = m_Vertices[face.verticesIdx[2]].position;
+
+        glm::vec3 edgeAB = edgePoints[getEdgeIndex({ face.verticesIdx[0], face.verticesIdx[1] })];
+        glm::vec3 edgeBC = edgePoints[getEdgeIndex({ face.verticesIdx[1], face.verticesIdx[2] })];
+        glm::vec3 edgeCA = edgePoints[getEdgeIndex({ face.verticesIdx[2], face.verticesIdx[0] })];
+
+        glm::vec3 faceABC = m_Faces[faceIdx].facePoint;
+
+        // use vertex lookup to avoid creating duplicate vertices
+        unsigned int vertAIdx = getVertIndex(vertA, VertexPos, VertLookup);
+        unsigned int vertBIdx = getVertIndex(vertB, VertexPos, VertLookup);
+        unsigned int vertCIdx = getVertIndex(vertC, VertexPos, VertLookup);
+        unsigned int edgeABIdx = getVertIndex(edgeAB, VertexPos, VertLookup);
+        unsigned int edgeBCIdx = getVertIndex(edgeBC, VertexPos, VertLookup);
+        unsigned int edgeCAIdx = getVertIndex(edgeCA, VertexPos, VertLookup);
+        unsigned int faceABCIdx = getVertIndex(faceABC, VertexPos, VertLookup);
+
+        // my variation to return a triangle mesh: connect the original vertex with face point, so the quads will become 2 triangles
+        FaceIndices.push_back({ vertAIdx, edgeABIdx, faceABCIdx });
+        FaceIndices.push_back({ faceABCIdx, edgeCAIdx, vertAIdx });
+
+        FaceIndices.push_back({ vertBIdx, edgeBCIdx, faceABCIdx });
+        FaceIndices.push_back({ faceABCIdx, edgeABIdx, vertBIdx });
+
+        FaceIndices.push_back({ vertCIdx, edgeCAIdx, faceABCIdx });
+        FaceIndices.push_back({ faceABCIdx, edgeBCIdx, vertCIdx });
+    }
+
+    Object Object;
+    Object.m_Min = m_Min; Object.m_Max = m_Max;
+    Object.m_VertexPos = VertexPos; Object.m_FaceIndices = FaceIndices;
+
+    return Object;
+}
+
 ////////// algorithms //////////
 
 // My own algorithm
@@ -160,49 +208,7 @@ Object Surface::Beehive()
     }
 
     // build new Object class
-    std::vector<glm::vec3> BHVertexPos;
-    std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> BHVertLookup;
-    std::vector<std::vector<unsigned int>> BHFaceIndices;
-
-    for (int faceIdx = 0; faceIdx < m_Faces.size(); faceIdx++)
-    {
-        FaceRecord face = m_Faces[faceIdx];
-
-        glm::vec3 vertA = m_Vertices[face.verticesIdx[0]].position;
-        glm::vec3 vertB = m_Vertices[face.verticesIdx[1]].position;
-        glm::vec3 vertC = m_Vertices[face.verticesIdx[2]].position;
-
-        glm::vec3 edgeAB = edgePoints[getEdgeIndex({ face.verticesIdx[0], face.verticesIdx[1] })];
-        glm::vec3 edgeBC = edgePoints[getEdgeIndex({ face.verticesIdx[1], face.verticesIdx[2] })];
-        glm::vec3 edgeCA = edgePoints[getEdgeIndex({ face.verticesIdx[2], face.verticesIdx[0] })];
-
-        glm::vec3 faceABC = m_Faces[faceIdx].facePoint;
-
-        // use vertex lookup to avoid creating duplicate vertices
-        unsigned int vertAIdx = getVertIndex(vertA, BHVertexPos, BHVertLookup);
-        unsigned int vertBIdx = getVertIndex(vertB, BHVertexPos, BHVertLookup);
-        unsigned int vertCIdx = getVertIndex(vertC, BHVertexPos, BHVertLookup);
-        unsigned int edgeABIdx = getVertIndex(edgeAB, BHVertexPos, BHVertLookup);
-        unsigned int edgeBCIdx = getVertIndex(edgeBC, BHVertexPos, BHVertLookup);
-        unsigned int edgeCAIdx = getVertIndex(edgeCA, BHVertexPos, BHVertLookup);
-        unsigned int faceABCIdx = getVertIndex(faceABC, BHVertexPos, BHVertLookup);
-
-        // my variation to return a triangle mesh: connect the original vertex with face point, so the quads will become 2 triangles
-        BHFaceIndices.push_back({ vertAIdx, edgeABIdx, faceABCIdx });
-        BHFaceIndices.push_back({ faceABCIdx, edgeCAIdx, vertAIdx });
-
-        BHFaceIndices.push_back({ vertBIdx, edgeBCIdx, faceABCIdx });
-        BHFaceIndices.push_back({ faceABCIdx, edgeABIdx, vertBIdx });
-
-        BHFaceIndices.push_back({ vertCIdx, edgeCAIdx, faceABCIdx });
-        BHFaceIndices.push_back({ faceABCIdx, edgeBCIdx, vertCIdx });
-    }
-
-    Object BHObject;
-    BHObject.m_Min = m_Min; BHObject.m_Max = m_Max;
-    BHObject.m_VertexPos = BHVertexPos; BHObject.m_FaceIndices = BHFaceIndices;
-
-    return BHObject;
+    return CCOutputOBJ(edgePoints);
 }
 
 // My own algorithm
@@ -244,49 +250,7 @@ Object Surface::Snowflake()
     }
 
     // build new Object class
-    std::vector<glm::vec3> SFVertexPos;
-    std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> SFVertLookup;
-    std::vector<std::vector<unsigned int>> SFFaceIndices;
-
-    for (int faceIdx = 0; faceIdx < m_Faces.size(); faceIdx++)
-    {
-        FaceRecord face = m_Faces[faceIdx];
-
-        glm::vec3 vertA = m_Vertices[face.verticesIdx[0]].position;
-        glm::vec3 vertB = m_Vertices[face.verticesIdx[1]].position;
-        glm::vec3 vertC = m_Vertices[face.verticesIdx[2]].position;
-
-        glm::vec3 edgeAB = edgePoints[getEdgeIndex({ face.verticesIdx[0], face.verticesIdx[1] })];
-        glm::vec3 edgeBC = edgePoints[getEdgeIndex({ face.verticesIdx[1], face.verticesIdx[2] })];
-        glm::vec3 edgeCA = edgePoints[getEdgeIndex({ face.verticesIdx[2], face.verticesIdx[0] })];
-
-        glm::vec3 faceABC = m_Faces[faceIdx].facePoint;
-
-        // use vertex lookup to avoid creating duplicate vertices
-        unsigned int vertAIdx = getVertIndex(vertA, SFVertexPos, SFVertLookup);
-        unsigned int vertBIdx = getVertIndex(vertB, SFVertexPos, SFVertLookup);
-        unsigned int vertCIdx = getVertIndex(vertC, SFVertexPos, SFVertLookup);
-        unsigned int edgeABIdx = getVertIndex(edgeAB, SFVertexPos, SFVertLookup);
-        unsigned int edgeBCIdx = getVertIndex(edgeBC, SFVertexPos, SFVertLookup);
-        unsigned int edgeCAIdx = getVertIndex(edgeCA, SFVertexPos, SFVertLookup);
-        unsigned int faceABCIdx = getVertIndex(faceABC, SFVertexPos, SFVertLookup);
-
-        // my variation to return a triangle mesh: connect the original vertex with face point, so the quads will become 2 triangles
-        SFFaceIndices.push_back({ vertAIdx, edgeABIdx, faceABCIdx });
-        SFFaceIndices.push_back({ faceABCIdx, edgeCAIdx, vertAIdx });
-
-        SFFaceIndices.push_back({ vertBIdx, edgeBCIdx, faceABCIdx });
-        SFFaceIndices.push_back({ faceABCIdx, edgeABIdx, vertBIdx });
-
-        SFFaceIndices.push_back({ vertCIdx, edgeCAIdx, faceABCIdx });
-        SFFaceIndices.push_back({ faceABCIdx, edgeBCIdx, vertCIdx });
-    }
-
-    Object SFObject;
-    SFObject.m_Min = m_Min; SFObject.m_Max = m_Max;
-    SFObject.m_VertexPos = SFVertexPos; SFObject.m_FaceIndices = SFFaceIndices;
-
-    return SFObject;
+    return CCOutputOBJ(edgePoints);
 }
 
 // Catmull Clark subdivision surface algorithm
@@ -347,47 +311,5 @@ Object Surface::CatmullClark()
     }
 
     // build new Object class
-    std::vector<glm::vec3> CCVertexPos;
-    std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> CCVertLookup;
-    std::vector<std::vector<unsigned int>> CCFaceIndices;
-
-    for (int faceIdx = 0; faceIdx < m_Faces.size(); faceIdx++)
-    {
-        FaceRecord face = m_Faces[faceIdx];
-
-        glm::vec3 vertA = m_Vertices[face.verticesIdx[0]].position;
-        glm::vec3 vertB = m_Vertices[face.verticesIdx[1]].position;
-        glm::vec3 vertC = m_Vertices[face.verticesIdx[2]].position;
-
-        glm::vec3 edgeAB = edgePoints[getEdgeIndex({ face.verticesIdx[0], face.verticesIdx[1] })];
-        glm::vec3 edgeBC = edgePoints[getEdgeIndex({ face.verticesIdx[1], face.verticesIdx[2] })];
-        glm::vec3 edgeCA = edgePoints[getEdgeIndex({ face.verticesIdx[2], face.verticesIdx[0] })];
-
-        glm::vec3 faceABC = m_Faces[faceIdx].facePoint;
-        
-        // use vertex lookup to avoid creating duplicate vertices
-        unsigned int vertAIdx = getVertIndex(vertA, CCVertexPos, CCVertLookup);
-        unsigned int vertBIdx = getVertIndex(vertB, CCVertexPos, CCVertLookup);
-        unsigned int vertCIdx = getVertIndex(vertC, CCVertexPos, CCVertLookup);
-        unsigned int edgeABIdx = getVertIndex(edgeAB, CCVertexPos, CCVertLookup);
-        unsigned int edgeBCIdx = getVertIndex(edgeBC, CCVertexPos, CCVertLookup);
-        unsigned int edgeCAIdx = getVertIndex(edgeCA, CCVertexPos, CCVertLookup);
-        unsigned int faceABCIdx = getVertIndex(faceABC, CCVertexPos, CCVertLookup);
-
-        // my variation to return a triangle mesh: connect the original vertex with face point, so the quads will become 2 triangles
-        CCFaceIndices.push_back({ vertAIdx, edgeABIdx, faceABCIdx });
-        CCFaceIndices.push_back({ faceABCIdx, edgeCAIdx, vertAIdx });
-
-        CCFaceIndices.push_back({ vertBIdx, edgeBCIdx, faceABCIdx });
-        CCFaceIndices.push_back({ faceABCIdx, edgeABIdx, vertBIdx });
-
-        CCFaceIndices.push_back({ vertCIdx, edgeCAIdx, faceABCIdx });
-        CCFaceIndices.push_back({ faceABCIdx, edgeBCIdx, vertCIdx });
-    }
-
-    Object CCObject;
-    CCObject.m_Min = m_Min; CCObject.m_Max = m_Max;
-    CCObject.m_VertexPos = CCVertexPos; CCObject.m_FaceIndices = CCFaceIndices;
-
-    return CCObject;
+    return CCOutputOBJ(edgePoints);
 }

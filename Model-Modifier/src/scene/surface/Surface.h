@@ -41,6 +41,7 @@ public:
 
 	Surface(Object obj);
 	~Surface();
+	Object CCOutputOBJ(std::vector<glm::vec3> edgePoints);
 
 	// Modification algorithms
 	Object Beehive();
