@@ -18,11 +18,13 @@ struct EdgeRecord
 {
 	unsigned endPoint1Idx; // maintain that endpoint1 < endpoint2 for searching
 	unsigned endPoint2Idx;
+	glm::vec3 midEdgePoint;
 	std::vector<unsigned int> adjFacesIdx; // should have 1 or 2 adjacent faces
 };
 
 struct FaceRecord
 {
+	glm::vec3 facePoint;
 	std::vector<unsigned int> verticesIdx; // each face can have 3 vertices
 	std::vector<unsigned int> edgesIdx; // each face can have 3 edges
 };

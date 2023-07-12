@@ -55,6 +55,10 @@ unsigned int Surface::getEdgeIndex(glm::uvec2 vertPair)
     EdgeRecord newEdge;
     newEdge.endPoint1Idx = orderedVertPair.x;
     newEdge.endPoint2Idx = orderedVertPair.y;
+    newEdge.midEdgePoint = 0.5f * (
+        m_Vertices[orderedVertPair.x].position +
+        m_Vertices[orderedVertPair.y].position
+        );
     m_Edges.push_back(newEdge);
     m_EdgeIdxLookup[orderedVertPair.x].insert(std::make_pair(orderedVertPair.y, newEdgeIdx));
     return newEdgeIdx;
@@ -76,6 +80,14 @@ Surface::Surface(Object obj)
         // create face record to be stored
         FaceRecord newFace;
         newFace.verticesIdx = faceVertices;
+
+        // calculate the face points
+        glm::vec3 vertexSum{0};
+        for (int j = 0; j < 3; j++)
+        {
+            vertexSum += m_Vertices[faceVertices[j]].position;
+        }
+        newFace.facePoint = vertexSum / 3.0f;
 
         // get edges next to the current face
         for (int i = 0; i < 3; i++)
@@ -107,23 +119,11 @@ Surface::~Surface()
 {
 }
 
+////////// algorithms //////////
+
 // My own algorithm
 Object Surface::Beehive()
 {
-    // calculate the face points
-    std::vector<glm::vec3> facePoints(m_Faces.size());
-    for (int i = 0; i < facePoints.size(); i++)
-    {
-        FaceRecord currFace = m_Faces[i];
-
-        glm::vec3 vertexSum{0};
-        for (int j = 0; j < 3; j++)
-        {
-            vertexSum += m_Vertices[currFace.verticesIdx[j]].position;
-        }
-        facePoints[i] = vertexSum / 3.0f;
-    }
-
     // calcuate edge points
     std::vector<glm::vec3> edgePoints(m_Edges.size());
     for (int i = 0; i < edgePoints.size(); i++)
@@ -132,18 +132,12 @@ Object Surface::Beehive()
         if (currEdge.adjFacesIdx.size() == 1) // boundary edge
         {
             // ME point
-            edgePoints[i] = 0.5f * (
-                m_Vertices[currEdge.endPoint1Idx].position +
-                m_Vertices[currEdge.endPoint2Idx].position
-                );
+            edgePoints[i] = currEdge.midEdgePoint;
         }
         else // edge borders 2 faces
         {
             // (AF + ME) / 2 point
-            edgePoints[i] = 0.25f * (
-                m_Vertices[currEdge.endPoint1Idx].position +
-                m_Vertices[currEdge.endPoint2Idx].position +
-                facePoints[currEdge.adjFacesIdx[0]] + facePoints[currEdge.adjFacesIdx[1]]);
+            edgePoints[i] = 0.5f * currEdge.midEdgePoint + 0.25f * (m_Faces[currEdge.adjFacesIdx[0]].facePoint + m_Faces[currEdge.adjFacesIdx[1]].facePoint);
         }
     }
 
@@ -156,7 +150,7 @@ Object Surface::Beehive()
         glm::vec3 avgFacePosition{0};
         for (unsigned int faceIdx : currVert.adjFacesIdx)
         {
-            avgFacePosition += facePoints[faceIdx];
+            avgFacePosition += m_Faces[faceIdx].facePoint;
         }
         float numAdjFaces = currVert.adjFacesIdx.size();
         avgFacePosition /= 3 * numAdjFaces;
@@ -182,7 +176,7 @@ Object Surface::Beehive()
         glm::vec3 edgeBC = edgePoints[getEdgeIndex({ face.verticesIdx[1], face.verticesIdx[2] })];
         glm::vec3 edgeCA = edgePoints[getEdgeIndex({ face.verticesIdx[2], face.verticesIdx[0] })];
 
-        glm::vec3 faceABC = facePoints[faceIdx];
+        glm::vec3 faceABC = m_Faces[faceIdx].facePoint;
 
         // use vertex lookup to avoid creating duplicate vertices
         unsigned int vertAIdx = getVertIndex(vertA, BHVertexPos, BHVertLookup);
@@ -214,20 +208,6 @@ Object Surface::Beehive()
 // My own algorithm
 Object Surface::Snowflake()
 {
-    // calculate the face points
-    std::vector<glm::vec3> facePoints(m_Faces.size());
-    for (int i = 0; i < facePoints.size(); i++)
-    {
-        FaceRecord currFace = m_Faces[i];
-
-        glm::vec3 vertexSum{0};
-        for (int j = 0; j < 3; j++)
-        {
-            vertexSum += m_Vertices[currFace.verticesIdx[j]].position;
-        }
-        facePoints[i] = vertexSum / 3.0f;
-    }
-
     // calcuate edge points
     std::vector<glm::vec3> edgePoints(m_Edges.size());
     for (int i = 0; i < edgePoints.size(); i++)
@@ -236,18 +216,12 @@ Object Surface::Snowflake()
         if (currEdge.adjFacesIdx.size() == 1) // boundary edge
         {
             // ME point
-            edgePoints[i] = 0.5f * (
-                m_Vertices[currEdge.endPoint1Idx].position +
-                m_Vertices[currEdge.endPoint2Idx].position
-                );
+            edgePoints[i] = currEdge.midEdgePoint;
         }
         else // edge borders 2 faces
         {
             // (AF + ME) / 2 point
-            edgePoints[i] = 0.25f * (
-                m_Vertices[currEdge.endPoint1Idx].position +
-                m_Vertices[currEdge.endPoint2Idx].position +
-                facePoints[currEdge.adjFacesIdx[0]] + facePoints[currEdge.adjFacesIdx[1]]);
+            edgePoints[i] = 0.5f * currEdge.midEdgePoint + 0.25f * (m_Faces[currEdge.adjFacesIdx[0]].facePoint + m_Faces[currEdge.adjFacesIdx[1]].facePoint);
         }
     }
 
@@ -260,7 +234,7 @@ Object Surface::Snowflake()
         glm::vec3 avgFacePosition{0};
         for (unsigned int faceIdx : currVert.adjFacesIdx)
         {
-            avgFacePosition += facePoints[faceIdx];
+            avgFacePosition += m_Faces[faceIdx].facePoint;
         }
         float numAdjFaces = currVert.adjFacesIdx.size();
         avgFacePosition /= numAdjFaces;
@@ -286,7 +260,7 @@ Object Surface::Snowflake()
         glm::vec3 edgeBC = edgePoints[getEdgeIndex({ face.verticesIdx[1], face.verticesIdx[2] })];
         glm::vec3 edgeCA = edgePoints[getEdgeIndex({ face.verticesIdx[2], face.verticesIdx[0] })];
 
-        glm::vec3 faceABC = facePoints[faceIdx];
+        glm::vec3 faceABC = m_Faces[faceIdx].facePoint;
 
         // use vertex lookup to avoid creating duplicate vertices
         unsigned int vertAIdx = getVertIndex(vertA, SFVertexPos, SFVertLookup);
@@ -318,20 +292,6 @@ Object Surface::Snowflake()
 // Catmull Clark subdivision surface algorithm
 Object Surface::CatmullClark()
 {
-    // calculate the face points
-    std::vector<glm::vec3> facePoints(m_Faces.size());
-    for (int i = 0; i < facePoints.size(); i++)
-    {
-        FaceRecord currFace = m_Faces[i];
-
-        glm::vec3 vertexSum{0};
-        for (int j = 0; j < 3; j++)
-        {
-            vertexSum += m_Vertices[currFace.verticesIdx[j]].position;
-        }
-        facePoints[i] = vertexSum / 3.0f;
-    }
-
     // calcuate edge points
     std::vector<glm::vec3> edgePoints(m_Edges.size());
     for (int i = 0; i < edgePoints.size(); i++)
@@ -340,18 +300,12 @@ Object Surface::CatmullClark()
         if (currEdge.adjFacesIdx.size() == 1) // boundary edge
         {
             // ME point
-            edgePoints[i] = 0.5f * (
-                m_Vertices[currEdge.endPoint1Idx].position +
-                m_Vertices[currEdge.endPoint2Idx].position
-                );
+            edgePoints[i] = currEdge.midEdgePoint;
         }
         else // edge borders 2 faces
         {
             // (AF + ME) / 2 point
-            edgePoints[i] = 0.25f * (
-                m_Vertices[currEdge.endPoint1Idx].position +
-                m_Vertices[currEdge.endPoint2Idx].position +
-                facePoints[currEdge.adjFacesIdx[0]] + facePoints[currEdge.adjFacesIdx[1]]);
+            edgePoints[i] = 0.5f * currEdge.midEdgePoint + 0.25f * (m_Faces[currEdge.adjFacesIdx[0]].facePoint + m_Faces[currEdge.adjFacesIdx[1]].facePoint);
         }
     }
 
@@ -370,7 +324,7 @@ Object Surface::CatmullClark()
         glm::vec3 avgFacePosition{0};
         for (unsigned int faceIdx : currVert.adjFacesIdx)
         {
-            avgFacePosition += facePoints[faceIdx];
+            avgFacePosition += m_Faces[faceIdx].facePoint;
         }
         float numAdjFaces = currVert.adjFacesIdx.size();
         avgFacePosition /= numAdjFaces;
@@ -409,7 +363,7 @@ Object Surface::CatmullClark()
         glm::vec3 edgeBC = edgePoints[getEdgeIndex({ face.verticesIdx[1], face.verticesIdx[2] })];
         glm::vec3 edgeCA = edgePoints[getEdgeIndex({ face.verticesIdx[2], face.verticesIdx[0] })];
 
-        glm::vec3 faceABC = facePoints[faceIdx];
+        glm::vec3 faceABC = m_Faces[faceIdx].facePoint;
         
         // use vertex lookup to avoid creating duplicate vertices
         unsigned int vertAIdx = getVertIndex(vertA, CCVertexPos, CCVertLookup);
