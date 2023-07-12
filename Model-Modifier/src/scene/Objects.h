@@ -6,8 +6,10 @@
 
 enum objectEnum
 {
+    ARMADILLO,
     BUNNY,
     COWHEAD,
+    CUBE,
     DOUBLETORUS,
     FACE,
     GARGOYLE,
@@ -33,8 +35,10 @@ public:
 public:
     std::unordered_map<int, const char*> m_Filepaths
     {
+        { ARMADILLO, "res/objects/armadillo.obj" },
         { BUNNY, "res/objects/bunny.obj" },
         { COWHEAD, "res/objects/cowhead.obj" },
+        { CUBE, "res/objects/cube.obj" },
         { DOUBLETORUS,"res/objects/double-torus.obj" },
         { FACE, "res/objects/face.obj" },
         { GARGOYLE, "res/objects/gargoyle.obj" },

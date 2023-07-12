@@ -276,8 +276,10 @@ int main()
         ImGui::Begin("Display parameters");
         if (ImGui::CollapsingHeader("Objection selection"))
         {
+            ImGui::RadioButton("Armadillo", &nextObject, ARMADILLO);
             ImGui::RadioButton("Bunny", &nextObject, BUNNY);
-            ImGui::RadioButton("Cow head", &nextObject, COWHEAD);
+            ImGui::RadioButton("Cow head", &nextObject, COWHEAD); 
+            ImGui::RadioButton("Cube", &nextObject, CUBE);
             ImGui::RadioButton("Double torus", &nextObject, DOUBLETORUS);
             ImGui::RadioButton("Face", &nextObject, FACE);
             ImGui::RadioButton("Gargoyle", &nextObject, GARGOYLE);
