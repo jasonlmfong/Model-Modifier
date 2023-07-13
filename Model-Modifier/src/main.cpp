@@ -290,9 +290,11 @@ int main()
             ImGui::RadioButton("Sphere", &nextObject, SPHERE);
             ImGui::RadioButton("Star", &nextObject, STAR);
             ImGui::RadioButton("Suzanne", &nextObject, SUZANNE);
+            ImGui::RadioButton("T-Shape", &nextObject, T);
             ImGui::RadioButton("Teapot", &nextObject, TEAPOT);
             ImGui::RadioButton("Teddy", &nextObject, TEDDY);
             ImGui::RadioButton("Torus", &nextObject, TORUS);
+            ImGui::RadioButton("Tubes", &nextObject, TUBES);
         }
 
         if (ImGui::CollapsingHeader("Modify Model"))

@@ -20,9 +20,11 @@ enum objectEnum
     SPHERE,
     STAR,
     SUZANNE,
+    T,
     TEAPOT,
     TEDDY,
-    TORUS
+    TORUS,
+    TUBES
 };
 
 class Objects
@@ -49,9 +51,11 @@ public:
         { SPHERE, "res/objects/sphere.obj" },
         { STAR, "res/objects/star.obj" },
         { SUZANNE, "res/objects/suzanne.obj" },
+        { T, "res/objects/T.obj" },
         { TEAPOT, "res/objects/teapot.obj" },
         { TEDDY, "res/objects/teddy.obj" },
-        { TORUS, "res/objects/torus.obj" }
+        { TORUS, "res/objects/torus.obj" },
+        { TUBES, "res/objects/tubes.obj" }
     };
     std::unordered_map<int, Object> m_Objects;
 };
