@@ -276,29 +276,44 @@ int main()
         ImGui::Begin("Display parameters");
         if (ImGui::CollapsingHeader("Objection selection"))
         {
-            ImGui::RadioButton("Armadillo", &nextObject, ARMADILLO);
-            ImGui::RadioButton("Bunny", &nextObject, BUNNY);
-            ImGui::RadioButton("Cow head", &nextObject, COWHEAD); 
-            ImGui::RadioButton("Cube", &nextObject, CUBE);
-            ImGui::RadioButton("Double torus", &nextObject, DOUBLETORUS);
-            ImGui::RadioButton("Face", &nextObject, FACE);
-            ImGui::RadioButton("Gargoyle", &nextObject, GARGOYLE);
-            ImGui::RadioButton("Icosahedron", &nextObject, ICOSA);
-            ImGui::RadioButton("Kitten", &nextObject, KITTEN);
-            ImGui::RadioButton("Octahedron", &nextObject, OCTA);
-            ImGui::RadioButton("Shuttle", &nextObject, SHUTTLE);
-            ImGui::RadioButton("Sphere", &nextObject, SPHERE);
-            ImGui::RadioButton("Star", &nextObject, STAR);
-            ImGui::RadioButton("Suzanne", &nextObject, SUZANNE);
-            ImGui::RadioButton("T-Shape", &nextObject, T);
-            ImGui::RadioButton("Teapot", &nextObject, TEAPOT);
-            ImGui::RadioButton("Teddy", &nextObject, TEDDY);
-            ImGui::RadioButton("Torus", &nextObject, TORUS);
-            ImGui::RadioButton("Tubes", &nextObject, TUBES);
+            if (ImGui::CollapsingHeader("Geometric objects"))
+            {
+                ImGui::RadioButton("Cube", &nextObject, CUBE);
+                ImGui::RadioButton("Double torus", &nextObject, DOUBLETORUS);
+                ImGui::RadioButton("Icosahedron", &nextObject, ICOSA);
+                ImGui::RadioButton("Octahedron", &nextObject, OCTA);
+                ImGui::RadioButton("Sphere", &nextObject, SPHERE);
+                ImGui::RadioButton("Star", &nextObject, STAR);
+                ImGui::RadioButton("T-Shape", &nextObject, T);
+                ImGui::RadioButton("Torus", &nextObject, TORUS);
+                ImGui::RadioButton("Tubes", &nextObject, TUBES);
+            }
+            if (ImGui::CollapsingHeader("Model objects"))
+            {
+                ImGui::RadioButton("Armadillo", &nextObject, ARMADILLO);
+                ImGui::RadioButton("Bunny", &nextObject, BUNNY);
+                ImGui::RadioButton("Cow head", &nextObject, COWHEAD);
+                ImGui::RadioButton("Face", &nextObject, FACE);
+                ImGui::RadioButton("Gargoyle", &nextObject, GARGOYLE);
+                ImGui::RadioButton("Kitten", &nextObject, KITTEN);
+                ImGui::RadioButton("Shuttle", &nextObject, SHUTTLE);
+                ImGui::RadioButton("Suzanne", &nextObject, SUZANNE);
+                ImGui::RadioButton("Teapot", &nextObject, TEAPOT);
+                ImGui::RadioButton("Teddy", &nextObject, TEDDY);
+            }
         }
 
         if (ImGui::CollapsingHeader("Modify Model"))
         {
+            if (ImGui::Button("Original"))
+            {
+                obj = objects.findObj(currObject); // search for the object requested
+                mesh.Rebuild(obj); // rebuild mesh based on object info
+
+                objectVA.Bind();
+                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
+                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+            }
             if (ImGui::Button("Beehive Surface"))
             {
                 Surface BH(obj);
