@@ -96,6 +96,8 @@ Surface::Surface(Object obj)
             unsigned int endVertex = faceVertices[(i + 1) % 3];
             unsigned int edgeIndex = getEdgeIndex({ startVertex, endVertex });
 
+            newFace.verticesEdges[startVertex].push_back(edgeIndex);
+            newFace.verticesEdges[endVertex].push_back(edgeIndex);
             newFace.edgesIdx.push_back(edgeIndex);
 
             // add the edges to the connecting vertices
@@ -126,10 +128,8 @@ Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
     std::vector<std::vector<unsigned int>> FaceIndices;
 
-    for (int faceIdx = 0; faceIdx < m_Faces.size(); faceIdx++)
+    for (FaceRecord face : m_Faces)
     {
-        FaceRecord face = m_Faces[faceIdx];
-
         glm::vec3 vertA = m_Vertices[face.verticesIdx[0]].position;
         glm::vec3 vertB = m_Vertices[face.verticesIdx[1]].position;
         glm::vec3 vertC = m_Vertices[face.verticesIdx[2]].position;
@@ -138,7 +138,7 @@ Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
         glm::vec3 edgeBC = edgePoints[getEdgeIndex({ face.verticesIdx[1], face.verticesIdx[2] })];
         glm::vec3 edgeCA = edgePoints[getEdgeIndex({ face.verticesIdx[2], face.verticesIdx[0] })];
 
-        glm::vec3 faceABC = m_Faces[faceIdx].facePoint;
+        glm::vec3 faceABC = face.facePoint;
 
         // use vertex lookup to avoid creating duplicate vertices
         unsigned int vertAIdx = getVertIndex(vertA, VertexPos, VertLookup);
@@ -312,4 +312,90 @@ Object Surface::CatmullClark()
 
     // build new Object class
     return CCOutputOBJ(edgePoints);
+}
+
+// Doo Sabin subdivision surface algorithm
+Object Surface::DooSabin()
+{
+    // make new vertices and store original vertex connectivity
+    std::vector<std::vector<glm::vec3>> newPointsPerFace(m_Faces.size());
+    std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerVertex;
+    std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerEdge;
+    for (int currFaceIdx = 0; currFaceIdx < m_Faces.size(); currFaceIdx++)
+    {
+        FaceRecord currFace = m_Faces[currFaceIdx];
+
+        // associate new vertices with the original vertices and edges
+        for (unsigned int vert : currFace.verticesIdx)
+        {
+            glm::vec3 point = 0.25f * (currFace.facePoint + m_Vertices[vert].position + 
+                m_Edges[currFace.verticesEdges[vert][0]].midEdgePoint + m_Edges[currFace.verticesEdges[vert][1]].midEdgePoint);
+            newPointsPerFace[currFaceIdx].push_back(point);
+            pointsPerVertex[vert].push_back(point);
+            for (unsigned int edge : currFace.verticesEdges[vert])
+            {
+                pointsPerEdge[edge].push_back(point);
+            }
+        }
+    }
+    
+    // build new Object class (DS style)
+    std::vector<glm::vec3> VertexPos;
+    std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
+    std::vector<std::vector<unsigned int>> FaceIndices;
+
+    for (int currFaceIdx = 0; currFaceIdx < m_Faces.size(); currFaceIdx++)
+    {
+        // use vertex lookup to avoid creating duplicate vertices
+        unsigned int vertAIdx = getVertIndex(newPointsPerFace[currFaceIdx][0], VertexPos, VertLookup);
+        unsigned int vertBIdx = getVertIndex(newPointsPerFace[currFaceIdx][1], VertexPos, VertLookup);
+        unsigned int vertCIdx = getVertIndex(newPointsPerFace[currFaceIdx][2], VertexPos, VertLookup);
+
+        FaceIndices.push_back({ vertAIdx, vertBIdx, vertCIdx });
+    }
+
+    for (int currEdgeIdx = 0; currEdgeIdx < pointsPerEdge.size(); currEdgeIdx++)
+    {
+        if (pointsPerEdge[currEdgeIdx].size() == 4)
+        {
+            // use vertex lookup to avoid creating duplicate vertices
+            unsigned int vertAIdx = getVertIndex(pointsPerEdge[currEdgeIdx][0], VertexPos, VertLookup);
+            unsigned int vertBIdx = getVertIndex(pointsPerEdge[currEdgeIdx][1], VertexPos, VertLookup);
+            unsigned int vertCIdx = getVertIndex(pointsPerEdge[currEdgeIdx][2], VertexPos, VertLookup);
+            unsigned int vertDIdx = getVertIndex(pointsPerEdge[currEdgeIdx][3], VertexPos, VertLookup);
+
+            FaceIndices.push_back({ vertAIdx, vertBIdx, vertCIdx });
+            FaceIndices.push_back({ vertCIdx, vertDIdx, vertAIdx });
+        }
+    }
+
+    for (int currVertIdx = 0; currVertIdx < m_Faces.size(); currVertIdx++)
+    {
+        std::vector<glm::vec3> allNewPointsAroundVert = pointsPerVertex[currVertIdx];
+
+        std::vector<unsigned int> neighVertIdx;
+        glm::vec3 center{0};
+        int numNeighs = allNewPointsAroundVert.size();
+        for (int neigh = 0; neigh < numNeighs; neigh++)
+        {
+            // use vertex lookup to avoid creating duplicate vertices
+            neighVertIdx.push_back(getVertIndex(allNewPointsAroundVert[neigh], VertexPos, VertLookup));
+            center += allNewPointsAroundVert[neigh];
+        }
+        
+        center /= numNeighs;
+        unsigned int centerIdx = getVertIndex(center, VertexPos, VertLookup);
+
+        for (int neigh = 0; neigh < numNeighs; neigh++)
+        {
+            FaceIndices.push_back({ centerIdx, neighVertIdx[neigh], neighVertIdx[(neigh + 1) % numNeighs] });
+        }
+    }
+
+
+    Object Object;
+    Object.m_Min = m_Min; Object.m_Max = m_Max;
+    Object.m_VertexPos = VertexPos; Object.m_FaceIndices = FaceIndices;
+
+    return Object;
 }

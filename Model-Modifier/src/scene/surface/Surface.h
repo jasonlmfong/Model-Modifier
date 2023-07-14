@@ -26,6 +26,7 @@ struct FaceRecord
 {
 	glm::vec3 facePoint;
 	std::vector<unsigned int> verticesIdx; // each face can have 3 vertices
+	std::unordered_map<unsigned int, std::vector<unsigned int>> verticesEdges; // each vertex will have 2 edges
 	std::vector<unsigned int> edgesIdx; // each face can have 3 edges
 };
 
@@ -47,6 +48,7 @@ public:
 	Object Beehive();
 	Object Snowflake();
 	Object CatmullClark();
+	Object DooSabin();
 
 public:
 	std::vector<VertexRecord> m_Vertices;
