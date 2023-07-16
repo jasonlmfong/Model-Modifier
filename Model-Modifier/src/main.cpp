@@ -276,6 +276,7 @@ int main()
         ImGui::Begin("Display parameters");
         if (ImGui::CollapsingHeader("Objection selection"))
         {
+            ImGui::Indent();
             if (ImGui::CollapsingHeader("Geometric objects"))
             {
                 ImGui::RadioButton("Cube", &nextObject, CUBE);
@@ -301,6 +302,7 @@ int main()
                 ImGui::RadioButton("Teapot", &nextObject, TEAPOT);
                 ImGui::RadioButton("Teddy", &nextObject, TEDDY);
             }
+            ImGui::Unindent();
         }
 
         if (ImGui::CollapsingHeader("Modify Model"))
@@ -354,6 +356,16 @@ int main()
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
                 objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
             }
+            if (ImGui::Button("Loop Subdivision Surface"))
+            {
+                Surface Lo(obj);
+                obj = Lo.Loop();
+                mesh.Rebuild(obj); // rebuild mesh based on object info
+
+                objectVA.Bind();
+                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
+                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+            }
         }
 
         if (ImGui::CollapsingHeader("Shading type"))
@@ -370,6 +382,7 @@ int main()
         
             if (nextShader == GOURAND || nextShader == PHONG)
             {
+                ImGui::Indent();
                 if (ImGui::CollapsingHeader("Material controls"))
                 {
                     ImGui::ColorEdit3("Ambient color", meshMat.m_Ambient);
@@ -395,6 +408,7 @@ int main()
                         ImGui::PopID();
                     }
                 }
+                ImGui::Unindent();
             }
         }
 
