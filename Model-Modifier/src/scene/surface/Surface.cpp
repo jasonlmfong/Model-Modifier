@@ -328,8 +328,10 @@ Object Surface::DooSabin()
         // associate new vertices with the original vertices and edges
         for (unsigned int vert : currFace.verticesIdx)
         {
+            // point between vertex, face point, 2 neighbour edge points
             glm::vec3 point = 0.25f * (currFace.facePoint + m_Vertices[vert].position + 
                 m_Edges[currFace.verticesEdges[vert][0]].midEdgePoint + m_Edges[currFace.verticesEdges[vert][1]].midEdgePoint);
+            // add to storage
             newPointsPerFace[currFaceIdx].push_back(point);
             pointsPerVertex[vert].push_back(point);
             for (unsigned int edge : currFace.verticesEdges[vert])
@@ -344,6 +346,7 @@ Object Surface::DooSabin()
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
     std::vector<std::vector<unsigned int>> FaceIndices;
 
+    // new face from old face
     for (int currFaceIdx = 0; currFaceIdx < m_Faces.size(); currFaceIdx++)
     {
         // use vertex lookup to avoid creating duplicate vertices
@@ -354,6 +357,7 @@ Object Surface::DooSabin()
         FaceIndices.push_back({ vertAIdx, vertBIdx, vertCIdx });
     }
 
+    // new face from old edge
     for (int currEdgeIdx = 0; currEdgeIdx < pointsPerEdge.size(); currEdgeIdx++)
     {
         if (pointsPerEdge[currEdgeIdx].size() == 4)
@@ -369,6 +373,7 @@ Object Surface::DooSabin()
         }
     }
 
+    // new face from old vertex
     for (int currVertIdx = 0; currVertIdx < m_Faces.size(); currVertIdx++)
     {
         std::vector<glm::vec3> allNewPointsAroundVert = pointsPerVertex[currVertIdx];
@@ -392,7 +397,7 @@ Object Surface::DooSabin()
         }
     }
 
-
+    // build object
     Object Object;
     Object.m_Min = m_Min; Object.m_Max = m_Max;
     Object.m_VertexPos = VertexPos; Object.m_FaceIndices = FaceIndices;
