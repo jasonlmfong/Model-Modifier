@@ -49,6 +49,7 @@ public:
 	Object Snowflake();
 	Object CatmullClark();
 	Object DooSabin();
+	Object Loop();
 
 public:
 	std::vector<VertexRecord> m_Vertices;
