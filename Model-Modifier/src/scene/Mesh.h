@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 
 #include "../external/glm/ext/vector_float3.hpp"
 #include "../external/glm/geometric.hpp"
@@ -10,6 +11,7 @@
 enum shading
 {
 	FLAT,
+	MIXED,
 	SMOOTH
 };
 
@@ -19,9 +21,9 @@ public:
 	Mesh(Object obj, int shading);
 	~Mesh();
 
+	void BuildFaceNormals();
+	
 	void BuildVerticesIndices();
-	void BuildVerticesIndices(Object obj);
-	void BuildVerticesIndices(int shading);
 	void Destroy();
 	void Rebuild();
 	void Rebuild(Object obj);

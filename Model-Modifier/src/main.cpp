@@ -385,6 +385,7 @@ int main()
         if (ImGui::CollapsingHeader("Shading type"))
         {
             ImGui::RadioButton("Flat shading", &nextShadingType, FLAT);
+            ImGui::RadioButton("Mixed shading", &nextShadingType, MIXED);
             ImGui::RadioButton("Smooth shading", &nextShadingType, SMOOTH);
         }
 
