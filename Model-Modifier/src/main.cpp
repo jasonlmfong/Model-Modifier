@@ -279,10 +279,13 @@ int main()
             ImGui::Indent();
             if (ImGui::CollapsingHeader("Geometric objects"))
             {
+                ImGui::RadioButton("Crumbled", &nextObject, CRUMPLED);
                 ImGui::RadioButton("Cube", &nextObject, CUBE);
                 ImGui::RadioButton("Double torus", &nextObject, DOUBLETORUS);
+                ImGui::RadioButton("Fandisk", &nextObject, FANDISK);
                 ImGui::RadioButton("Icosahedron", &nextObject, ICOSA);
                 ImGui::RadioButton("Octahedron", &nextObject, OCTA);
+                ImGui::RadioButton("Oloid", &nextObject, OLOID);
                 ImGui::RadioButton("Sphere", &nextObject, SPHERE);
                 ImGui::RadioButton("Star", &nextObject, STAR);
                 ImGui::RadioButton("T-Shape", &nextObject, T);
@@ -292,6 +295,7 @@ int main()
             if (ImGui::CollapsingHeader("Model objects"))
             {
                 ImGui::RadioButton("Armadillo", &nextObject, ARMADILLO);
+                ImGui::RadioButton("Bob", &nextObject, BOB);
                 ImGui::RadioButton("Bunny", &nextObject, BUNNY);
                 ImGui::RadioButton("Cow head", &nextObject, COWHEAD);
                 ImGui::RadioButton("Face", &nextObject, FACE);
@@ -360,6 +364,16 @@ int main()
             {
                 Surface Lo(obj);
                 obj = Lo.Loop();
+                mesh.Rebuild(obj); // rebuild mesh based on object info
+
+                objectVA.Bind();
+                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
+                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+            }
+            if (ImGui::Button("Garland Heckbert Simplication Surface"))
+            {
+                Surface GH(obj);
+                obj = GH.QEM();
                 mesh.Rebuild(obj); // rebuild mesh based on object info
 
                 objectVA.Bind();
