@@ -42,6 +42,8 @@ public:
 
 	Surface(Object obj);
 	~Surface();
+
+	// helper
 	Object CCOutputOBJ(std::vector<glm::vec3> edgePoints);
 
 	// Modification algorithms
@@ -50,6 +52,7 @@ public:
 	Object CatmullClark();
 	Object DooSabin();
 	Object Loop();
+	Object QEM();
 
 public:
 	std::vector<VertexRecord> m_Vertices;

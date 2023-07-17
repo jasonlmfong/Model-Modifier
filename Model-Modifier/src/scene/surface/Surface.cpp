@@ -22,7 +22,7 @@ unsigned int Surface::getVertIndex(glm::vec3 vertPos,
         }
     }
     // not found, create new edge and insert at the end of m_Edges
-    unsigned int newVertIdx = AllVertexPos.size();
+    unsigned int newVertIdx = static_cast<unsigned int>(AllVertexPos.size());
     AllVertexPos.push_back(vertPos);
     VertIdxLookup[vertPos.x][vertPos.y].insert(std::make_pair(vertPos.z, newVertIdx));
     return newVertIdx;
@@ -51,7 +51,7 @@ unsigned int Surface::getEdgeIndex(glm::uvec2 vertPair)
         }
     }
     // not found, create new edge and insert at the end of m_Edges
-    unsigned int newEdgeIdx = m_Edges.size();
+    unsigned int newEdgeIdx = static_cast<unsigned int>(m_Edges.size());
     EdgeRecord newEdge;
     newEdge.endPoint1Idx = orderedVertPair.x;
     newEdge.endPoint2Idx = orderedVertPair.y;
@@ -105,7 +105,7 @@ Surface::Surface(Object obj)
             m_Vertices[endVertex].adjEdgesIdx.push_back(edgeIndex);
         }
 
-        unsigned int faceIndex = m_Faces.size();
+        unsigned int faceIndex = static_cast<unsigned int>(m_Faces.size());
         m_Faces.push_back(newFace);
 
         // add face index to the connecting vertices and edges 
@@ -120,6 +120,8 @@ Surface::Surface(Object obj)
 Surface::~Surface()
 {
 }
+
+////////// helper //////////
 
 Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
 {
@@ -200,8 +202,7 @@ Object Surface::Beehive()
         {
             avgFacePosition += m_Faces[faceIdx].facePoint;
         }
-        float numAdjFaces = currVert.adjFacesIdx.size();
-        avgFacePosition /= 3 * numAdjFaces;
+        avgFacePosition /= 3 * static_cast<float>(currVert.adjFacesIdx.size());
 
         // update original vertex point to new position
         m_Vertices[i].position = avgFacePosition;
@@ -242,8 +243,7 @@ Object Surface::Snowflake()
         {
             avgFacePosition += m_Faces[faceIdx].facePoint;
         }
-        float numAdjFaces = currVert.adjFacesIdx.size();
-        avgFacePosition /= numAdjFaces;
+        avgFacePosition /= static_cast<float>(currVert.adjFacesIdx.size());
 
         // update original vertex point to new position
         m_Vertices[i].position = avgFacePosition;
@@ -290,7 +290,7 @@ Object Surface::CatmullClark()
         {
             avgFacePosition += m_Faces[faceIdx].facePoint;
         }
-        float numAdjFaces = currVert.adjFacesIdx.size();
+        float numAdjFaces = static_cast<float>(currVert.adjFacesIdx.size());
         avgFacePosition /= numAdjFaces;
 
         // calcalate R: average of edge midpoints
@@ -300,8 +300,7 @@ Object Surface::CatmullClark()
             EdgeRecord currEdge = m_Edges[edgeIndex];
             avgMidEdge += 0.5f * (originalPoints[currEdge.endPoint1Idx] + originalPoints[currEdge.endPoint2Idx]);
         }
-        float numAdjEdges = currVert.adjEdgesIdx.size();
-        avgMidEdge /= numAdjEdges;
+        avgMidEdge /= static_cast<float>(currVert.adjEdgesIdx.size());
 
         glm::vec3 newPoint = avgFacePosition + 2.0f * avgMidEdge + (numAdjFaces - 3) * originalPoints[i];
         newPoint /= numAdjFaces;
@@ -380,7 +379,7 @@ Object Surface::DooSabin()
 
         std::vector<unsigned int> neighVertIdx;
         glm::vec3 center{0};
-        int numNeighs = allNewPointsAroundVert.size();
+        int numNeighs = static_cast<int>(allNewPointsAroundVert.size());
         for (int neigh = 0; neigh < numNeighs; neigh++)
         {
             // use vertex lookup to avoid creating duplicate vertices
@@ -438,7 +437,7 @@ Object Surface::Loop()
         {
             sumNeighbours += 2.0f * m_Edges[adjEdge].midEdgePoint - vertPos;
         }
-        int neighbours = vert.adjEdgesIdx.size();
+        int neighbours = static_cast<int>(vert.adjEdgesIdx.size());
         if (neighbours == 2)
             m_Vertices[i].position = 0.75f * vertPos + 0.125f * sumNeighbours;
         else

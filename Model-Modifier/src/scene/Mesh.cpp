@@ -33,13 +33,15 @@ void Mesh::BuildFaceNormals()
 
 void Mesh::BuildVerticesIndices()
 {
+    int numFaces = static_cast<unsigned int>(m_Object.m_FaceIndices.size());
+
     // build output items to OpenGL
     if (m_ShadingType == FLAT) // flat shading
     {
         // build out the VBO with x,y,z coords of vertices, and normal vectors
-        m_OutNumVert = 2 * 3 * 3 * m_Object.m_FaceIndices.size();
+        m_OutNumVert = 2 * 3 * 3 * numFaces;
         m_OutVertices = new float[m_OutNumVert] {};
-        for (int i = 0; i < m_Object.m_FaceIndices.size(); i++)
+        for (int i = 0; i < numFaces; i++)
         {
             for (int j = 0; j < 3; j++)
             {
@@ -55,9 +57,9 @@ void Mesh::BuildVerticesIndices()
         }
 
         // build out IBO indices
-        m_OutNumIdx = 3 * 3 * m_Object.m_FaceIndices.size();
+        m_OutNumIdx = 3 * 3 * static_cast<unsigned int>(numFaces);
         m_OutIndices = new unsigned int[m_OutNumIdx];
-        for (int i = 0; i < m_OutNumIdx; i++)
+        for (unsigned int i = 0; i < m_OutNumIdx; i++)
         {
             m_OutIndices[i] = i;
         }
@@ -66,7 +68,7 @@ void Mesh::BuildVerticesIndices()
     {
         // get vertex-face connectivity: get all faces that touch the a given vertex
         std::unordered_map<unsigned int, std::vector<unsigned int>> vertAdjFaces(m_Object.m_VertexPos.size());
-        for (int faceIdx = 0; faceIdx < m_Object.m_FaceIndices.size(); faceIdx++)
+        for (int faceIdx = 0; faceIdx < numFaces; faceIdx++)
         {
             std::vector<unsigned int> faceVertIdx = m_Object.m_FaceIndices[faceIdx];
             // add face index to the connecting vertices
@@ -77,8 +79,8 @@ void Mesh::BuildVerticesIndices()
         }
 
         // build mixed vertex normals by first getting current face normal, then average adjacent normals
-        std::vector<std::vector<glm::vec3>> cornerVertexNormals(m_Object.m_FaceIndices.size());
-        for (unsigned int currFace = 0; currFace < m_Object.m_FaceIndices.size(); currFace++)
+        std::vector<std::vector<glm::vec3>> cornerVertexNormals(numFaces);
+        for (int currFace = 0; currFace < numFaces; currFace++)
         {
             // get face normal
             glm::vec3 currFaceNormal = m_FaceNormals[currFace];
@@ -105,9 +107,9 @@ void Mesh::BuildVerticesIndices()
         }
 
         // build out the VBO with x,y,z coords of vertices, and normal vectors
-        m_OutNumVert = 2 * 3 * 3 * m_Object.m_FaceIndices.size();
+        m_OutNumVert = 2 * 3 * 3 * numFaces;
         m_OutVertices = new float[m_OutNumVert] {};
-        for (int i = 0; i < m_Object.m_FaceIndices.size(); i++)
+        for (int i = 0; i < numFaces; i++)
         {
             for (int j = 0; j < 3; j++)
             {
@@ -123,9 +125,9 @@ void Mesh::BuildVerticesIndices()
         }
 
         // build out IBO indices
-        m_OutNumIdx = 3 * 3 * m_Object.m_FaceIndices.size();
+        m_OutNumIdx = 3 * 3 * static_cast<unsigned int>(numFaces);
         m_OutIndices = new unsigned int[m_OutNumIdx];
-        for (int i = 0; i < m_OutNumIdx; i++)
+        for (unsigned int i = 0; i < m_OutNumIdx; i++)
         {
             m_OutIndices[i] = i;
         }
@@ -134,7 +136,7 @@ void Mesh::BuildVerticesIndices()
     {
         // get vertex-face connectivity: get all faces that touch the a given vertex
         std::unordered_map<unsigned int, std::vector<unsigned int>> vertAdjFaces(m_Object.m_VertexPos.size());
-        for (int faceIdx = 0; faceIdx < m_Object.m_FaceIndices.size(); faceIdx++)
+        for (int faceIdx = 0; faceIdx < numFaces; faceIdx++)
         {
             std::vector<unsigned int> faceVertIdx = m_Object.m_FaceIndices[faceIdx];
             // add face index to the connecting vertices
@@ -161,7 +163,7 @@ void Mesh::BuildVerticesIndices()
         }
 
         // build out the VBO with x,y,z coords of vertices, and normal vectors
-        m_OutNumVert = 2 * 3 * m_Object.m_VertexPos.size();
+        m_OutNumVert = 2 * 3 * static_cast<unsigned int>(m_Object.m_VertexPos.size());
         m_OutVertices = new float[m_OutNumVert] {};
         for (int i = 0; i < m_Object.m_VertexPos.size(); i++)
         {
@@ -181,9 +183,9 @@ void Mesh::BuildVerticesIndices()
         }
 
         // build out IBO indices
-        m_OutNumIdx = 3 * m_Object.m_FaceIndices.size();
+        m_OutNumIdx = 3 * numFaces;
         m_OutIndices = new unsigned int[m_OutNumIdx];
-        for (int i = 0; i < m_Object.m_FaceIndices.size(); i++)
+        for (int i = 0; i < numFaces; i++)
         {
             m_OutIndices[3 * i + 0] = m_Object.m_FaceIndices[i][0];
             m_OutIndices[3 * i + 1] = m_Object.m_FaceIndices[i][1];

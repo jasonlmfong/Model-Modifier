@@ -137,14 +137,14 @@ int main()
     Input::Init(windowID);
 
     // keyboard movement variables
-    double currentTime = 0.0;
-    double lastTime = 0.0;
+    float currentTime = 0.0f;
+    float lastTime = 0.0f;
     float deltaTime = 0.0f;
     // mouse movement variables
     double currXpos, currYpos, deltaX, deltaY;
     double lastXpos = 0.0;
     double lastYpos = 0.0;
-    double sens = 200.0;
+    float sens = 200.0f;
 
     // Setup Dear ImGui context
     ImGui::CreateContext();
@@ -164,8 +164,8 @@ int main()
 
         ////////// input controls //////////
         lastTime = currentTime;
-        currentTime = glfwGetTime();
-        deltaTime = float(currentTime - lastTime);
+        currentTime = (float) glfwGetTime();
+        deltaTime = currentTime - lastTime;
 
         // close the window
         if (Input::IsKeyDown(GLFW_KEY_ESCAPE))
