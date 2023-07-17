@@ -28,6 +28,13 @@ enum shader
     PHONG
 };
 
+enum renderMode
+{
+    POLYGON,
+    WIREFRAME,
+    POINTCLOUD
+};
+
 void saveImage(const char* filepath, GLFWwindow* window) 
 {
     int width, height;
@@ -60,6 +67,11 @@ int main()
     VertexBufferLayout layout;
     layout.Push<float>(3); // 3d coordinates
     layout.Push<float>(3); // normals
+
+    // render mode
+    int currRenderMode = POLYGON;
+    int nextRenderMode;
+    glPointSize(2);
 
     // shading type
     int currShadingType = FLAT;
@@ -137,14 +149,14 @@ int main()
     Input::Init(windowID);
 
     // keyboard movement variables
-    double currentTime = 0.0;
-    double lastTime = 0.0;
+    float currentTime = 0.0f;
+    float lastTime = 0.0f;
     float deltaTime = 0.0f;
     // mouse movement variables
     double currXpos, currYpos, deltaX, deltaY;
     double lastXpos = 0.0;
     double lastYpos = 0.0;
-    double sens = 200.0;
+    float sens = 200.0f;
 
     // Setup Dear ImGui context
     ImGui::CreateContext();
@@ -161,11 +173,12 @@ int main()
         nextObject = currObject;
         nextShadingType = currShadingType;
         nextShader = currShader;
+        nextRenderMode = currRenderMode;
 
         ////////// input controls //////////
         lastTime = currentTime;
-        currentTime = glfwGetTime();
-        deltaTime = float(currentTime - lastTime);
+        currentTime = (float) glfwGetTime();
+        deltaTime = currentTime - lastTime;
 
         // close the window
         if (Input::IsKeyDown(GLFW_KEY_ESCAPE))
@@ -279,6 +292,8 @@ int main()
             ImGui::Indent();
             if (ImGui::CollapsingHeader("Geometric objects"))
             {
+                ImGui::Indent();
+
                 ImGui::RadioButton("Crumbled", &nextObject, CRUMPLED);
                 ImGui::RadioButton("Cube", &nextObject, CUBE);
                 ImGui::RadioButton("Double torus", &nextObject, DOUBLETORUS);
@@ -291,9 +306,13 @@ int main()
                 ImGui::RadioButton("T-Shape", &nextObject, T);
                 ImGui::RadioButton("Torus", &nextObject, TORUS);
                 ImGui::RadioButton("Tubes", &nextObject, TUBES);
+
+                ImGui::Unindent();
             }
             if (ImGui::CollapsingHeader("Model objects"))
             {
+                ImGui::Indent();
+
                 ImGui::RadioButton("Armadillo", &nextObject, ARMADILLO);
                 ImGui::RadioButton("Bob", &nextObject, BOB);
                 ImGui::RadioButton("Bunny", &nextObject, BUNNY);
@@ -305,12 +324,15 @@ int main()
                 ImGui::RadioButton("Suzanne", &nextObject, SUZANNE);
                 ImGui::RadioButton("Teapot", &nextObject, TEAPOT);
                 ImGui::RadioButton("Teddy", &nextObject, TEDDY);
+
+                ImGui::Unindent();
             }
             ImGui::Unindent();
         }
 
         if (ImGui::CollapsingHeader("Modify Model"))
         {
+            ImGui::Indent();
             if (ImGui::Button("Original"))
             {
                 obj = objects.findObj(currObject); // search for the object requested
@@ -380,17 +402,24 @@ int main()
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
                 objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
             }
+            ImGui::Unindent();
         }
 
         if (ImGui::CollapsingHeader("Shading type"))
         {
+            ImGui::Indent();
+
             ImGui::RadioButton("Flat shading", &nextShadingType, FLAT);
             ImGui::RadioButton("Mixed shading", &nextShadingType, MIXED);
             ImGui::RadioButton("Smooth shading", &nextShadingType, SMOOTH);
+
+            ImGui::Unindent();
         }
 
         if (ImGui::CollapsingHeader("Shader selection"))
         {
+            ImGui::Indent();
+
             ImGui::RadioButton("Normal shader", &nextShader, NORMAL);
             ImGui::RadioButton("Gourand shader", &nextShader, GOURAND);
             ImGui::RadioButton("Phong shader", &nextShader, PHONG);
@@ -400,14 +429,20 @@ int main()
                 ImGui::Indent();
                 if (ImGui::CollapsingHeader("Material controls"))
                 {
+                    ImGui::Indent();
+
                     ImGui::ColorEdit3("Ambient color", meshMat.m_Ambient);
                     ImGui::ColorEdit3("Diffuse color", meshMat.m_Diffuse);
                     ImGui::ColorEdit3("Specular color", meshMat.m_Specular);
                     ImGui::SliderFloat("Shine constant", &meshMat.m_Shine, 10, 100);
+
+                    ImGui::Unindent();
                 }
 
                 if (ImGui::CollapsingHeader("Lighting controls"))
                 {
+                    ImGui::Indent();
+
                     for (int l = 0; l < 3; l++)
                     {
                         ImGui::PushID(l);
@@ -422,46 +457,49 @@ int main()
                         }
                         ImGui::PopID();
                     }
+                    ImGui::Unindent();
                 }
                 ImGui::Unindent();
             }
+            ImGui::Unindent();
         }
 
         if (ImGui::CollapsingHeader("Display options:"))
         {
-            if (ImGui::Checkbox("Wireframe mode", &wireframe))
-            {
-                if (wireframe)
-                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
-                else
-                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // surface mode
-            }
-            ImGui::Checkbox("Framerate tracker", &framerate);
-            if (framerate)
-            {
-                ImGui::Text("Application average %.1f FPS", ImGui::GetIO().Framerate);
-            }
-            if (ImGui::Button("Reset Camera"))
-            {
-                camera.ResetView();
-            }
-            if (ImGui::Button("Screenshot"))
-            {
-                struct tm newtime;
-                time_t now = time(0);
-                localtime_s(&newtime, &now);
+            ImGui::Indent();
+            
+            ImGui::RadioButton("Polygon", &nextRenderMode, POLYGON);
+            ImGui::RadioButton("Wireframe", &nextRenderMode, WIREFRAME);
+            ImGui::RadioButton("Point cloud", &nextRenderMode, POINTCLOUD);
+                
+            ImGui::Unindent();
+        }
 
-                // print various components of tm structure.
-                std::string year = std::to_string(1900 + newtime.tm_year);
-                std::string month = std::to_string(1 + newtime.tm_mon);
-                std::string day = std::to_string(newtime.tm_mday);
-                std::string hour = std::to_string(newtime.tm_hour);
-                std::string min = std::to_string(newtime.tm_min);
-                std::string sec = std::to_string(newtime.tm_sec);
+        ImGui::Checkbox("Framerate tracker", &framerate);
+        if (framerate)
+        {
+            ImGui::Text("Application average %.1f FPS", ImGui::GetIO().Framerate);
+        }
+        if (ImGui::Button("Reset Camera"))
+        {
+            camera.ResetView();
+        }
+        if (ImGui::Button("Screenshot"))
+        {
+            struct tm newtime;
+            time_t now = time(0);
+            localtime_s(&newtime, &now);
 
-                std::string path = "gallery/Screenshot " + year + "-" + month + "-" + day + " " + hour + min + sec + ".png";
-                saveImage(path.c_str(), windowID);
-            }
+            // print various components of tm structure.
+            std::string year = std::to_string(1900 + newtime.tm_year);
+            std::string month = std::to_string(1 + newtime.tm_mon);
+            std::string day = std::to_string(newtime.tm_mday);
+            std::string hour = std::to_string(newtime.tm_hour);
+            std::string min = std::to_string(newtime.tm_min);
+            std::string sec = std::to_string(newtime.tm_sec);
+
+            std::string path = "gallery/Screenshot " + year + "-" + month + "-" + day + " " + hour + min + sec + ".png";
+            saveImage(path.c_str(), windowID);
         }
 
         ImGui::End();
@@ -529,6 +567,19 @@ int main()
             objectVA.Bind();
             objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
             objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+        }
+
+        ////////// change render mode //////////
+        if (nextRenderMode != currRenderMode)
+        {
+            currRenderMode = nextRenderMode;
+
+            if (currRenderMode == POLYGON)
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            else if (currRenderMode == WIREFRAME)
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            else if (currRenderMode == POINTCLOUD)
+                glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
         }
 
         ////////// Render object here //////////
