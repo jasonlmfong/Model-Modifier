@@ -464,7 +464,7 @@ int main()
             ImGui::Unindent();
         }
 
-        if (ImGui::CollapsingHeader("Display options:"))
+        if (ImGui::CollapsingHeader("Render mode"))
         {
             ImGui::Indent();
             
