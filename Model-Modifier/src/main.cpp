@@ -78,6 +78,8 @@ int main()
     int nextShadingType;
 
     Mesh mesh(obj, currShadingType);
+    // keep track of number of faces
+    int numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size());
 
     // build openGL objects using mesh
     VertexArray objectVA;
@@ -139,10 +141,10 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // wireframe mode
-    bool wireframe = false;
     // framerate mode
     bool framerate = false;
+    // num of triangles mode
+    bool triangles = false;
 
     GLFWwindow* windowID = window.GetID();
     // input initialization & input callbacks
@@ -337,6 +339,7 @@ int main()
             {
                 obj = objects.findObj(currObject); // search for the object requested
                 mesh.Rebuild(obj); // rebuild mesh based on object info
+                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
                 objectVA.Bind();
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -347,6 +350,7 @@ int main()
                 Surface BH(obj);
                 obj = BH.Beehive(); 
                 mesh.Rebuild(obj); // rebuild mesh based on object info
+                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
                 objectVA.Bind();
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -357,6 +361,7 @@ int main()
                 Surface SF(obj);
                 obj = SF.Snowflake();
                 mesh.Rebuild(obj); // rebuild mesh based on object info
+                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
                 objectVA.Bind();
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -367,6 +372,7 @@ int main()
                 Surface CC(obj);
                 obj = CC.CatmullClark();
                 mesh.Rebuild(obj); // rebuild mesh based on object info
+                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
                 objectVA.Bind();
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -377,6 +383,7 @@ int main()
                 Surface DS(obj);
                 obj = DS.DooSabin();
                 mesh.Rebuild(obj); // rebuild mesh based on object info
+                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
                 objectVA.Bind();
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -387,6 +394,7 @@ int main()
                 Surface Lo(obj);
                 obj = Lo.Loop();
                 mesh.Rebuild(obj); // rebuild mesh based on object info
+                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
                 objectVA.Bind();
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -397,6 +405,7 @@ int main()
                 Surface GH(obj);
                 obj = GH.QEM();
                 mesh.Rebuild(obj); // rebuild mesh based on object info
+                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
                 objectVA.Bind();
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -475,11 +484,27 @@ int main()
             ImGui::Unindent();
         }
 
-        ImGui::Checkbox("Framerate tracker", &framerate);
-        if (framerate)
+        if (ImGui::CollapsingHeader("Statistics"))
         {
-            ImGui::Text("Application average %.1f FPS", ImGui::GetIO().Framerate);
+            ImGui::Indent();
+
+            ImGui::Checkbox("Framerate tracker", &framerate);
+            if (framerate)
+            {
+                ImGui::Text("Application average %.1f FPS: ", ImGui::GetIO().Framerate);
+            }
+            ImGui::Checkbox("# Triangles", &triangles);
+            if (triangles)
+            {
+                std::stringstream ss;
+                ss << numFaces;
+                std::string str = "Number of triangles: " + ss.str();
+                ImGui::Text(str.c_str());
+            }
+
+            ImGui::Unindent();
         }
+        
         if (ImGui::Button("Reset Camera"))
         {
             camera.ResetView();
@@ -563,6 +588,7 @@ int main()
             obj = objects.findObj(currObject); // search for the object requested
             
             mesh.Rebuild(obj); // rebuild mesh based on object info
+            numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
             objectVA.Bind();
             objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
