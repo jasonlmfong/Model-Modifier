@@ -1,7 +1,7 @@
 ﻿#include "Surface.h"
 
-unsigned int Surface::getVertIndex(glm::vec3 vertPos, 
-    std::vector<glm::vec3>& AllVertexPos, 
+unsigned int Surface::getVertIndex(glm::vec3 vertPos,
+    std::vector<glm::vec3>& AllVertexPos,
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>>& VertIdxLookup)
 {
     // search if pos x in our lookup
@@ -328,7 +328,7 @@ Object Surface::DooSabin()
         for (unsigned int vert : currFace.verticesIdx)
         {
             // point between vertex, face point, 2 neighbour edge points
-            glm::vec3 point = 0.25f * (currFace.facePoint + m_Vertices[vert].position + 
+            glm::vec3 point = 0.25f * (currFace.facePoint + m_Vertices[vert].position +
                 m_Edges[currFace.verticesEdges[vert][0]].midEdgePoint + m_Edges[currFace.verticesEdges[vert][1]].midEdgePoint);
             // add to storage
             newPointsPerFace[currFaceIdx].push_back(point);
@@ -339,7 +339,7 @@ Object Surface::DooSabin()
             }
         }
     }
-    
+
     // build new Object class (DS style)
     std::vector<glm::vec3> VertexPos;
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
@@ -386,7 +386,7 @@ Object Surface::DooSabin()
             neighVertIdx.push_back(getVertIndex(allNewPointsAroundVert[neigh], VertexPos, VertLookup));
             center += allNewPointsAroundVert[neigh];
         }
-        
+
         center /= numNeighs;
         unsigned int centerIdx = getVertIndex(center, VertexPos, VertLookup);
 
@@ -420,8 +420,8 @@ Object Surface::Loop()
         else // edge borders 2 faces
         {
             // 3/8 face points + 2/8 edge point
-            edgePoints[i] = 0.375f * m_Faces[currEdge.adjFacesIdx[0]].facePoint + 
-                0.375f * m_Faces[currEdge.adjFacesIdx[1]].facePoint + 
+            edgePoints[i] = 0.375f * m_Faces[currEdge.adjFacesIdx[0]].facePoint +
+                0.375f * m_Faces[currEdge.adjFacesIdx[1]].facePoint +
                 0.25f * currEdge.midEdgePoint;
         }
     }

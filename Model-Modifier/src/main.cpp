@@ -110,6 +110,7 @@ int main()
     float pitch = 0.3333f; // radians
     float radius = 3.0f;
     Camera camera(pitch, yaw, radius);
+    camera.ResetView();
 
     float rotationAngle = 0.0f; // rotation angle of the object mesh
     glm::mat4 modelMatrix = glm::mat4(1.0f);
