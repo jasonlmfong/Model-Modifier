@@ -319,6 +319,7 @@ int main()
                 ImGui::RadioButton("Armadillo", &nextObject, ARMADILLO);
                 ImGui::RadioButton("Bob", &nextObject, BOB);
                 ImGui::RadioButton("Bunny", &nextObject, BUNNY);
+                ImGui::RadioButton("Cow", &nextObject, COW);
                 ImGui::RadioButton("Cow head", &nextObject, COWHEAD);
                 ImGui::RadioButton("Face", &nextObject, FACE);
                 ImGui::RadioButton("Gargoyle", &nextObject, GARGOYLE);
