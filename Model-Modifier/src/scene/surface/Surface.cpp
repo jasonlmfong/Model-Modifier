@@ -484,3 +484,6 @@ Object Surface::Loop()
 
     return Object;
 }
+
+// Garland Heckbert simplification surface algorithm
+
