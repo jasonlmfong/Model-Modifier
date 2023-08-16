@@ -316,6 +316,7 @@ int main()
             {
                 ImGui::Indent();
 
+                ImGui::RadioButton("Ankylosaurus", &nextObject, ANKYLOSAURUS);
                 ImGui::RadioButton("Armadillo", &nextObject, ARMADILLO);
                 ImGui::RadioButton("Bob", &nextObject, BOB);
                 ImGui::RadioButton("Bunny", &nextObject, BUNNY);

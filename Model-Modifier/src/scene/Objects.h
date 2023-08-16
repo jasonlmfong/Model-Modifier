@@ -6,6 +6,7 @@
 
 enum objectEnum
 {
+    ANKYLOSAURUS,
     ARMADILLO,
     BOB,
     BUNNY,
@@ -42,6 +43,7 @@ public:
 public:
     std::unordered_map<int, const char*> m_Filepaths
     {
+        { ANKYLOSAURUS, "res/objects/ankylosaurus.obj" },
         { ARMADILLO, "res/objects/armadillo.obj" },
         { BOB, "res/objects/bob.obj" },
         { BUNNY, "res/objects/bunny.obj" },
