@@ -3,6 +3,7 @@
 
 #include "../../external/glm/ext/vector_float3.hpp"
 #include "../../external/glm/ext/vector_uint2.hpp"
+#include "../../external/glm/ext/matrix_float4x4.hpp"
 #include "../../external/glm/geometric.hpp"
 
 #include "../Object.h"
@@ -45,6 +46,7 @@ public:
 
 	// helper
 	Object CCOutputOBJ(std::vector<glm::vec3> edgePoints);
+	glm::mat4 ComputeQuadric(VertexRecord v0);
 
 	// Modification algorithms
 	Object Beehive();

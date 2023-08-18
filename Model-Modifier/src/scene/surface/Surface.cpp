@@ -123,6 +123,7 @@ Surface::~Surface()
 
 ////////// helper //////////
 
+// create the obj file, in Catmull Clark style
 Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
 {
     // build new Object class (CC style)
@@ -162,11 +163,33 @@ Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
         FaceIndices.push_back({ faceABCIdx, edgeBCIdx, vertCIdx });
     }
 
-    Object Object;
-    Object.m_Min = m_Min; Object.m_Max = m_Max;
-    Object.m_VertexPos = VertexPos; Object.m_FaceIndices = FaceIndices;
+    Object Obj;
+    Obj.m_Min = m_Min; Obj.m_Max = m_Max;
+    Obj.m_VertexPos = VertexPos; Obj.m_FaceIndices = FaceIndices;
 
-    return Object;
+    return Obj;
+}
+
+// computer quadric matrix by summing all K_p matrices of a vertice v0
+glm::mat4 Surface::ComputeQuadric(VertexRecord v0)
+{
+    glm::mat4 quadric{ 0.0f };
+    // for each neighbouring face, compute K_p
+    glm::vec3 position = v0.position;
+    for (unsigned int faceIdx : v0.adjFacesIdx)
+    {
+        FaceRecord face = m_Faces[faceIdx];
+        glm::vec3 pos0 = m_Vertices[face.verticesIdx[0]].position;
+        glm::vec3 pos1 = m_Vertices[face.verticesIdx[1]].position;
+        glm::vec3 pos2 = m_Vertices[face.verticesIdx[2]].position;
+
+        glm::vec3 faceNormal = glm::normalize(glm::cross(pos1 - pos0, pos2 - pos0));
+        glm::vec4 plane{ faceNormal, -glm::dot(faceNormal, position) }; // plane equation ax+by+cz+d = 0
+
+        quadric += glm::outerProduct(plane, plane); // K_p
+    }
+
+    return quadric;
 }
 
 ////////// algorithms //////////
@@ -397,11 +420,11 @@ Object Surface::DooSabin()
     }
 
     // build object
-    Object Object;
-    Object.m_Min = m_Min; Object.m_Max = m_Max;
-    Object.m_VertexPos = VertexPos; Object.m_FaceIndices = FaceIndices;
+    Object Obj;
+    Obj.m_Min = m_Min; Obj.m_Max = m_Max;
+    Obj.m_VertexPos = VertexPos; Obj.m_FaceIndices = FaceIndices;
 
-    return Object;
+    return Obj;
 }
 
 // Loop subdivision surface algorithm
@@ -478,12 +501,22 @@ Object Surface::Loop()
     }
 
     // build object
-    Object Object;
-    Object.m_Min = m_Min; Object.m_Max = m_Max;
-    Object.m_VertexPos = VertexPos; Object.m_FaceIndices = FaceIndices;
+    Object Obj;
+    Obj.m_Min = m_Min; Obj.m_Max = m_Max;
+    Obj.m_VertexPos = VertexPos; Obj.m_FaceIndices = FaceIndices;
 
-    return Object;
+    return Obj;
 }
 
 // Garland Heckbert simplification surface algorithm
+Object Surface::QEM()
+{
+    // calculate quadraic error for each vertex
+    std::unordered_map<int, glm::mat4> quadricLookup;
+    for (int vertIdx = 0; vertIdx < m_Vertices.size(); vertIdx++)
+    {
+        quadricLookup.insert({ vertIdx, ComputeQuadric(m_Vertices[vertIdx])});
+    }
 
+
+}
