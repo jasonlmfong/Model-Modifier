@@ -515,7 +515,7 @@ Object Surface::QEM()
     std::unordered_map<int, glm::mat4> quadricLookup;
     for (int vertIdx = 0; vertIdx < m_Vertices.size(); vertIdx++)
     {
-        quadricLookup.insert({ vertIdx, ComputeQuadric(m_Vertices[vertIdx])});
+        quadricLookup.insert({ vertIdx, ComputeQuadric(m_Vertices[vertIdx]) });
     }
 
     const float THRESHOLD = 0.05f;
@@ -555,6 +555,62 @@ Object Surface::QEM()
                 valid_pairs.push_back(std::pair<int, int> { firstV, secondV });
             }
             // else, do nothing, not a valid pair
+        }
+    }
+
+    // compute the new point and error associated for each valid pair
+
+    // each pair should contain a few pieces of information
+    // vertex 1, vertex 2, the new vertex position, the error after contraction, the quadric matrices for both 1 and 2, and the new?
+    for (std::pair<int, int> valid_pair : valid_pairs)
+    {
+        glm::mat4 firstQuad = quadricLookup[valid_pair.first];
+        glm::mat4 secondQuad = quadricLookup[valid_pair.second];
+        glm::mat4 Quad = firstQuad + secondQuad;
+    
+        glm::mat4 MatQ = {
+            Quad[1][1], Quad[1][2], Quad[1][3], Quad[1][4],
+            Quad[1][2], Quad[2][2], Quad[2][3], Quad[2][4],
+            Quad[1][3], Quad[2][3], Quad[3][3], Quad[3][4],
+            0,          0,          0,          1
+        };
+        if (glm::determinant(MatQ) != 0)
+        {
+            glm::vec4 newVPos = glm::inverse(MatQ) * glm::vec4{ 0, 0, 0, 1 }; 
+            // change back to 3d coords from homogeneous coordinates
+            glm::vec3 newV(newVPos);
+            newV /= newVPos[3];
+
+            // 1x4 vector * 4x4 matrix * 4x1 vector yields a 1x1 matrix
+            float newVError = (newVPos * Quad * newVPos)[0];
+        }
+        else
+        {
+            glm::vec4 end1 = { m_Vertices[valid_pair.first].position, 1.0f };
+            // 1x4 vector * 4x4 matrix * 4x1 vector yields a 1x1 matrix
+            float end1Error = (end1 * Quad * end1)[0];
+
+            glm::vec4 end2 = { m_Vertices[valid_pair.second].position, 1.0f };
+            // 1x4 vector * 4x4 matrix * 4x1 vector yields a 1x1 matrix
+            float end2Error = (end2 * Quad * end2)[0];
+
+            glm::vec4 mid = (end1 + end2) / 2.0f;
+            // 1x4 vector * 4x4 matrix * 4x1 vector yields a 1x1 matrix
+            float midError = (mid * Quad * mid)[0];
+
+            float minError = std::min(end1Error, end2Error, midError);
+            if (minError == end1Error)
+            {
+                glm::vec3 newV(end1);
+            }
+            if (minError == end2Error)
+            {
+                glm::vec3 newV(end2);
+            }
+            if (minError == midError)
+            {
+                glm::vec3 newV(mid);
+            }
         }
     }
 
