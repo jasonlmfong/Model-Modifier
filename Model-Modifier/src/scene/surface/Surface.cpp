@@ -518,5 +518,45 @@ Object Surface::QEM()
         quadricLookup.insert({ vertIdx, ComputeQuadric(m_Vertices[vertIdx])});
     }
 
+    const float THRESHOLD = 0.05f;
 
+    // select all valid pairs
+    std::vector<std::set<int>> vertexPairLookup; // maintain vertex pairs
+    vertexPairLookup.resize(m_Vertices.size());
+
+    std::vector<std::pair<int, int>> valid_pairs;
+    for (int firstV = 0; firstV < m_Vertices.size(); firstV++)
+    {
+        for (int secondV = firstV + 1; secondV < m_Vertices.size(); secondV++)
+        {
+            auto searchx = m_EdgeIdxLookup.find(firstV);
+            if (searchx != m_EdgeIdxLookup.end())
+            {
+                // search if ending vertex in our lookup
+                auto searchy = searchx->second.find(secondV);
+                if (searchy != searchx->second.end())
+                {
+                    // add the pair idx to the vertices
+                    vertexPairLookup[firstV].insert(valid_pairs.size());
+                    vertexPairLookup[secondV].insert(valid_pairs.size());
+                    // found edge, add to valid pairs
+                    valid_pairs.push_back(std::pair<int, int> { firstV, secondV });
+                }
+            }
+            // not found, check if the edges are close (distance smaller than threshold)
+            glm::vec3 firstPos = m_Vertices[firstV].position;
+            glm::vec3 secondPos = m_Vertices[secondV].position;
+            if (glm::distance(firstPos, secondPos) < THRESHOLD)
+            {
+                // add the pair idx to the vertices
+                vertexPairLookup[firstV].insert(valid_pairs.size());
+                vertexPairLookup[secondV].insert(valid_pairs.size());
+                // found edge, add to valid pairs
+                valid_pairs.push_back(std::pair<int, int> { firstV, secondV });
+            }
+            // else, do nothing, not a valid pair
+        }
+    }
+
+    
 }
