@@ -526,7 +526,7 @@ int main()
             std::string min = std::to_string(newtime.tm_min);
             std::string sec = std::to_string(newtime.tm_sec);
 
-            std::string path = "gallery/Screenshot " + year + "-" + month + "-" + day + " " + hour + min + sec + ".png";
+            std::string path = "gallery/Screenshot_" + year + "-" + month + "-" + day + "_" + hour + min + sec + ".png";
             saveImage(path.c_str(), windowID);
         }
 
