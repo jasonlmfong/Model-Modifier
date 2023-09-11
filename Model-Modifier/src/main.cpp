@@ -403,17 +403,17 @@ int main()
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
                 objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
             }
-            if (ImGui::Button("Garland Heckbert Simplication Surface"))
-            {
-                Surface GH(obj);
-                obj = GH.QEM();
-                mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+            //if (ImGui::Button("Garland Heckbert Simplication Surface"))
+            //{
+            //    Surface GH(obj);
+            //    obj = GH.QEM();
+            //    mesh.Rebuild(obj); // rebuild mesh based on object info
+            //    numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
-                objectVA.Bind();
-                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
-                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
-            }
+            //    objectVA.Bind();
+            //    objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
+            //    objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+            //}
             ImGui::Unindent();
         }
 

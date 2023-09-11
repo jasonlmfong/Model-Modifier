@@ -46,6 +46,8 @@ public:
 	~Surface();
 
 	// helper
+	glm::vec3 ComputeFaceNormal(FaceRecord face);
+	glm::vec3 ComputeFaceNormal(glm::vec3 pos0, glm::vec3 pos1, glm::vec3 pos2);
 	Object CCOutputOBJ(std::vector<glm::vec3> edgePoints);
 	glm::mat4 ComputeQuadric(VertexRecord v0);
 

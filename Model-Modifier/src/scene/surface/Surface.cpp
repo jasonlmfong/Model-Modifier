@@ -123,6 +123,19 @@ Surface::~Surface()
 
 ////////// helper //////////
 
+glm::vec3 Surface::ComputeFaceNormal(FaceRecord face)
+{
+    glm::vec3 pos0 = m_Vertices[face.verticesIdx[0]].position;
+    glm::vec3 pos1 = m_Vertices[face.verticesIdx[1]].position;
+    glm::vec3 pos2 = m_Vertices[face.verticesIdx[2]].position;
+    return glm::normalize(glm::cross(pos1 - pos0, pos2 - pos0));
+}
+
+glm::vec3 Surface::ComputeFaceNormal(glm::vec3 pos0, glm::vec3 pos1, glm::vec3 pos2)
+{
+    return glm::normalize(glm::cross(pos1 - pos0, pos2 - pos0));
+}
+
 // create the obj file, in Catmull Clark style
 Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
 {
@@ -179,11 +192,7 @@ glm::mat4 Surface::ComputeQuadric(VertexRecord v0)
     for (unsigned int faceIdx : v0.adjFacesIdx)
     {
         FaceRecord face = m_Faces[faceIdx];
-        glm::vec3 pos0 = m_Vertices[face.verticesIdx[0]].position;
-        glm::vec3 pos1 = m_Vertices[face.verticesIdx[1]].position;
-        glm::vec3 pos2 = m_Vertices[face.verticesIdx[2]].position;
-
-        glm::vec3 faceNormal = glm::normalize(glm::cross(pos1 - pos0, pos2 - pos0));
+        glm::vec3 faceNormal = ComputeFaceNormal(face);
         glm::vec4 plane{ faceNormal, -glm::dot(faceNormal, position) }; // plane equation ax+by+cz+d = 0
 
         quadric += glm::outerProduct(plane, plane); // K_p
@@ -342,7 +351,6 @@ Object Surface::DooSabin()
     // make new vertices and store original vertex connectivity
     std::vector<std::vector<glm::vec3>> newPointsPerFace(m_Faces.size());
     std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerVertex;
-    std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerEdge;
     for (int currFaceIdx = 0; currFaceIdx < m_Faces.size(); currFaceIdx++)
     {
         FaceRecord currFace = m_Faces[currFaceIdx];
@@ -356,10 +364,32 @@ Object Surface::DooSabin()
             // add to storage
             newPointsPerFace[currFaceIdx].push_back(point);
             pointsPerVertex[vert].push_back(point);
-            for (unsigned int edge : currFace.verticesEdges[vert])
-            {
-                pointsPerEdge[edge].push_back(point);
-            }
+        }
+    }
+    std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerEdge;
+    for (int currEdgeIdx = 0; currEdgeIdx < m_Edges.size(); currEdgeIdx++)
+    {
+        EdgeRecord currEdge = m_Edges[currEdgeIdx];
+        // skip boundary edges, they cannot form a new face
+        if (currEdge.adjFacesIdx.size() == 2)
+        {
+            FaceRecord adjFace0 = m_Faces[currEdge.adjFacesIdx[0]];
+            FaceRecord adjFace1 = m_Faces[currEdge.adjFacesIdx[1]];
+
+            // add the new edge points in an ordered manner
+            pointsPerEdge[currEdgeIdx].resize(4);
+            pointsPerEdge[currEdgeIdx][0] =
+                0.25f * (adjFace0.facePoint + m_Vertices[currEdge.endPoint1Idx].position +
+                    m_Edges[adjFace0.verticesEdges[currEdge.endPoint1Idx][0]].midEdgePoint + m_Edges[adjFace0.verticesEdges[currEdge.endPoint1Idx][1]].midEdgePoint);
+            pointsPerEdge[currEdgeIdx][1] =
+                0.25f * (adjFace0.facePoint + m_Vertices[currEdge.endPoint2Idx].position +
+                    m_Edges[adjFace0.verticesEdges[currEdge.endPoint2Idx][0]].midEdgePoint + m_Edges[adjFace0.verticesEdges[currEdge.endPoint2Idx][1]].midEdgePoint);
+            pointsPerEdge[currEdgeIdx][2] =
+                0.25f * (adjFace1.facePoint + m_Vertices[currEdge.endPoint2Idx].position +
+                    m_Edges[adjFace1.verticesEdges[currEdge.endPoint2Idx][0]].midEdgePoint + m_Edges[adjFace1.verticesEdges[currEdge.endPoint2Idx][1]].midEdgePoint);
+            pointsPerEdge[currEdgeIdx][3] =
+                0.25f * (adjFace1.facePoint + m_Vertices[currEdge.endPoint1Idx].position +
+                    m_Edges[adjFace1.verticesEdges[currEdge.endPoint1Idx][0]].midEdgePoint + m_Edges[adjFace1.verticesEdges[currEdge.endPoint1Idx][1]].midEdgePoint);
         }
     }
 
@@ -382,40 +412,85 @@ Object Surface::DooSabin()
     // new face from old edge (broken down to 2 triangles)
     for (int currEdgeIdx = 0; currEdgeIdx < pointsPerEdge.size(); currEdgeIdx++)
     {
-        if (pointsPerEdge[currEdgeIdx].size() == 4)
+        EdgeRecord currEdge = m_Edges[currEdgeIdx];
+        // skip boundary edges, they cannot form a new face
+        if (currEdge.adjFacesIdx.size() == 2)
         {
-            // use vertex lookup to avoid creating duplicate vertices
-            unsigned int vertAIdx = getVertIndex(pointsPerEdge[currEdgeIdx][0], VertexPos, VertLookup);
-            unsigned int vertBIdx = getVertIndex(pointsPerEdge[currEdgeIdx][1], VertexPos, VertLookup);
-            unsigned int vertCIdx = getVertIndex(pointsPerEdge[currEdgeIdx][2], VertexPos, VertLookup);
-            unsigned int vertDIdx = getVertIndex(pointsPerEdge[currEdgeIdx][3], VertexPos, VertLookup);
+            // build neighbour face normal to match later
+            glm::vec3 avgFaceNormal{0};
+            for (int adjFaces = 0; adjFaces < 2; adjFaces++)
+            {
+                FaceRecord adjFace = m_Faces[currEdge.adjFacesIdx[adjFaces]];
+                avgFaceNormal += ComputeFaceNormal(adjFace);
+            }
+            avgFaceNormal /= 2.0f;
 
-            FaceIndices.push_back({ vertAIdx, vertBIdx, vertCIdx });
-            FaceIndices.push_back({ vertCIdx, vertDIdx, vertAIdx });
+            if (pointsPerEdge[currEdgeIdx].size() == 4)
+            {
+                // use vertex lookup to avoid creating duplicate vertices
+                unsigned int vertAIdx = getVertIndex(pointsPerEdge[currEdgeIdx][0], VertexPos, VertLookup);
+                unsigned int vertBIdx = getVertIndex(pointsPerEdge[currEdgeIdx][1], VertexPos, VertLookup);
+                unsigned int vertCIdx = getVertIndex(pointsPerEdge[currEdgeIdx][2], VertexPos, VertLookup);
+                unsigned int vertDIdx = getVertIndex(pointsPerEdge[currEdgeIdx][3], VertexPos, VertLookup);
+
+                // check if our normal is flipped or not
+                glm::vec3 ABCNormal = ComputeFaceNormal(pointsPerEdge[currEdgeIdx][0], pointsPerEdge[currEdgeIdx][1], pointsPerEdge[currEdgeIdx][2]);
+                if (glm::dot(ABCNormal, avgFaceNormal) > 0)
+                {
+                    // not flipped, usual triangulation of 012, 230
+                    FaceIndices.push_back({ vertAIdx, vertBIdx, vertCIdx });
+                    FaceIndices.push_back({ vertCIdx, vertDIdx, vertAIdx });
+                }
+                else
+                {
+                    // flipped normals, use 103, 321
+                    FaceIndices.push_back({ vertBIdx, vertAIdx, vertDIdx });
+                    FaceIndices.push_back({ vertDIdx, vertCIdx, vertBIdx });
+                }
+            }
         }
     }
 
     // new face from old vertex (broken down to n-2 triangles)
-    for (int currVertIdx = 0; currVertIdx < m_Faces.size(); currVertIdx++)
+    for (int currVertIdx = 0; currVertIdx < m_Vertices.size(); currVertIdx++)
     {
-        std::vector<glm::vec3> allNewPointsAroundVert = pointsPerVertex[currVertIdx];
-
-        std::vector<unsigned int> neighVertIdx;
-        glm::vec3 center{0};
-        int numNeighs = static_cast<int>(allNewPointsAroundVert.size());
-        for (int neigh = 0; neigh < numNeighs; neigh++)
+        VertexRecord currVert = m_Vertices[currVertIdx];
+        // build neighbour face normal to match later
+        glm::vec3 avgFaceNormal{0};
+        for (unsigned int adjFaceIdx : currVert.adjFacesIdx)
         {
+            FaceRecord adjFace = m_Faces[adjFaceIdx];
+            avgFaceNormal += ComputeFaceNormal(adjFace);
+        }
+        avgFaceNormal /= static_cast<float>(currVert.adjFacesIdx.size());
+
+        std::vector<unsigned int> newVertsIdx;
+        glm::vec3 center{0};
+        int numNewVerts = static_cast<int>(pointsPerVertex[currVertIdx].size());
+        for (int newVertIdx = 0; newVertIdx < numNewVerts; newVertIdx++)
+        {
+            glm::vec3 currPoint = pointsPerVertex[currVertIdx][newVertIdx];
             // use vertex lookup to avoid creating duplicate vertices
-            neighVertIdx.push_back(getVertIndex(allNewPointsAroundVert[neigh], VertexPos, VertLookup));
-            center += allNewPointsAroundVert[neigh];
+            newVertsIdx.push_back(getVertIndex(currPoint, VertexPos, VertLookup));
+            center += currPoint;
         }
 
-        center /= numNeighs;
+        center /= numNewVerts;
         unsigned int centerIdx = getVertIndex(center, VertexPos, VertLookup);
 
-        for (int neigh = 0; neigh < numNeighs; neigh++)
+        for (int newVertIdx = 0; newVertIdx < numNewVerts; newVertIdx++)
         {
-            FaceIndices.push_back({ centerIdx, neighVertIdx[neigh], neighVertIdx[(neigh + 1) % numNeighs] });
+            glm::vec3 testNormal = ComputeFaceNormal(center, pointsPerVertex[currVertIdx][newVertIdx], pointsPerVertex[currVertIdx][(newVertIdx + 1) % numNewVerts]);
+            if (glm::dot(testNormal, avgFaceNormal) > 0)
+            {
+                // not flipped
+                FaceIndices.push_back({ centerIdx, newVertsIdx[newVertIdx], newVertsIdx[(newVertIdx + 1) % numNewVerts] });
+            }
+            else
+            {
+                // flipped normals
+                FaceIndices.push_back({ centerIdx, newVertsIdx[(newVertIdx + 1) % numNewVerts], newVertsIdx[newVertIdx] });
+            }
         }
     }
 
@@ -506,113 +581,4 @@ Object Surface::Loop()
     Obj.m_VertexPos = VertexPos; Obj.m_FaceIndices = FaceIndices;
 
     return Obj;
-}
-
-// Garland Heckbert simplification surface algorithm
-Object Surface::QEM()
-{
-    // calculate quadraic error for each vertex
-    std::unordered_map<int, glm::mat4> quadricLookup;
-    for (int vertIdx = 0; vertIdx < m_Vertices.size(); vertIdx++)
-    {
-        quadricLookup.insert({ vertIdx, ComputeQuadric(m_Vertices[vertIdx]) });
-    }
-
-    const float THRESHOLD = 0.05f;
-
-    // select all valid pairs
-    std::vector<std::set<int>> vertexPairLookup; // maintain vertex pairs
-    vertexPairLookup.resize(m_Vertices.size());
-
-    std::vector<std::pair<int, int>> valid_pairs;
-    for (int firstV = 0; firstV < m_Vertices.size(); firstV++)
-    {
-        for (int secondV = firstV + 1; secondV < m_Vertices.size(); secondV++)
-        {
-            auto searchx = m_EdgeIdxLookup.find(firstV);
-            if (searchx != m_EdgeIdxLookup.end())
-            {
-                // search if ending vertex in our lookup
-                auto searchy = searchx->second.find(secondV);
-                if (searchy != searchx->second.end())
-                {
-                    // add the pair idx to the vertices
-                    vertexPairLookup[firstV].insert(valid_pairs.size());
-                    vertexPairLookup[secondV].insert(valid_pairs.size());
-                    // found edge, add to valid pairs
-                    valid_pairs.push_back(std::pair<int, int> { firstV, secondV });
-                }
-            }
-            // not found, check if the edges are close (distance smaller than threshold)
-            glm::vec3 firstPos = m_Vertices[firstV].position;
-            glm::vec3 secondPos = m_Vertices[secondV].position;
-            if (glm::distance(firstPos, secondPos) < THRESHOLD)
-            {
-                // add the pair idx to the vertices
-                vertexPairLookup[firstV].insert(valid_pairs.size());
-                vertexPairLookup[secondV].insert(valid_pairs.size());
-                // found edge, add to valid pairs
-                valid_pairs.push_back(std::pair<int, int> { firstV, secondV });
-            }
-            // else, do nothing, not a valid pair
-        }
-    }
-
-    // compute the new point and error associated for each valid pair
-
-    // each pair should contain a few pieces of information
-    // vertex 1, vertex 2, the new vertex position, the error after contraction, the quadric matrices for both 1 and 2, and the new?
-    for (std::pair<int, int> valid_pair : valid_pairs)
-    {
-        glm::mat4 firstQuad = quadricLookup[valid_pair.first];
-        glm::mat4 secondQuad = quadricLookup[valid_pair.second];
-        glm::mat4 Quad = firstQuad + secondQuad;
-    
-        glm::mat4 MatQ = {
-            Quad[1][1], Quad[1][2], Quad[1][3], Quad[1][4],
-            Quad[1][2], Quad[2][2], Quad[2][3], Quad[2][4],
-            Quad[1][3], Quad[2][3], Quad[3][3], Quad[3][4],
-            0,          0,          0,          1
-        };
-        if (glm::determinant(MatQ) != 0)
-        {
-            glm::vec4 newVPos = glm::inverse(MatQ) * glm::vec4{ 0, 0, 0, 1 }; 
-            // change back to 3d coords from homogeneous coordinates
-            glm::vec3 newV(newVPos);
-            newV /= newVPos[3];
-
-            // 1x4 vector * 4x4 matrix * 4x1 vector yields a 1x1 matrix
-            float newVError = (newVPos * Quad * newVPos)[0];
-        }
-        else
-        {
-            glm::vec4 end1 = { m_Vertices[valid_pair.first].position, 1.0f };
-            // 1x4 vector * 4x4 matrix * 4x1 vector yields a 1x1 matrix
-            float end1Error = (end1 * Quad * end1)[0];
-
-            glm::vec4 end2 = { m_Vertices[valid_pair.second].position, 1.0f };
-            // 1x4 vector * 4x4 matrix * 4x1 vector yields a 1x1 matrix
-            float end2Error = (end2 * Quad * end2)[0];
-
-            glm::vec4 mid = (end1 + end2) / 2.0f;
-            // 1x4 vector * 4x4 matrix * 4x1 vector yields a 1x1 matrix
-            float midError = (mid * Quad * mid)[0];
-
-            float minError = std::min(end1Error, end2Error, midError);
-            if (minError == end1Error)
-            {
-                glm::vec3 newV(end1);
-            }
-            if (minError == end2Error)
-            {
-                glm::vec3 newV(end2);
-            }
-            if (minError == midError)
-            {
-                glm::vec3 newV(mid);
-            }
-        }
-    }
-
-    
 }
