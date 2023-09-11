@@ -614,5 +614,6 @@ Object Surface::QEM()
         }
     }
 
-    
+    // create a min-heap to store all the pairs, ordered by error cost
+
 }
