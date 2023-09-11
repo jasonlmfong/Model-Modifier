@@ -478,18 +478,26 @@ Object Surface::DooSabin()
         center /= numNewVerts;
         unsigned int centerIdx = getVertIndex(center, VertexPos, VertLookup);
 
+        // TODO: FIX THE "HOLES" WITH A MORE EFFICIENT METHOD
+        // CURRENTLY USING A DOUBLE FOR LOOP TO COVER ALL HOLES
         for (int newVertIdx = 0; newVertIdx < numNewVerts; newVertIdx++)
         {
-            glm::vec3 testNormal = ComputeFaceNormal(center, pointsPerVertex[currVertIdx][newVertIdx], pointsPerVertex[currVertIdx][(newVertIdx + 1) % numNewVerts]);
-            if (glm::dot(testNormal, avgFaceNormal) > 0)
+            for (int newVertIdx2 = 0; newVertIdx2 < numNewVerts; newVertIdx2++)
             {
-                // not flipped
-                FaceIndices.push_back({ centerIdx, newVertsIdx[newVertIdx], newVertsIdx[(newVertIdx + 1) % numNewVerts] });
-            }
-            else
-            {
-                // flipped normals
-                FaceIndices.push_back({ centerIdx, newVertsIdx[(newVertIdx + 1) % numNewVerts], newVertsIdx[newVertIdx] });
+                if (newVertIdx != newVertIdx2)
+                {
+                    glm::vec3 testNormal = ComputeFaceNormal(center, pointsPerVertex[currVertIdx][newVertIdx], pointsPerVertex[currVertIdx][newVertIdx2]);
+                    if (glm::dot(testNormal, avgFaceNormal) > 0)
+                    {
+                        // not flipped
+                        FaceIndices.push_back({ centerIdx, newVertsIdx[newVertIdx], newVertsIdx[newVertIdx2] });
+                    }
+                    else
+                    {
+                        // flipped normals
+                        FaceIndices.push_back({ centerIdx, newVertsIdx[newVertIdx2], newVertsIdx[newVertIdx] });
+                    }
+                }
             }
         }
     }
