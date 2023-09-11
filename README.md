@@ -7,6 +7,7 @@ This repository contains my `C++17` and `OpenGL` implementation of a mesh viewer
 - [x] Dynamic object selection
     - [x] Simple geometric objects
     - [x] Complex test objects
+    - [x] Automatic rescaling
     - [x] Caching
 - [x] Mesh modification algorithms
     - [x] Subdivision surface
@@ -36,6 +37,10 @@ This repository contains my `C++17` and `OpenGL` implementation of a mesh viewer
     - [x] Mesh polygons
     - [x] Wireframe
     - [x] Point cloud
+- [x] Interactivity
+    - [x] Rotate model
+    - [x] Move camera
+    - [x] Rotate camera
 - [x] Information
     - [x] Framerate counter
     - [x] Number of triangles in current mesh
@@ -75,8 +80,8 @@ Here I try to list all sources wherever possible.
 | Cube | Me |
 | Double Torus | [Geometry Collective](https://github.com/GeometryCollective/ddg-exercises/tree/main/input) |
 | Fandisk | CAD part Pratt & Whitney/Hughes Hoppe |
-| Icosahedron | Me |
-| Octahedron | Me |
+| Icosahedron | [John Burkardt](https://people.sc.fsu.edu/~jburkardt/data/obj/obj.html) |
+| Octahedron | [John Burkardt](https://people.sc.fsu.edu/~jburkardt/data/obj/obj.html) |
 | Oloid | [Keenan Crane](https://www.cs.cmu.edu/~kmcrane/Projects/ModelRepository/) |
 | Sphere | [Geometry Collective](https://github.com/GeometryCollective/ddg-exercises/tree/main/input) |
 | Star | Unknown |
@@ -96,7 +101,7 @@ Here I try to list all sources wherever possible.
 | Face | [Geometry Collective](https://github.com/GeometryCollective/ddg-exercises/tree/main/input) |
 | Gargoyle | [Geometry Collective](https://github.com/GeometryCollective/ddg-exercises/tree/main/input) |
 | Kitten | [Geometry Collective](https://github.com/GeometryCollective/ddg-exercises/tree/main/input) |
-| Shuttle | Unknown |
+| Shuttle | [John Burkardt](https://people.sc.fsu.edu/~jburkardt/data/obj/obj.html) |
 | Suzanne | [Blender](https://www.blender.org/) |
 | Teapot | [Martin Newell](https://users.cs.utah.edu/~dejohnso/models/teapot.html) | 
 | Teddy | Unknown |
