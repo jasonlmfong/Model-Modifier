@@ -143,6 +143,7 @@ Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
     std::vector<glm::vec3> VertexPos;
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
     std::vector<std::vector<unsigned int>> FaceIndices;
+    std::unordered_map<int, int> NumberPolygons;
 
     for (FaceRecord face : m_Faces)
     {
@@ -174,11 +175,14 @@ Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
 
         FaceIndices.push_back({ vertCIdx, edgeCAIdx, faceABCIdx });
         FaceIndices.push_back({ faceABCIdx, edgeBCIdx, vertCIdx });
+
+        NumberPolygons[3] += 6;
     }
 
     Object Obj;
     Obj.m_Min = m_Min; Obj.m_Max = m_Max;
     Obj.m_VertexPos = VertexPos; Obj.m_FaceIndices = FaceIndices;
+    Obj.m_NumPolygons = NumberPolygons;
 
     return Obj;
 }
@@ -397,6 +401,7 @@ Object Surface::DooSabin()
     std::vector<glm::vec3> VertexPos;
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
     std::vector<std::vector<unsigned int>> FaceIndices;
+    std::unordered_map<int, int> NumberPolygons;
 
     // new face from old face
     for (int currFaceIdx = 0; currFaceIdx < m_Faces.size(); currFaceIdx++)
@@ -407,6 +412,7 @@ Object Surface::DooSabin()
         unsigned int vertCIdx = getVertIndex(newPointsPerFace[currFaceIdx][2], VertexPos, VertLookup);
 
         FaceIndices.push_back({ vertAIdx, vertBIdx, vertCIdx });
+        NumberPolygons[3] += 1;
     }
 
     // new face from old edge (broken down to 2 triangles)
@@ -440,12 +446,14 @@ Object Surface::DooSabin()
                     // not flipped, usual triangulation of 012, 230
                     FaceIndices.push_back({ vertAIdx, vertBIdx, vertCIdx });
                     FaceIndices.push_back({ vertCIdx, vertDIdx, vertAIdx });
+                    NumberPolygons[3] += 2;
                 }
                 else
                 {
                     // flipped normals, use 103, 321
                     FaceIndices.push_back({ vertBIdx, vertAIdx, vertDIdx });
                     FaceIndices.push_back({ vertDIdx, vertCIdx, vertBIdx });
+                    NumberPolygons[3] += 2;
                 }
             }
         }
@@ -491,11 +499,13 @@ Object Surface::DooSabin()
                     {
                         // not flipped
                         FaceIndices.push_back({ centerIdx, newVertsIdx[newVertIdx], newVertsIdx[newVertIdx2] });
+                        NumberPolygons[3] += 1;
                     }
                     else
                     {
                         // flipped normals
                         FaceIndices.push_back({ centerIdx, newVertsIdx[newVertIdx2], newVertsIdx[newVertIdx] });
+                        NumberPolygons[3] += 1;
                     }
                 }
             }
@@ -506,6 +516,7 @@ Object Surface::DooSabin()
     Object Obj;
     Obj.m_Min = m_Min; Obj.m_Max = m_Max;
     Obj.m_VertexPos = VertexPos; Obj.m_FaceIndices = FaceIndices;
+    Obj.m_NumPolygons = NumberPolygons;
 
     return Obj;
 }
@@ -557,6 +568,7 @@ Object Surface::Loop()
     std::vector<glm::vec3> VertexPos;
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
     std::vector<std::vector<unsigned int>> FaceIndices;
+    std::unordered_map<int, int> NumberPolygons;
 
     for (FaceRecord face : m_Faces)
     {
@@ -581,12 +593,14 @@ Object Surface::Loop()
         FaceIndices.push_back({ edgeABIdx, vertBIdx, edgeBCIdx });
         FaceIndices.push_back({ edgeCAIdx, edgeBCIdx, vertCIdx });
         FaceIndices.push_back({ edgeCAIdx, edgeABIdx, edgeBCIdx });
+        NumberPolygons[3] += 4;
     }
 
     // build object
     Object Obj;
     Obj.m_Min = m_Min; Obj.m_Max = m_Max;
     Obj.m_VertexPos = VertexPos; Obj.m_FaceIndices = FaceIndices;
+    Obj.m_NumPolygons = NumberPolygons;
 
     return Obj;
 }

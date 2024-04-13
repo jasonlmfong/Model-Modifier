@@ -14,8 +14,8 @@
 #include "renderer/IndexBuffer.h"
 #include "renderer/Shader.h"
 #include "renderer/Camera.h"
-#include "scene/Object.h"
-#include "scene/Objects.h"
+#include "scene/object/Object.h"
+#include "scene/object/Objects.h"
 #include "scene/Mesh.h"
 #include "scene/Material.h"
 #include "scene/Light.h"
@@ -496,13 +496,23 @@ int main()
             {
                 ImGui::Text("Application average %.1f FPS: ", ImGui::GetIO().Framerate);
             }
-            ImGui::Checkbox("# Triangles", &triangles);
+            ImGui::Checkbox("Number of Polygons", &triangles);
             if (triangles)
             {
                 std::stringstream ss;
                 ss << numFaces;
-                std::string str = "Number of triangles: " + ss.str();
-                ImGui::Text(str.c_str());
+                std::string sstr = "Number of polygons: " + ss.str();
+                ImGui::Text(sstr.c_str());
+
+                for (const std::pair<int, int> numPolygon : mesh.m_Object.m_NumPolygons)
+                {
+                    std::stringstream sizeStringStream;
+                    sizeStringStream << numPolygon.first;
+                    std::stringstream numStringStream;
+                    numStringStream << numPolygon.second;
+                    std::string str = "Number of " + sizeStringStream.str() + "-gons: " + numStringStream.str();
+                    ImGui::Text(str.c_str());
+                }
             }
 
             ImGui::Unindent();
@@ -590,6 +600,7 @@ int main()
 
             obj = objects.findObj(currObject); // search for the object requested
             
+            // TODO: make display object?
             mesh.Rebuild(obj); // rebuild mesh based on object info
             numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
