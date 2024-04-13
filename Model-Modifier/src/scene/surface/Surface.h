@@ -7,7 +7,7 @@
 #include "../../external/glm/ext/matrix_float4x4.hpp"
 #include "../../external/glm/geometric.hpp"
 
-#include "../Object.h"
+#include "../object/Object.h"
 
 struct VertexRecord
 {

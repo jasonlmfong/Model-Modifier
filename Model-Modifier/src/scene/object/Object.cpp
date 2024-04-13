@@ -81,6 +81,7 @@ void Object::loadOBJ(const char* filename)
                 faceIndices.push_back(vertIdx);
             }
             m_FaceIndices.push_back(faceIndices);
+            m_NumPolygons[faceIndices.size()] += 1;
         }
     }
 }
