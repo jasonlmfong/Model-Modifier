@@ -289,7 +289,7 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Display parameters");
+        ImGui::Begin("Display controls");
         if (ImGui::CollapsingHeader("Objection selection"))
         {
             ImGui::Indent();
@@ -491,7 +491,14 @@ int main()
                 
             ImGui::Unindent();
         }
+        
+        if (ImGui::Button("Reset Camera"))
+        {
+            camera.ResetView();
+        }
+        ImGui::End();
 
+        ImGui::Begin("Utilities");
         if (ImGui::CollapsingHeader("Statistics"))
         {
             ImGui::Indent();
@@ -522,11 +529,7 @@ int main()
 
             ImGui::Unindent();
         }
-        
-        if (ImGui::Button("Reset Camera"))
-        {
-            camera.ResetView();
-        }
+
         if (ImGui::Button("Screenshot"))
         {
             struct tm newtime;
