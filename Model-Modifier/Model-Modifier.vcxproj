@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -351,6 +351,7 @@
     <ClInclude Include="src\renderer\Window.h" />
     <ClInclude Include="src\scene\object\Object.h" />
     <ClInclude Include="src\scene\object\Objects.h" />
+    <ClInclude Include="src\scene\object\util\Triangulate.h" />
     <ClInclude Include="src\scene\surface\Surface.h" />
   </ItemGroup>
   <ItemGroup>
