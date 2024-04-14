@@ -15,12 +15,12 @@ Mesh::~Mesh()
 void Mesh::BuildFaceNormals()
 {
     // build face normal vectors from obj
-    m_FaceNormals.resize(m_Object.m_FaceIndices.size());
-    for (int i = 0; i < m_Object.m_FaceIndices.size(); i++)
+    m_FaceNormals.resize(m_Object.m_TriFaceIndices.size());
+    for (int i = 0; i < m_Object.m_TriFaceIndices.size(); i++)
     {
-        unsigned int ia = m_Object.m_FaceIndices[i][0];
-        unsigned int ib = m_Object.m_FaceIndices[i][1];
-        unsigned int ic = m_Object.m_FaceIndices[i][2];
+        unsigned int ia = m_Object.m_TriFaceIndices[i][0];
+        unsigned int ib = m_Object.m_TriFaceIndices[i][1];
+        unsigned int ic = m_Object.m_TriFaceIndices[i][2];
         glm::vec3 normal = glm::normalize(
             glm::cross(
                 m_Object.m_VertexPos[ib] - m_Object.m_VertexPos[ia],
@@ -33,7 +33,7 @@ void Mesh::BuildFaceNormals()
 
 void Mesh::BuildVerticesIndices()
 {
-    int numFaces = static_cast<unsigned int>(m_Object.m_FaceIndices.size());
+    int numFaces = static_cast<unsigned int>(m_Object.m_TriFaceIndices.size());
 
     // build output items to OpenGL
     if (m_ShadingType == FLAT) // flat shading
@@ -46,9 +46,9 @@ void Mesh::BuildVerticesIndices()
             for (int j = 0; j < 3; j++)
             {
                 // ith face, jth corner, xyz coordinates and normals
-                m_OutVertices[18 * i + 6 * j + 0] = m_Object.m_VertexPos[m_Object.m_FaceIndices[i][j]].x;
-                m_OutVertices[18 * i + 6 * j + 1] = m_Object.m_VertexPos[m_Object.m_FaceIndices[i][j]].y;
-                m_OutVertices[18 * i + 6 * j + 2] = m_Object.m_VertexPos[m_Object.m_FaceIndices[i][j]].z;
+                m_OutVertices[18 * i + 6 * j + 0] = m_Object.m_VertexPos[m_Object.m_TriFaceIndices[i][j]].x;
+                m_OutVertices[18 * i + 6 * j + 1] = m_Object.m_VertexPos[m_Object.m_TriFaceIndices[i][j]].y;
+                m_OutVertices[18 * i + 6 * j + 2] = m_Object.m_VertexPos[m_Object.m_TriFaceIndices[i][j]].z;
 
                 m_OutVertices[18 * i + 6 * j + 3] = m_FaceNormals[i].x;
                 m_OutVertices[18 * i + 6 * j + 4] = m_FaceNormals[i].y;
@@ -70,7 +70,7 @@ void Mesh::BuildVerticesIndices()
         std::unordered_map<unsigned int, std::vector<unsigned int>> vertAdjFaces(m_Object.m_VertexPos.size());
         for (int faceIdx = 0; faceIdx < numFaces; faceIdx++)
         {
-            std::vector<unsigned int> faceVertIdx = m_Object.m_FaceIndices[faceIdx];
+            std::vector<unsigned int> faceVertIdx = m_Object.m_TriFaceIndices[faceIdx];
             // add face index to the connecting vertices
             for (int i = 0; i < 3; i++)
             {
@@ -86,13 +86,13 @@ void Mesh::BuildVerticesIndices()
             glm::vec3 currFaceNormal = m_FaceNormals[currFace];
             std::vector<glm::vec3> faceCornerNormals;
 
-            for (unsigned int currCorner = 0; currCorner < m_Object.m_FaceIndices[currFace].size(); currCorner++)
+            for (unsigned int currCorner = 0; currCorner < m_Object.m_TriFaceIndices[currFace].size(); currCorner++)
             {
                 // corner normal to be stored
                 glm::vec3 currCornerNormal {0};
 
                 // go through all neighbour faces (including current face)
-                for (unsigned int adjFace : vertAdjFaces[m_Object.m_FaceIndices[currFace][currCorner]])
+                for (unsigned int adjFace : vertAdjFaces[m_Object.m_TriFaceIndices[currFace][currCorner]])
                 {
                     glm::vec3 adjFaceNormal = m_FaceNormals[adjFace];
                     // if adjacent face is "close" to current face, then add the adj face normal to current corner normal
@@ -114,9 +114,9 @@ void Mesh::BuildVerticesIndices()
             for (int j = 0; j < 3; j++)
             {
                 // ith face, jth corner, xyz coordinates and normals
-                m_OutVertices[18 * i + 6 * j + 0] = m_Object.m_VertexPos[m_Object.m_FaceIndices[i][j]].x;
-                m_OutVertices[18 * i + 6 * j + 1] = m_Object.m_VertexPos[m_Object.m_FaceIndices[i][j]].y;
-                m_OutVertices[18 * i + 6 * j + 2] = m_Object.m_VertexPos[m_Object.m_FaceIndices[i][j]].z;
+                m_OutVertices[18 * i + 6 * j + 0] = m_Object.m_VertexPos[m_Object.m_TriFaceIndices[i][j]].x;
+                m_OutVertices[18 * i + 6 * j + 1] = m_Object.m_VertexPos[m_Object.m_TriFaceIndices[i][j]].y;
+                m_OutVertices[18 * i + 6 * j + 2] = m_Object.m_VertexPos[m_Object.m_TriFaceIndices[i][j]].z;
 
                 m_OutVertices[18 * i + 6 * j + 3] = cornerVertexNormals[i][j].x;
                 m_OutVertices[18 * i + 6 * j + 4] = cornerVertexNormals[i][j].y;
@@ -138,7 +138,7 @@ void Mesh::BuildVerticesIndices()
         std::unordered_map<unsigned int, std::vector<unsigned int>> vertAdjFaces(m_Object.m_VertexPos.size());
         for (int faceIdx = 0; faceIdx < numFaces; faceIdx++)
         {
-            std::vector<unsigned int> faceVertIdx = m_Object.m_FaceIndices[faceIdx];
+            std::vector<unsigned int> faceVertIdx = m_Object.m_TriFaceIndices[faceIdx];
             // add face index to the connecting vertices
             for (int i = 0; i < 3; i++)
             {
@@ -187,9 +187,9 @@ void Mesh::BuildVerticesIndices()
         m_OutIndices = new unsigned int[m_OutNumIdx];
         for (int i = 0; i < numFaces; i++)
         {
-            m_OutIndices[3 * i + 0] = m_Object.m_FaceIndices[i][0];
-            m_OutIndices[3 * i + 1] = m_Object.m_FaceIndices[i][1];
-            m_OutIndices[3 * i + 2] = m_Object.m_FaceIndices[i][2];
+            m_OutIndices[3 * i + 0] = m_Object.m_TriFaceIndices[i][0];
+            m_OutIndices[3 * i + 1] = m_Object.m_TriFaceIndices[i][1];
+            m_OutIndices[3 * i + 2] = m_Object.m_TriFaceIndices[i][2];
         }
     }
 }

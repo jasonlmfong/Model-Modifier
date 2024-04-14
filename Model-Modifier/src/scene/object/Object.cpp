@@ -1,4 +1,5 @@
 #include "Object.h"
+#include "util/Triangulate.h"
 
 Object::Object()
     : m_Min(0), m_Max(0)
@@ -8,6 +9,10 @@ Object::Object()
 Object::Object(const char* filename)
 {
     loadOBJ(filename);
+    if (m_NumPolygons.size() == 1 && m_NumPolygons.count(3) == 1)
+        m_TriFaceIndices = m_FaceIndices;
+    else
+        TriangulateFaces();
     Rescale();
 }
 
@@ -119,4 +124,28 @@ void Object::Reload(const char* filename)
     Destroy();
     loadOBJ(filename);
     Rescale();
+}
+
+void Object::TriangulateFaces()
+{
+    std::vector<std::vector<unsigned int>> triFaces;
+
+    for (size_t i = 0; i < m_FaceIndices.size(); i++)
+    {
+        if (m_FaceIndices[i].size() == 3)
+            triFaces.push_back(m_FaceIndices[i]);
+        else if (m_FaceIndices[i].size() > 3)
+        {
+            int sides = m_FaceIndices[i].size();
+            std::vector<unsigned int> polygon = m_FaceIndices[i];
+
+            std::vector<std::vector<int>> triangulate = TriangulatePolygonalFace(polygon, m_VertexPos);
+            for (std::vector<int> triangle : triangulate)
+            {
+                triFaces.push_back({polygon[triangle[0]], polygon[triangle[1]] , polygon[triangle[2]] });
+            }
+        }
+    }
+
+    m_TriFaceIndices = triFaces;
 }

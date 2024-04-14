@@ -8,6 +8,8 @@ This repository contains my `C++17` and `OpenGL` implementation of a mesh viewer
 
 - [x] Objects
   - [x] Custom .obj parser
+  - [x] Triangulation
+    - [x] Minimum cost polygon triangulation
 - [x] Dynamic object selection
   - [x] Simple geometric objects
   - [x] Complex test objects

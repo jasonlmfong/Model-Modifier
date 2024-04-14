@@ -22,7 +22,7 @@ public:
 	void Destroy();
 	void Reload(const char* filename);
 
-	std::vector<std::vector<unsigned int>>  TriangulateFaces(std::vector<std::vector<unsigned int>> faces);
+	void TriangulateFaces();
 
 public:
 	glm::vec3 m_Min;
@@ -30,6 +30,7 @@ public:
 
 	std::vector<glm::vec3> m_VertexPos;
 	std::vector<std::vector<unsigned int>> m_FaceIndices;
+	std::vector<std::vector<unsigned int>> m_TriFaceIndices;
 
 	std::unordered_map<int, int> m_NumPolygons;
 };
