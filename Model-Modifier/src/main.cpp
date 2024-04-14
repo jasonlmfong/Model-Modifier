@@ -299,6 +299,7 @@ int main()
 
                 ImGui::RadioButton("Crumbled", &nextObject, CRUMPLED);
                 ImGui::RadioButton("Cube", &nextObject, CUBE);
+                ImGui::RadioButton("Cube2", &nextObject, CUBE2);  // temp
                 ImGui::RadioButton("Double torus", &nextObject, DOUBLETORUS);
                 ImGui::RadioButton("Fandisk", &nextObject, FANDISK);
                 ImGui::RadioButton("Icosahedron", &nextObject, ICOSA);
@@ -307,8 +308,10 @@ int main()
                 ImGui::RadioButton("Sphere", &nextObject, SPHERE);
                 ImGui::RadioButton("Star", &nextObject, STAR);
                 ImGui::RadioButton("T-Shape", &nextObject, T);
+                ImGui::RadioButton("T-Shape2", &nextObject, T2);  // temp
                 ImGui::RadioButton("Torus", &nextObject, TORUS);
                 ImGui::RadioButton("Tubes", &nextObject, TUBES);
+                ImGui::RadioButton("Tubes2", &nextObject, TUBES2);  // temp
 
                 ImGui::Unindent();
             }
@@ -319,8 +322,10 @@ int main()
                 ImGui::RadioButton("Ankylosaurus", &nextObject, ANKYLOSAURUS);
                 ImGui::RadioButton("Armadillo", &nextObject, ARMADILLO);
                 ImGui::RadioButton("Bob", &nextObject, BOB);
+                ImGui::RadioButton("Bob2", &nextObject, BOB2);  // temp
                 ImGui::RadioButton("Bunny", &nextObject, BUNNY);
                 ImGui::RadioButton("Cow", &nextObject, COW);
+                ImGui::RadioButton("Cow2", &nextObject, COW2);  // temp
                 ImGui::RadioButton("Cow head", &nextObject, COWHEAD);
                 ImGui::RadioButton("Face", &nextObject, FACE);
                 ImGui::RadioButton("Gargoyle", &nextObject, GARGOYLE);
