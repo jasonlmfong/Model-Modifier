@@ -353,10 +353,10 @@ int main()
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
                 objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
             }
-            if (ImGui::Button("Beehive Surface"))
+            if (ImGui::Button("Beehive Surface (tri)"))
             {
                 Surface BH(obj);
-                obj = BH.Beehive(); 
+                obj = BH.Beehive(3); 
                 mesh.Rebuild(obj); // rebuild mesh based on object info
                 numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
@@ -364,10 +364,21 @@ int main()
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
                 objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
             }
-            if (ImGui::Button("SnowFlake Surface"))
+            if (ImGui::Button("Beehive Surface (quad)"))
+            {
+                Surface BH(obj);
+                obj = BH.Beehive(4);
+                mesh.Rebuild(obj); // rebuild mesh based on object info
+                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+
+                objectVA.Bind();
+                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
+                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+            }
+            if (ImGui::Button("SnowFlake Surface (tri)"))
             {
                 Surface SF(obj);
-                obj = SF.Snowflake();
+                obj = SF.Snowflake(3);
                 mesh.Rebuild(obj); // rebuild mesh based on object info
                 numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
@@ -375,10 +386,32 @@ int main()
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
                 objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
             }
-            if (ImGui::Button("Catmull Clark Subdivision Surface"))
+            if (ImGui::Button("SnowFlake Surface (quad)"))
+            {
+                Surface SF(obj);
+                obj = SF.Snowflake(4);
+                mesh.Rebuild(obj); // rebuild mesh based on object info
+                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+
+                objectVA.Bind();
+                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
+                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+            }
+            if (ImGui::Button("Catmull Clark Subdivision Surface (tri)"))
             {
                 Surface CC(obj);
-                obj = CC.CatmullClark();
+                obj = CC.CatmullClark(3);
+                mesh.Rebuild(obj); // rebuild mesh based on object info
+                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+
+                objectVA.Bind();
+                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
+                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+            }
+            if (ImGui::Button("Catmull Clark Subdivision Surface (quad)"))
+            {
+                Surface CC(obj);
+                obj = CC.CatmullClark(4);
                 mesh.Rebuild(obj); // rebuild mesh based on object info
                 numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
