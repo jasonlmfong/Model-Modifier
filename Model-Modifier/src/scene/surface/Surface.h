@@ -57,7 +57,8 @@ public:
 	Object Snowflake(int n);
 	Object CatmullClark(int n);
 	Object DooSabin();
-	Object Loop();
+	Object Loop3();
+	Object Loop4();
 	Object QEM();
 
 public:
