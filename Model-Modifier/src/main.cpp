@@ -25,7 +25,8 @@ enum shader
 {
     GOURAND,
     NORMAL,
-    PHONG
+    PHONG,
+    BLINNPHONG,
 };
 
 enum renderMode
@@ -93,6 +94,10 @@ int main()
     std::string phongFragmentPath = "res/shaders/phong.frag";
     Shader phongShader(phongVertexPath, phongFragmentPath);
 
+    std::string blinnPhongVertexPath = "res/shaders/phong.vert";
+    std::string blinnPhongFragmentPath = "res/shaders/blinnPhong.frag";
+    Shader blinnPhongShader(blinnPhongVertexPath, blinnPhongFragmentPath);
+
     std::string normalVertexPath = "res/shaders/normal.vert";
     std::string normalFragmentPath = "res/shaders/normal.frag";
     Shader normalShader(normalVertexPath, normalFragmentPath);
@@ -126,7 +131,7 @@ int main()
     shader.SetUniformMat4f("u_Model", modelMatrix);
     shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
     shader.SetUniformMat4f("u_Projection", projMatrix);
-    if (currShader == GOURAND || currShader == PHONG)
+    if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG)
     {
         shader.SetUniform3fv("light_pos", 3, light.m_Pos);
         shader.SetUniform3fv("light_col", 3, light.m_Col);
@@ -484,8 +489,9 @@ int main()
             ImGui::RadioButton("Normal shader", &nextShader, NORMAL);
             ImGui::RadioButton("Gourand shader", &nextShader, GOURAND);
             ImGui::RadioButton("Phong shader", &nextShader, PHONG);
+            ImGui::RadioButton("Blinn-Phong shader", &nextShader, BLINNPHONG);
         
-            if (nextShader == GOURAND || nextShader == PHONG)
+            if (nextShader == GOURAND || nextShader == PHONG || nextShader == BLINNPHONG)
             {
                 ImGui::Indent();
                 if (ImGui::CollapsingHeader("Material controls"))
@@ -604,6 +610,8 @@ int main()
 
             if (currShader == PHONG)
                 shader = phongShader;
+            if (currShader == BLINNPHONG)
+                shader = blinnPhongShader;
             else if (currShader == GOURAND)
                 shader = gourandShader;
             else if (currShader == NORMAL)
@@ -616,7 +624,7 @@ int main()
         shader.SetUniformMat4f("u_Model", modelMatrix);
         shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
         shader.SetUniformMat4f("u_Projection", projMatrix);
-        if (currShader == GOURAND || currShader == PHONG)
+        if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG)
         {
             shader.SetUniform3fv("light_pos", 3, light.m_Pos);
             shader.SetUniform3fv("light_col", 3, light.m_Col); 
