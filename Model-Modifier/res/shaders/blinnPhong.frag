@@ -19,10 +19,11 @@ vec3 compute_light(vec3 lightpos, vec3 lightcol)
 	vec3 n = normalize(view_pos_normal);
 	vec3 v = normalize(-view_pos);
 	vec3 l = normalize(lightpos - view_pos);
-	vec3 r = reflect(-l, n);
+	vec3 h = normalize(v + l);
 	
 	vec3 diffuse_light = diffuse * lightcol * max(0.0, dot(n, l));
-	vec3 spec_light = specular * lightcol * pow(max(0, dot(r, v)), shine/4.0);
+	
+	vec3 spec_light = specular * lightcol * pow(max(0, dot(n, h)), shine);
 	return diffuse_light + spec_light;
 }
 
