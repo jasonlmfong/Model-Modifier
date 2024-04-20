@@ -28,6 +28,7 @@ enum shader
     PHONG,
     BLINNPHONG,
     GOOCH,
+    CEL,
 };
 
 enum renderMode
@@ -111,6 +112,10 @@ int main()
     std::string goochFragmentPath = "res/shaders/gooch.frag";
     Shader goochShader(goochVertexPath, goochFragmentPath);
 
+    std::string celVertexPath = "res/shaders/phong.vert";
+    std::string celFragmentPath = "res/shaders/cel.frag";
+    Shader celShader(celVertexPath, celFragmentPath);
+
     int currShader = NORMAL;
     int nextShader;
     Shader shader = normalShader;
@@ -142,7 +147,7 @@ int main()
     shader.SetUniformMat4f("u_Model", modelMatrix);
     shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
     shader.SetUniformMat4f("u_Projection", projMatrix);
-    if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH)
+    if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH || currShader == CEL)
     {
         shader.SetUniform3fv("light_pos", 3, light.m_Pos);
         shader.SetUniform3fv("light_col", 3, light.m_Col);
@@ -509,8 +514,9 @@ int main()
             ImGui::RadioButton("Phong shader", &nextShader, PHONG);
             ImGui::RadioButton("Blinn-Phong shader", &nextShader, BLINNPHONG);
             ImGui::RadioButton("Gooch shader", &nextShader, GOOCH);
+            ImGui::RadioButton("Cel shader", &nextShader, CEL);
         
-            if (nextShader == GOURAND || nextShader == PHONG || nextShader == BLINNPHONG || nextShader == GOOCH)
+            if (nextShader == GOURAND || nextShader == PHONG || nextShader == BLINNPHONG || nextShader == GOOCH || nextShader == CEL)
             {
                 ImGui::Indent();
                 if (ImGui::CollapsingHeader("Material controls"))
@@ -655,6 +661,8 @@ int main()
                 shader = normalShader;
             else if (currShader == GOOCH)
                 shader = goochShader;
+            else if (currShader == CEL)
+                shader = celShader;
 
             shader.Bind();
         }
@@ -663,7 +671,7 @@ int main()
         shader.SetUniformMat4f("u_Model", modelMatrix);
         shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
         shader.SetUniformMat4f("u_Projection", projMatrix);
-        if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH)
+        if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH || currShader == CEL)
         {
             shader.SetUniform3fv("light_pos", 3, light.m_Pos);
             shader.SetUniform3fv("light_col", 3, light.m_Col); 
