@@ -27,6 +27,7 @@ enum shader
     NORMAL,
     PHONG,
     BLINNPHONG,
+    GOOCH,
 };
 
 enum renderMode
@@ -106,6 +107,10 @@ int main()
     std::string gourandFragmentPath = "res/shaders/gourand.frag";
     Shader gourandShader(gourandVertexPath, gourandFragmentPath);
 
+    std::string goochVertexPath = "res/shaders/phong.vert";
+    std::string goochFragmentPath = "res/shaders/gooch.frag";
+    Shader goochShader(goochVertexPath, goochFragmentPath);
+
     int currShader = NORMAL;
     int nextShader;
     Shader shader = normalShader;
@@ -126,12 +131,18 @@ int main()
     Light light = Light();
     int* toggled = new int[3];
 
+    // Gooch variables
+    float* gooch_warm = new float[3] {1, 0.25, 0};
+    float* gooch_cool = new float[3] {0, 0.75, 1};
+    float gooch_alpha = 0.2f;
+    float gooch_beta = 0.2f;
+
     // upload uniforms
     shader.Bind();
     shader.SetUniformMat4f("u_Model", modelMatrix);
     shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
     shader.SetUniformMat4f("u_Projection", projMatrix);
-    if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG)
+    if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH)
     {
         shader.SetUniform3fv("light_pos", 3, light.m_Pos);
         shader.SetUniform3fv("light_col", 3, light.m_Col);
@@ -140,6 +151,13 @@ int main()
         shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
         shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
         shader.SetUniform1f("shine", meshMat.m_Shine);
+    }
+    if (currShader == GOOCH)
+    {
+        shader.SetUniform3fv("warm", 1, gooch_warm);
+        shader.SetUniform3fv("cool", 1, gooch_cool);
+        shader.SetUniform1f("alpha", gooch_alpha);
+        shader.SetUniform1f("beta", gooch_beta);
     }
 
     // openGL settings
@@ -490,8 +508,9 @@ int main()
             ImGui::RadioButton("Gourand shader", &nextShader, GOURAND);
             ImGui::RadioButton("Phong shader", &nextShader, PHONG);
             ImGui::RadioButton("Blinn-Phong shader", &nextShader, BLINNPHONG);
+            ImGui::RadioButton("Gooch shader", &nextShader, GOOCH);
         
-            if (nextShader == GOURAND || nextShader == PHONG || nextShader == BLINNPHONG)
+            if (nextShader == GOURAND || nextShader == PHONG || nextShader == BLINNPHONG || nextShader == GOOCH)
             {
                 ImGui::Indent();
                 if (ImGui::CollapsingHeader("Material controls"))
@@ -526,6 +545,24 @@ int main()
                     }
                     ImGui::Unindent();
                 }
+
+                if (nextShader == GOOCH)
+                {
+                    if (ImGui::CollapsingHeader("Gooch controls"))
+                    {
+                        ImGui::Indent();
+
+                        ImGui::ColorEdit3("Warm color", gooch_warm);
+                        ImGui::ColorEdit3("Cool color", gooch_cool);
+                        ImGui::SliderFloat("Alpha", &gooch_alpha, 0, 1);
+                        ImGui::SliderFloat("Beta", &gooch_beta, 0, 1);
+
+                        ImGui::Spacing();
+
+                        ImGui::Unindent();
+                    }
+                }
+
                 ImGui::Unindent();
             }
             ImGui::Unindent();
@@ -610,12 +647,14 @@ int main()
 
             if (currShader == PHONG)
                 shader = phongShader;
-            if (currShader == BLINNPHONG)
+            else if (currShader == BLINNPHONG)
                 shader = blinnPhongShader;
             else if (currShader == GOURAND)
                 shader = gourandShader;
             else if (currShader == NORMAL)
                 shader = normalShader;
+            else if (currShader == GOOCH)
+                shader = goochShader;
 
             shader.Bind();
         }
@@ -624,7 +663,7 @@ int main()
         shader.SetUniformMat4f("u_Model", modelMatrix);
         shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
         shader.SetUniformMat4f("u_Projection", projMatrix);
-        if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG)
+        if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH)
         {
             shader.SetUniform3fv("light_pos", 3, light.m_Pos);
             shader.SetUniform3fv("light_col", 3, light.m_Col); 
@@ -639,6 +678,14 @@ int main()
             shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
             shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
             shader.SetUniform1f("shine", meshMat.m_Shine);
+
+            if (currShader == GOOCH)
+            {
+                shader.SetUniform3fv("warm", 1, gooch_warm);
+                shader.SetUniform3fv("cool", 1, gooch_cool);
+                shader.SetUniform1f("alpha", gooch_alpha);
+                shader.SetUniform1f("beta", gooch_beta);
+            }
         }
 
         ////////// regenerate object //////////
