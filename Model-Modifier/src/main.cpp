@@ -96,9 +96,8 @@ int main()
     std::string phongFragmentPath = "res/shaders/phong.frag";
     Shader phongShader(phongVertexPath, phongFragmentPath);
 
-    std::string blinnPhongVertexPath = "res/shaders/phong.vert";
     std::string blinnPhongFragmentPath = "res/shaders/blinnPhong.frag";
-    Shader blinnPhongShader(blinnPhongVertexPath, blinnPhongFragmentPath);
+    Shader blinnPhongShader(phongVertexPath, blinnPhongFragmentPath);
 
     std::string normalVertexPath = "res/shaders/normal.vert";
     std::string normalFragmentPath = "res/shaders/normal.frag";
@@ -108,13 +107,11 @@ int main()
     std::string gourandFragmentPath = "res/shaders/gourand.frag";
     Shader gourandShader(gourandVertexPath, gourandFragmentPath);
 
-    std::string goochVertexPath = "res/shaders/phong.vert";
     std::string goochFragmentPath = "res/shaders/gooch.frag";
-    Shader goochShader(goochVertexPath, goochFragmentPath);
+    Shader goochShader(phongVertexPath, goochFragmentPath);
 
-    std::string celVertexPath = "res/shaders/phong.vert";
     std::string celFragmentPath = "res/shaders/cel.frag";
-    Shader celShader(celVertexPath, celFragmentPath);
+    Shader celShader(phongVertexPath, celFragmentPath);
 
     int currShader = NORMAL;
     int nextShader;
