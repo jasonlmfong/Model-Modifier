@@ -86,7 +86,7 @@ void Object::loadOBJ(const char* filename)
                 faceIndices.push_back(vertIdx);
             }
             m_FaceIndices.push_back(faceIndices);
-            m_NumPolygons[faceIndices.size()] += 1;
+            m_NumPolygons[static_cast<int>(faceIndices.size())] += 1;
         }
     }
 }
@@ -136,7 +136,7 @@ void Object::TriangulateFaces()
             triFaces.push_back(m_FaceIndices[i]);
         else if (m_FaceIndices[i].size() > 3)
         {
-            int sides = m_FaceIndices[i].size();
+            int sides = static_cast<int>(m_FaceIndices[i].size());
             std::vector<unsigned int> polygon = m_FaceIndices[i];
 
             std::vector<std::vector<int>> triangulate = TriangulatePolygonalFace(polygon, m_VertexPos);

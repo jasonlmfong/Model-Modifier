@@ -22,7 +22,7 @@ public:
 	~Mesh();
 
 	void BuildFaceNormals();
-	
+
 	void BuildVerticesIndices();
 	void Destroy();
 	void Rebuild();

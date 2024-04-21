@@ -71,7 +71,7 @@ std::vector<std::vector<int>> TriangulatePolygonalFace(std::vector<unsigned int>
 {
     std::vector<glm::vec2> vertices_on_plane = projectPolygonToPlane(faceIdx, all_vertices);
 
-    int n = vertices_on_plane.size();
+    int n = static_cast<int>(vertices_on_plane.size());
     // perform minimum cost triangulation calculation
     std::vector<std::vector<int>> best_vertex = mct(vertices_on_plane, n);
 
