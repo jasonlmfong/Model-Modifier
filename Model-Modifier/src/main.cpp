@@ -29,6 +29,7 @@ enum shader
     BLINNPHONG,
     GOOCH,
     CEL,
+    COOKTORRANCE,
 };
 
 enum renderMode
@@ -113,6 +114,9 @@ int main()
     std::string celFragmentPath = "res/shaders/cel.frag";
     Shader celShader(phongVertexPath, celFragmentPath);
 
+    std::string cookTorranceFragmentPath = "res/shaders/cookTorrance.frag";
+    Shader cookTorranceShader(phongVertexPath, cookTorranceFragmentPath);
+
     int currShader = NORMAL;
     int nextShader;
     Shader shader = normalShader;
@@ -139,12 +143,16 @@ int main()
     float gooch_alpha = 0.2f;
     float gooch_beta = 0.2f;
 
+    // Cook-Torrance variables
+    float metallic = 0.2f;
+    float roughness = 0.3f;
+
     // upload uniforms
     shader.Bind();
     shader.SetUniformMat4f("u_Model", modelMatrix);
     shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
     shader.SetUniformMat4f("u_Projection", projMatrix);
-    if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH || currShader == CEL)
+    if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH || currShader == CEL || currShader == COOKTORRANCE)
     {
         shader.SetUniform3fv("light_pos", 3, light.m_Pos);
         shader.SetUniform3fv("light_col", 3, light.m_Col);
@@ -153,13 +161,19 @@ int main()
         shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
         shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
         shader.SetUniform1f("shine", meshMat.m_Shine);
-    }
-    if (currShader == GOOCH)
-    {
-        shader.SetUniform3fv("warm", 1, gooch_warm);
-        shader.SetUniform3fv("cool", 1, gooch_cool);
-        shader.SetUniform1f("alpha", gooch_alpha);
-        shader.SetUniform1f("beta", gooch_beta);
+
+        if (currShader == GOOCH)
+        {
+            shader.SetUniform3fv("warm", 1, gooch_warm);
+            shader.SetUniform3fv("cool", 1, gooch_cool);
+            shader.SetUniform1f("alpha", gooch_alpha);
+            shader.SetUniform1f("beta", gooch_beta);
+        }
+        if (currShader == COOKTORRANCE)
+        {
+            shader.SetUniform1f("metallic", metallic);
+            shader.SetUniform1f("roughness", roughness);
+        }
     }
 
     // openGL settings
@@ -512,8 +526,9 @@ int main()
             ImGui::RadioButton("Blinn-Phong shader", &nextShader, BLINNPHONG);
             ImGui::RadioButton("Gooch shader", &nextShader, GOOCH);
             ImGui::RadioButton("Cel shader", &nextShader, CEL);
+            ImGui::RadioButton("Cook-Torrance shader", &nextShader, COOKTORRANCE);
         
-            if (nextShader == GOURAND || nextShader == PHONG || nextShader == BLINNPHONG || nextShader == GOOCH || nextShader == CEL)
+            if (nextShader == GOURAND || nextShader == PHONG || nextShader == BLINNPHONG || nextShader == GOOCH || nextShader == CEL || nextShader == COOKTORRANCE)
             {
                 ImGui::Indent();
                 if (ImGui::CollapsingHeader("Material controls"))
@@ -559,6 +574,21 @@ int main()
                         ImGui::ColorEdit3("Cool color", gooch_cool);
                         ImGui::SliderFloat("Alpha", &gooch_alpha, 0, 1);
                         ImGui::SliderFloat("Beta", &gooch_beta, 0, 1);
+
+                        ImGui::Spacing();
+
+                        ImGui::Unindent();
+                    }
+                }
+
+                if (nextShader == COOKTORRANCE)
+                {
+                    if (ImGui::CollapsingHeader("Cook-Torrance controls"))
+                    {
+                        ImGui::Indent();
+
+                        ImGui::SliderFloat("Metallic", &metallic, 0, 1);
+                        ImGui::SliderFloat("Roughness", &roughness, 0.05, 1);
 
                         ImGui::Spacing();
 
@@ -660,6 +690,8 @@ int main()
                 shader = goochShader;
             else if (currShader == CEL)
                 shader = celShader;
+            else if (currShader == COOKTORRANCE)
+                shader = cookTorranceShader;
 
             shader.Bind();
         }
@@ -668,7 +700,7 @@ int main()
         shader.SetUniformMat4f("u_Model", modelMatrix);
         shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
         shader.SetUniformMat4f("u_Projection", projMatrix);
-        if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH || currShader == CEL)
+        if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH || currShader == CEL || currShader == COOKTORRANCE)
         {
             shader.SetUniform3fv("light_pos", 3, light.m_Pos);
             shader.SetUniform3fv("light_col", 3, light.m_Col); 
@@ -690,6 +722,11 @@ int main()
                 shader.SetUniform3fv("cool", 1, gooch_cool);
                 shader.SetUniform1f("alpha", gooch_alpha);
                 shader.SetUniform1f("beta", gooch_beta);
+            }
+            if (currShader == COOKTORRANCE)
+            {
+                shader.SetUniform1f("metallic", metallic);
+                shader.SetUniform1f("roughness", roughness);
             }
         }
 
