@@ -2,7 +2,7 @@
 
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/jasonlmfong/Model-Modifier/blob/main/LICENSE)
 
-This repository contains my `C++17` and `OpenGL` implementation of a mesh viewer for `.obj` files, with various algorithms for interacting with the meshes.
+This repository contains my `C++17` and `OpenGL` implementation of a mesh viewer for `.obj` files, with various algorithms for interacting with the meshes, and various shading techniques.
 
 ## Features
 
@@ -27,17 +27,21 @@ This repository contains my `C++17` and `OpenGL` implementation of a mesh viewer
   - [x] Smooth shading (Per-vertex normals)
   - [x] Mixed shading (Per-Corner normals)
 - [x] Shader options
-  - [x] Normal shader
-  - [x] [Gourand shader](https://en.wikipedia.org/wiki/Gouraud_shading)
-  - [x] [Phong shader](https://en.wikipedia.org/wiki/Phong_shading)
-  - [x] Material controls
-    - [x] Ambient
-    - [x] Diffuse
-    - [x] Specular
-    - [x] Shine
-  - [x] Lighting controls
-    - [x] Position
-    - [x] Color
+  - [x] [Normal](<https://en.wikipedia.org/wiki/Normal_(geometry)>) shading
+  - [x] [Gourand shading](https://en.wikipedia.org/wiki/Gouraud_shading)
+  - [x] [Phong shading](https://en.wikipedia.org/wiki/Phong_shading)
+  - [x] [Blinn-Phong shading](https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_reflection_model)
+  - [x] [Gooch shading](https://en.wikipedia.org/wiki/Gooch_shading)
+  - [x] [Cel shading](https://en.wikipedia.org/wiki/Cel_shading)
+  - [x] [Cook-Torrance shading](https://inst.eecs.berkeley.edu/~cs283/sp13/lectures/cookpaper.pdf)
+- [x] Material controls
+  - [x] Ambient
+  - [x] Diffuse
+  - [x] Specular
+  - [x] Shine
+- [x] Lighting controls
+  - [x] Position
+  - [x] Color
   - [x] Multiple lights
 - [x] Render modes
   - [x] Mesh polygons
@@ -49,7 +53,7 @@ This repository contains my `C++17` and `OpenGL` implementation of a mesh viewer
   - [x] Rotate camera
 - [x] Information
   - [x] Framerate counter
-  - [x] Number of triangles in current mesh
+  - [x] Number of polygons in current mesh
 - [x] Screenshot to PNG
 
 ## Image Gallery
@@ -58,6 +62,9 @@ This repository contains my `C++17` and `OpenGL` implementation of a mesh viewer
 
 > Armadillo mesh, Phong shader, 3 lights from different positions, not smoothened
 
+<details>
+<summary>Comparison of different subdivision surface algorithms</summary>
+  
 ![Sample cow rendering 1](Model-Modifier/gallery/Screenshot_2023-9-11_12505.png)
 
 > Cow mesh, Normal shader, not smoothened
@@ -73,6 +80,8 @@ This repository contains my `C++17` and `OpenGL` implementation of a mesh viewer
 ![Sample cow rendering 4](Model-Modifier/gallery/Screenshot_2023-9-11_125020.png)
 
 > Cow mesh, Normal shader, smoothened 1 time with Loop subdivision
+
+</details>
 
 ![Sample smoothed star rendering](Model-Modifier/gallery/Screenshot_2023-7-16_141825.png)
 
