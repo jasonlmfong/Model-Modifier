@@ -77,7 +77,7 @@ Surface::Surface(Object obj)
 
     for (std::vector<unsigned int> faceVertices : obj.m_FaceIndices)
     {
-        int n = faceVertices.size();
+        int n = static_cast<int>(faceVertices.size());
 
         // create face record to be stored
         FaceRecord newFace;

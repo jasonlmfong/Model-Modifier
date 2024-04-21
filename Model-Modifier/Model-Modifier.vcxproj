@@ -39,7 +39,6 @@
     <ClCompile Include="src\renderer\VertexBuffer.cpp" />
     <ClCompile Include="src\renderer\Window.cpp" />
     <ClCompile Include="src\scene\Mesh.cpp" />
-    <ClCompile Include="src\scene\Mesh.h" />
     <ClCompile Include="src\scene\object\Object.cpp" />
     <ClCompile Include="src\scene\object\Objects.cpp" />
     <ClCompile Include="src\scene\surface\Surface_CatmullClark.cpp" />
@@ -352,6 +351,7 @@
     <ClInclude Include="src\renderer\VertexBuffer.h" />
     <ClInclude Include="src\renderer\VertexBufferLayout.h" />
     <ClInclude Include="src\renderer\Window.h" />
+    <ClInclude Include="src\scene\Mesh.h" />
     <ClInclude Include="src\scene\object\Object.h" />
     <ClInclude Include="src\scene\object\Objects.h" />
     <ClInclude Include="src\scene\object\util\PlaneProjection.h" />

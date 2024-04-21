@@ -69,9 +69,6 @@
     <ClCompile Include="src\scene\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\Mesh.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\scene\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1023,6 +1020,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\object\util\PlaneProjection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -588,7 +588,7 @@ int main()
                         ImGui::Indent();
 
                         ImGui::SliderFloat("Metallic", &metallic, 0, 1);
-                        ImGui::SliderFloat("Roughness", &roughness, 0.05, 1);
+                        ImGui::SliderFloat("Roughness", &roughness, 0.05f, 1);
 
                         ImGui::Spacing();
 
