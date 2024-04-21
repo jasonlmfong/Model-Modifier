@@ -42,6 +42,9 @@
     <ClCompile Include="src\scene\Mesh.h" />
     <ClCompile Include="src\scene\object\Object.cpp" />
     <ClCompile Include="src\scene\object\Objects.cpp" />
+    <ClCompile Include="src\scene\surface\Surface_CatmullClark.cpp" />
+    <ClCompile Include="src\scene\surface\Surface_DooSabin.cpp" />
+    <ClCompile Include="src\scene\surface\Surface_Loop.cpp" />
     <ClCompile Include="src\scene\surface\Surface.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -351,6 +354,7 @@
     <ClInclude Include="src\renderer\Window.h" />
     <ClInclude Include="src\scene\object\Object.h" />
     <ClInclude Include="src\scene\object\Objects.h" />
+    <ClInclude Include="src\scene\object\util\PlaneProjection.h" />
     <ClInclude Include="src\scene\object\util\Triangulate.h" />
     <ClInclude Include="src\scene\surface\Surface.h" />
   </ItemGroup>
