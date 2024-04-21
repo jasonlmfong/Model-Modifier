@@ -27,6 +27,7 @@ struct EdgeRecord
 struct FaceRecord
 {
 	glm::vec3 facePoint;
+	// int n;
 	std::vector<unsigned int> verticesIdx; // each face can have n vertices
 	std::unordered_map<unsigned int, std::vector<unsigned int>> verticesEdges; // each vertex will have 2 edges
 	std::vector<unsigned int> edgesIdx; // each face can have n edges
@@ -50,6 +51,13 @@ public:
 	glm::vec3 ComputeFaceNormal(glm::vec3 pos0, glm::vec3 pos1, glm::vec3 pos2);
 	Object CCOutputOBJ3(std::vector<glm::vec3> edgePoints);
 	Object CCOutputOBJ4(std::vector<glm::vec3> edgePoints);
+	Object DSOutputOBJ(
+		std::vector<std::vector<glm::vec3>> newPointsPerFace,
+		std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerVertex,
+		std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerEdge
+	);
+	Object LoOutputOBJ3(std::vector<glm::vec3> edgePoints);
+	Object LoOutputOBJ4(std::vector<glm::vec3> edgePoints);
 	glm::mat4 ComputeQuadric(VertexRecord v0);
 
 	// Modification algorithms
