@@ -6,19 +6,11 @@
 #include "../../../external/glm/geometric.hpp"
 
 
-std::vector<glm::vec2> projectPolygonToPlane(std::vector<unsigned int> faceIdx, std::vector<glm::vec3> all_vertices)
+std::vector<glm::vec2> projectPolygonToPlane(std::vector<glm::vec3> polygonVertices)
 {
-    // poly is a list of indices into m_VertexPos
-    // where each item in vertpos is a glm::vec3
-    std::vector<glm::vec3> poly_vertices;
-    for (unsigned int corner : faceIdx)
-    {
-        poly_vertices.push_back(all_vertices[corner]);
-    }
-
-    glm::vec3 origin = poly_vertices[0];
-    glm::vec3 basis1 = glm::normalize(poly_vertices[1] - origin);
-    glm::vec3 basis2 = glm::normalize(poly_vertices[2] - origin);
+    glm::vec3 origin = polygonVertices[0];
+    glm::vec3 basis1 = glm::normalize(polygonVertices[1] - origin);
+    glm::vec3 basis2 = glm::normalize(polygonVertices[2] - origin);
     // get plane normal and represent all vertices as points on this new plane (xy coords)
     glm::vec3 face_normal = glm::normalize(glm::cross(basis1, basis2));
 
@@ -27,7 +19,7 @@ std::vector<glm::vec2> projectPolygonToPlane(std::vector<unsigned int> faceIdx, 
 
     // represent all vertices as a linear combination of the 2D bases
     std::vector<glm::vec2> vertices_on_plane;
-    for (glm::vec3 point : poly_vertices)
+    for (glm::vec3 point : polygonVertices)
     {
         glm::vec3 dist_from_origin = point - origin;
         double u_coord = glm::dot(basis1, dist_from_origin);
@@ -37,7 +29,3 @@ std::vector<glm::vec2> projectPolygonToPlane(std::vector<unsigned int> faceIdx, 
 
     return vertices_on_plane;
 }
-
-
-// send polygonal face to plane, then use clockwise scheme  (from face point) to get proper face order, can start 0 index with  original 0 index
-

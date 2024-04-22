@@ -29,7 +29,7 @@ Object Surface::LoOutputOBJ3(std::vector<glm::vec3> edgePoints)
         unsigned int edgeBCIdx = getVertIndex(edgeBC, VertexPos, VertLookup);
         unsigned int edgeCAIdx = getVertIndex(edgeCA, VertexPos, VertLookup);
 
-        // create new faces (each original traingle will have 4 new triangles
+        // create new faces (each original traingle will have 4 new triangles)
         FaceIndices.push_back({ vertAIdx, edgeABIdx, edgeCAIdx });
         FaceIndices.push_back({ edgeABIdx, vertBIdx, edgeBCIdx });
         FaceIndices.push_back({ edgeCAIdx, edgeBCIdx, vertCIdx });
@@ -77,7 +77,7 @@ Object Surface::LoOutputOBJ4(std::vector<glm::vec3> edgePoints)
         unsigned int edgeDAIdx = getVertIndex(edgeDA, VertexPos, VertLookup);
         unsigned int FaceIdx = getVertIndex(face.facePoint, VertexPos, VertLookup);
 
-        // create new faces (each original traingle will have 4 new triangles
+        // create new faces (each original quad will have 4 new quads)
         FaceIndices.push_back({ vertAIdx, edgeABIdx, FaceIdx, edgeDAIdx });
         FaceIndices.push_back({ vertBIdx, edgeBCIdx, FaceIdx, edgeABIdx });
         FaceIndices.push_back({ vertCIdx, edgeCDIdx, FaceIdx, edgeBCIdx });

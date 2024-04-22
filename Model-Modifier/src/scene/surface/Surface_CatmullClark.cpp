@@ -92,13 +92,9 @@ Object Surface::CCOutputOBJ4(std::vector<glm::vec3> edgePoints)
         unsigned int edgeDAIdx = getVertIndex(edgeDA, VertexPos, VertLookup);
         unsigned int faceABCDIdx = getVertIndex(faceABCD, VertexPos, VertLookup);
 
-        // my variation to return a triangle mesh: connect the original vertex with face point, so the quads will become 2 triangles
         FaceIndices.push_back({ vertAIdx, edgeABIdx, faceABCDIdx, edgeDAIdx });
-
         FaceIndices.push_back({ vertBIdx, edgeBCIdx, faceABCDIdx, edgeABIdx });
-
         FaceIndices.push_back({ vertCIdx, edgeCDIdx, faceABCDIdx, edgeBCIdx });
-
         FaceIndices.push_back({ vertDIdx, edgeDAIdx, faceABCDIdx, edgeCDIdx });
 
         NumberPolygons[4] += 4;
