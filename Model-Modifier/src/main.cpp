@@ -749,7 +749,6 @@ int main()
 
             obj = objects.findObj(currObject); // search for the object requested
             
-            // TODO: make display object?
             mesh.Rebuild(obj); // rebuild mesh based on object info
             numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
