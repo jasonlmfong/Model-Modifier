@@ -130,6 +130,9 @@ Object Surface::DooSabin()
     for (int currVertIdx = 0; currVertIdx < m_Vertices.size(); currVertIdx++)
     {
         VertexRecord currVert = m_Vertices[currVertIdx];
+        if (currVert.adjFacesIdx.size() < 3)
+            continue;
+
         // build neighbour face normal to match later
         glm::vec3 avgFaceNormal{ 0 };
         for (unsigned int adjFaceIdx : currVert.adjFacesIdx)
