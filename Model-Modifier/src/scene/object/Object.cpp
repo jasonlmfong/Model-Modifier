@@ -1,5 +1,4 @@
 #include "Object.h"
-#include "util/Triangulate.h"
 
 Object::Object()
     : m_Min(0), m_Max(0)
@@ -139,7 +138,7 @@ void Object::TriangulateFaces()
             int sides = static_cast<int>(m_FaceIndices[i].size());
             std::vector<unsigned int> polygon = m_FaceIndices[i];
 
-            std::vector<std::vector<int>> triangulate = TriangulatePolygonalFace(polygon, m_VertexPos);
+            std::vector<std::vector<int>> triangulate = triangulatePolygonalFace(polygon, m_VertexPos);
             for (std::vector<int> triangle : triangulate)
             {
                 triFaces.push_back({polygon[triangle[0]], polygon[triangle[1]] , polygon[triangle[2]] });

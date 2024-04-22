@@ -1,12 +1,4 @@
-#pragma once
-
-#include <vector>
-#include <limits>
-#include "../../../external/glm/ext/vector_float2.hpp"
-#include "../../../external/glm/ext/vector_float3.hpp"
-#include "../../../external/glm/geometric.hpp"
-
-#include "PlaneProjection.h"
+#include "Triangulate.h"
 
 double triCost(glm::vec2 a, glm::vec2 b, glm::vec2 c)
 {
@@ -67,7 +59,7 @@ std::vector<std::vector<int>> extractTriangulation(std::vector<std::vector<int>>
 }
 
 // can assume faceIdx.size() > 3
-std::vector<std::vector<int>> TriangulatePolygonalFace(std::vector<unsigned int> faceIdx, std::vector<glm::vec3> allVertices)
+std::vector<std::vector<int>> triangulatePolygonalFace(std::vector<unsigned int> faceIdx, std::vector<glm::vec3> allVertices)
 {
     std::vector<glm::vec3> polyVertices;
     for (unsigned int corner : faceIdx)

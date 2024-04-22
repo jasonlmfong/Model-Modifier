@@ -10,6 +10,8 @@
 #include "../../external/glm/geometric.hpp"
 
 #include "../object/Object.h"
+#include "../util/PlaneProjection.h"
+#include "../util/OrderVertices.h"
 
 struct VertexRecord
 {
