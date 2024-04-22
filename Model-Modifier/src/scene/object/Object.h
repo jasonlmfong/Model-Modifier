@@ -9,6 +9,7 @@
 
 #include "../../external/glm/ext/vector_float3.hpp"
 #include "../../external/glm/geometric.hpp"
+#include "../util/Triangulate.h"
 
 class Object
 {

@@ -3,9 +3,12 @@
 
 ////////// helpers to build the Object //////////
 
-Object Surface::DSOutputOBJ(std::vector<glm::vec3> edgePoints)
+Object Surface::DSOutputOBJ(
+    std::vector<std::vector<glm::vec3>> newPointsPerFace,
+    std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerVertex,
+    std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerEdge
+)
 {
-    
 }
 
 
@@ -32,6 +35,7 @@ Object Surface::DooSabin()
             pointsPerVertex[vert].push_back(point);
         }
     }
+
     std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerEdge;
     for (int currEdgeIdx = 0; currEdgeIdx < m_Edges.size(); currEdgeIdx++)
     {
@@ -59,27 +63,30 @@ Object Surface::DooSabin()
         }
     }
 
-    /*return DSOutputOBJ(edgePoints);*/
-
     // build new Object class (DS style)
     std::vector<glm::vec3> VertexPos;
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
     std::vector<std::vector<unsigned int>> FaceIndices;
     std::unordered_map<int, int> NumberPolygons;
 
-    // new face from old face
+    // new face from old face (n-gon from n-gon)
     for (int currFaceIdx = 0; currFaceIdx < m_Faces.size(); currFaceIdx++)
     {
-        // use vertex lookup to avoid creating duplicate vertices
-        unsigned int vertAIdx = getVertIndex(newPointsPerFace[currFaceIdx][0], VertexPos, VertLookup);
-        unsigned int vertBIdx = getVertIndex(newPointsPerFace[currFaceIdx][1], VertexPos, VertLookup);
-        unsigned int vertCIdx = getVertIndex(newPointsPerFace[currFaceIdx][2], VertexPos, VertLookup);
+        int n = static_cast<int>(newPointsPerFace[currFaceIdx].size());
 
-        FaceIndices.push_back({ vertAIdx, vertBIdx, vertCIdx });
-        NumberPolygons[3] += 1;
+        std::vector<unsigned int> newFaceIdx;
+        for (int i = 0; i < n; i++)
+        {
+            // use vertex lookup to avoid creating duplicate vertices
+            unsigned int vertIdx = getVertIndex(newPointsPerFace[currFaceIdx][i], VertexPos, VertLookup);
+            newFaceIdx.push_back(vertIdx);
+        }
+
+        FaceIndices.push_back(newFaceIdx);
+        NumberPolygons[n] += 1;
     }
 
-    // new face from old edge (broken down to 2 triangles)
+    // new face from old edge (always a quad face)
     for (int currEdgeIdx = 0; currEdgeIdx < pointsPerEdge.size(); currEdgeIdx++)
     {
         EdgeRecord currEdge = m_Edges[currEdgeIdx];
@@ -90,8 +97,7 @@ Object Surface::DooSabin()
             glm::vec3 avgFaceNormal{ 0 };
             for (int adjFaces = 0; adjFaces < 2; adjFaces++)
             {
-                FaceRecord adjFace = m_Faces[currEdge.adjFacesIdx[adjFaces]];
-                avgFaceNormal += ComputeFaceNormal(adjFace);
+                avgFaceNormal += ComputeFaceNormal(m_Faces[currEdge.adjFacesIdx[adjFaces]]);
             }
             avgFaceNormal /= 2.0f;
 
@@ -107,23 +113,20 @@ Object Surface::DooSabin()
                 glm::vec3 ABCNormal = ComputeFaceNormal(pointsPerEdge[currEdgeIdx][0], pointsPerEdge[currEdgeIdx][1], pointsPerEdge[currEdgeIdx][2]);
                 if (glm::dot(ABCNormal, avgFaceNormal) > 0)
                 {
-                    // not flipped, usual triangulation of 012, 230
-                    FaceIndices.push_back({ vertAIdx, vertBIdx, vertCIdx });
-                    FaceIndices.push_back({ vertCIdx, vertDIdx, vertAIdx });
-                    NumberPolygons[3] += 2;
+                    // not flipped, usual triangulation of 0123
+                    FaceIndices.push_back({ vertAIdx, vertBIdx, vertCIdx, vertDIdx });
                 }
                 else
                 {
-                    // flipped normals, use 103, 321
-                    FaceIndices.push_back({ vertBIdx, vertAIdx, vertDIdx });
-                    FaceIndices.push_back({ vertDIdx, vertCIdx, vertBIdx });
-                    NumberPolygons[3] += 2;
+                    // flipped normals, use 3210
+                    FaceIndices.push_back({ vertDIdx, vertCIdx, vertBIdx, vertAIdx });
                 }
+                NumberPolygons[4] += 1;
             }
         }
     }
 
-    // new face from old vertex (broken down to n-2 triangles)
+    // new face from old vertex (n-gon for n faces the old vertex neighbours)
     for (int currVertIdx = 0; currVertIdx < m_Vertices.size(); currVertIdx++)
     {
         VertexRecord currVert = m_Vertices[currVertIdx];
@@ -131,56 +134,64 @@ Object Surface::DooSabin()
         glm::vec3 avgFaceNormal{ 0 };
         for (unsigned int adjFaceIdx : currVert.adjFacesIdx)
         {
-            FaceRecord adjFace = m_Faces[adjFaceIdx];
-            avgFaceNormal += ComputeFaceNormal(adjFace);
+            avgFaceNormal += ComputeFaceNormal(m_Faces[adjFaceIdx]);
         }
         avgFaceNormal /= static_cast<float>(currVert.adjFacesIdx.size());
 
-        std::vector<unsigned int> newVertsIdx;
-        glm::vec3 center{ 0 };
+        // get vertices for new face
+        std::vector<glm::vec3> polyVertices;
+        glm::vec3 centroid{ 0 };  // new facepoint
         int numNewVerts = static_cast<int>(pointsPerVertex[currVertIdx].size());
         for (int newVertIdx = 0; newVertIdx < numNewVerts; newVertIdx++)
         {
             glm::vec3 currPoint = pointsPerVertex[currVertIdx][newVertIdx];
-            // use vertex lookup to avoid creating duplicate vertices
-            newVertsIdx.push_back(getVertIndex(currPoint, VertexPos, VertLookup));
-            center += currPoint;
+            polyVertices.push_back(currPoint);
+            centroid += currPoint;
         }
+        centroid /= numNewVerts;
 
-        center /= numNewVerts;
-        unsigned int centerIdx = getVertIndex(center, VertexPos, VertLookup);
+        // project new vertices (and facepoint) to plane
+        polyVertices.push_back(centroid);
+        std::vector<glm::vec2> verticesOnPlane = projectPolygonToPlane(polyVertices);
+        // get the order of vertices to form the polygon
+        glm::vec2 centroid2D = verticesOnPlane.back();
+        verticesOnPlane.pop_back();
+        std::vector<unsigned int> vertOrdering = OrderPolygonVertices(verticesOnPlane, centroid2D, numNewVerts);
 
-        // TODO: FIX THE "HOLES" WITH A MORE EFFICIENT METHOD
-        // CURRENTLY USING A DOUBLE FOR LOOP TO COVER ALL HOLES
-        for (int newVertIdx = 0; newVertIdx < numNewVerts; newVertIdx++)
+        // check if our normal is flipped or not
+        glm::vec3 vertFaceNormal = ComputeFaceNormal(polyVertices[vertOrdering[0]], polyVertices[vertOrdering[1]], polyVertices[vertOrdering[2]]);
+        std::vector<unsigned int> newFaceIdx;
+        if (glm::dot(vertFaceNormal, avgFaceNormal) > 0)
         {
-            for (int newVertIdx2 = 0; newVertIdx2 < numNewVerts; newVertIdx2++)
+            // not flipped, use the poylgon vertex ordering we have
+            for (int i = 0; i < numNewVerts; i++)
             {
-                if (newVertIdx != newVertIdx2)
-                {
-                    glm::vec3 testNormal = ComputeFaceNormal(center, pointsPerVertex[currVertIdx][newVertIdx], pointsPerVertex[currVertIdx][newVertIdx2]);
-                    if (glm::dot(testNormal, avgFaceNormal) > 0)
-                    {
-                        // not flipped
-                        FaceIndices.push_back({ centerIdx, newVertsIdx[newVertIdx], newVertsIdx[newVertIdx2] });
-                        NumberPolygons[3] += 1;
-                    }
-                    else
-                    {
-                        // flipped normals
-                        FaceIndices.push_back({ centerIdx, newVertsIdx[newVertIdx2], newVertsIdx[newVertIdx] });
-                        NumberPolygons[3] += 1;
-                    }
-                }
+                // use vertex lookup to avoid creating duplicate vertices
+                unsigned int vertIdx = getVertIndex(polyVertices[vertOrdering[i]], VertexPos, VertLookup);
+                newFaceIdx.push_back(vertIdx);
             }
+            FaceIndices.push_back(newFaceIdx);
         }
+        else
+        {
+            // flipped normals, reverse the poylgon vertex ordering we have
+            for (int i = 0; i < numNewVerts; i++)
+            {
+                // use vertex lookup to avoid creating duplicate vertices
+                unsigned int vertIdx = getVertIndex(polyVertices[vertOrdering[numNewVerts - 1 - i]], VertexPos, VertLookup);
+                newFaceIdx.push_back(vertIdx);
+            }
+            FaceIndices.push_back(newFaceIdx);
+        }
+        NumberPolygons[numNewVerts] += 1;
     }
 
     // build object
     Object Obj;
     Obj.m_Min = m_Min; Obj.m_Max = m_Max;
-    Obj.m_VertexPos = VertexPos; Obj.m_FaceIndices = FaceIndices; Obj.m_TriFaceIndices = FaceIndices;
+    Obj.m_VertexPos = VertexPos; Obj.m_FaceIndices = FaceIndices;
     Obj.m_NumPolygons = NumberPolygons;
+    Obj.TriangulateFaces();
 
     return Obj;
 }

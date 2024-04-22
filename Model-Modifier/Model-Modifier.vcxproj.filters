@@ -93,6 +93,15 @@
     <ClCompile Include="src\scene\surface\Surface_DooSabin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene\util\Triangulate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\util\PlaneProjection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\util\OrderVertices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\external\glm\detail\_features.hpp">
@@ -1016,13 +1025,16 @@
     <ClInclude Include="src\scene\surface\Surface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\object\util\Triangulate.h">
+    <ClInclude Include="src\scene\util\Triangulate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\object\util\PlaneProjection.h">
+    <ClInclude Include="src\scene\util\PlaneProjection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\util\OrderVertices.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
