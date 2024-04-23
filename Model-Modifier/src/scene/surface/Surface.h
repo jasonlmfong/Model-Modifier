@@ -53,8 +53,7 @@ public:
 	// helper
 	glm::vec3 ComputeFaceNormal(FaceRecord face);
 	glm::vec3 ComputeFaceNormal(glm::vec3 pos0, glm::vec3 pos1, glm::vec3 pos2);
-	Object CCOutputOBJ3(std::vector<glm::vec3> edgePoints);
-	Object CCOutputOBJ4(std::vector<glm::vec3> edgePoints);
+	Object CCOutputOBJ(std::vector<glm::vec3> edgePoints);
 	Object DSOutputOBJ(
 		std::vector<std::vector<glm::vec3>> newPointsPerFace,
 		std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerVertex,
@@ -65,9 +64,9 @@ public:
 	glm::mat4 ComputeQuadric(VertexRecord v0);
 
 	// Modification algorithms
-	Object Beehive(int n);
-	Object Snowflake(int n);
-	Object CatmullClark(int n);
+	Object Beehive();
+	Object Snowflake();
+	Object CatmullClark();
 	Object DooSabin();
 	Object Loop3();
 	Object Loop4();
