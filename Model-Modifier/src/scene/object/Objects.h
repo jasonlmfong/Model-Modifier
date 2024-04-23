@@ -16,7 +16,6 @@ enum objectEnum
     COWHEAD,
     CRUMPLED,
     CUBE,
-    CUBE2,
     DOUBLETORUS,
     FACE,
     FANDISK,
@@ -30,12 +29,10 @@ enum objectEnum
     STAR,
     SUZANNE,
     T,
-    T2,
     TEAPOT,
     TEDDY,
     TORUS,
     TUBES,
-    TUBES2
 };
 
 class Objects
@@ -60,8 +57,6 @@ public:
         { COWHEAD, "res/objects/cowhead.obj" },
         { CRUMPLED, "res/objects/CrumpledDevelopable.obj" },
         { CUBE, "res/objects/cube.obj" },
-
-        { CUBE2, "res/objects/cube2.obj" },
         { DOUBLETORUS,"res/objects/double-torus.obj" },
         { FACE, "res/objects/face.obj" },
         { FANDISK, "res/objects/fandisk.obj" },
@@ -75,14 +70,10 @@ public:
         { STAR, "res/objects/star.obj" },
         { SUZANNE, "res/objects/suzanne.obj" },
         { T, "res/objects/T.obj" },
-        
-        { T2, "res/objects/T2.obj" },
         { TEAPOT, "res/objects/teapot.obj" },
         { TEDDY, "res/objects/teddy.obj" },
         { TORUS, "res/objects/torus.obj" },
         { TUBES, "res/objects/tubes.obj" },
-
-        { TUBES2, "res/objects/tubes2.obj" }
     };
     std::unordered_map<int, Object> m_Objects;
 };
