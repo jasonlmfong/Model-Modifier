@@ -9,60 +9,6 @@ Object Surface::DSOutputOBJ(
     std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerEdge
 )
 {
-}
-
-
-////////// algorithms //////////
-
-// Doo Sabin subdivision surface algorithm
-Object Surface::DooSabin()
-{
-    // make new vertices and store original vertex connectivity
-    std::vector<std::vector<glm::vec3>> newPointsPerFace(m_Faces.size());
-    std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerVertex;
-    for (int currFaceIdx = 0; currFaceIdx < m_Faces.size(); currFaceIdx++)
-    {
-        FaceRecord currFace = m_Faces[currFaceIdx];
-
-        // associate new vertices with the original vertices and edges
-        for (unsigned int vert : currFace.verticesIdx)
-        {
-            // point between vertex, face point, 2 neighbour edge points
-            glm::vec3 point = 0.25f * (currFace.facePoint + m_Vertices[vert].position +
-                m_Edges[currFace.verticesEdges[vert][0]].midEdgePoint + m_Edges[currFace.verticesEdges[vert][1]].midEdgePoint);
-            // add to storage
-            newPointsPerFace[currFaceIdx].push_back(point);
-            pointsPerVertex[vert].push_back(point);
-        }
-    }
-
-    std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerEdge;
-    for (int currEdgeIdx = 0; currEdgeIdx < m_Edges.size(); currEdgeIdx++)
-    {
-        EdgeRecord currEdge = m_Edges[currEdgeIdx];
-        // skip boundary edges, they cannot form a new face
-        if (currEdge.adjFacesIdx.size() == 2)
-        {
-            FaceRecord adjFace0 = m_Faces[currEdge.adjFacesIdx[0]];
-            FaceRecord adjFace1 = m_Faces[currEdge.adjFacesIdx[1]];
-
-            // add the new edge points in an ordered manner
-            pointsPerEdge[currEdgeIdx].resize(4);
-            pointsPerEdge[currEdgeIdx][0] =
-                0.25f * (adjFace0.facePoint + m_Vertices[currEdge.endPoint1Idx].position +
-                    m_Edges[adjFace0.verticesEdges[currEdge.endPoint1Idx][0]].midEdgePoint + m_Edges[adjFace0.verticesEdges[currEdge.endPoint1Idx][1]].midEdgePoint);
-            pointsPerEdge[currEdgeIdx][1] =
-                0.25f * (adjFace0.facePoint + m_Vertices[currEdge.endPoint2Idx].position +
-                    m_Edges[adjFace0.verticesEdges[currEdge.endPoint2Idx][0]].midEdgePoint + m_Edges[adjFace0.verticesEdges[currEdge.endPoint2Idx][1]].midEdgePoint);
-            pointsPerEdge[currEdgeIdx][2] =
-                0.25f * (adjFace1.facePoint + m_Vertices[currEdge.endPoint2Idx].position +
-                    m_Edges[adjFace1.verticesEdges[currEdge.endPoint2Idx][0]].midEdgePoint + m_Edges[adjFace1.verticesEdges[currEdge.endPoint2Idx][1]].midEdgePoint);
-            pointsPerEdge[currEdgeIdx][3] =
-                0.25f * (adjFace1.facePoint + m_Vertices[currEdge.endPoint1Idx].position +
-                    m_Edges[adjFace1.verticesEdges[currEdge.endPoint1Idx][0]].midEdgePoint + m_Edges[adjFace1.verticesEdges[currEdge.endPoint1Idx][1]].midEdgePoint);
-        }
-    }
-
     // build new Object class (DS style)
     std::vector<glm::vec3> VertexPos;
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
@@ -197,4 +143,59 @@ Object Surface::DooSabin()
     Obj.TriangulateFaces();
 
     return Obj;
+}
+
+
+////////// algorithms //////////
+
+// Doo Sabin subdivision surface algorithm
+Object Surface::DooSabin()
+{
+    // make new vertices and store original vertex connectivity
+    std::vector<std::vector<glm::vec3>> newPointsPerFace(m_Faces.size());
+    std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerVertex;
+    for (int currFaceIdx = 0; currFaceIdx < m_Faces.size(); currFaceIdx++)
+    {
+        FaceRecord currFace = m_Faces[currFaceIdx];
+
+        // associate new vertices with the original vertices and edges
+        for (unsigned int vert : currFace.verticesIdx)
+        {
+            // point between vertex, face point, 2 neighbour edge points
+            glm::vec3 point = 0.25f * (currFace.facePoint + m_Vertices[vert].position +
+                m_Edges[currFace.verticesEdges[vert][0]].midEdgePoint + m_Edges[currFace.verticesEdges[vert][1]].midEdgePoint);
+            // add to storage
+            newPointsPerFace[currFaceIdx].push_back(point);
+            pointsPerVertex[vert].push_back(point);
+        }
+    }
+
+    std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerEdge;
+    for (int currEdgeIdx = 0; currEdgeIdx < m_Edges.size(); currEdgeIdx++)
+    {
+        EdgeRecord currEdge = m_Edges[currEdgeIdx];
+        // skip boundary edges, they cannot form a new face
+        if (currEdge.adjFacesIdx.size() == 2)
+        {
+            FaceRecord adjFace0 = m_Faces[currEdge.adjFacesIdx[0]];
+            FaceRecord adjFace1 = m_Faces[currEdge.adjFacesIdx[1]];
+
+            // add the new edge points in an ordered manner
+            pointsPerEdge[currEdgeIdx].resize(4);
+            pointsPerEdge[currEdgeIdx][0] =
+                0.25f * (adjFace0.facePoint + m_Vertices[currEdge.endPoint1Idx].position +
+                    m_Edges[adjFace0.verticesEdges[currEdge.endPoint1Idx][0]].midEdgePoint + m_Edges[adjFace0.verticesEdges[currEdge.endPoint1Idx][1]].midEdgePoint);
+            pointsPerEdge[currEdgeIdx][1] =
+                0.25f * (adjFace0.facePoint + m_Vertices[currEdge.endPoint2Idx].position +
+                    m_Edges[adjFace0.verticesEdges[currEdge.endPoint2Idx][0]].midEdgePoint + m_Edges[adjFace0.verticesEdges[currEdge.endPoint2Idx][1]].midEdgePoint);
+            pointsPerEdge[currEdgeIdx][2] =
+                0.25f * (adjFace1.facePoint + m_Vertices[currEdge.endPoint2Idx].position +
+                    m_Edges[adjFace1.verticesEdges[currEdge.endPoint2Idx][0]].midEdgePoint + m_Edges[adjFace1.verticesEdges[currEdge.endPoint2Idx][1]].midEdgePoint);
+            pointsPerEdge[currEdgeIdx][3] =
+                0.25f * (adjFace1.facePoint + m_Vertices[currEdge.endPoint1Idx].position +
+                    m_Edges[adjFace1.verticesEdges[currEdge.endPoint1Idx][0]].midEdgePoint + m_Edges[adjFace1.verticesEdges[currEdge.endPoint1Idx][1]].midEdgePoint);
+        }
+    }
+
+    return DSOutputOBJ(newPointsPerFace, pointsPerVertex, pointsPerEdge);
 }
