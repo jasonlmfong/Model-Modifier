@@ -433,21 +433,10 @@ int main()
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
                 objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
             }
-            if (ImGui::Button("Loop Subdivision Surface (tri)"))
+            if (ImGui::Button("Loop Subdivision Surface"))
             {
                 Surface Lo(obj);
-                obj = Lo.Loop3();
-                mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
-
-                objectVA.Bind();
-                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
-                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
-            }
-            if (ImGui::Button("Loop Subdivision Surface (quad)"))
-            {
-                Surface Lo(obj);
-                obj = Lo.Loop4();
+                obj = Lo.Loop();
                 mesh.Rebuild(obj); // rebuild mesh based on object info
                 numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
