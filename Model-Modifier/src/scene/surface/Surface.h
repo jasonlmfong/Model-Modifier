@@ -59,8 +59,7 @@ public:
 		std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerVertex,
 		std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerEdge
 	);
-	Object LoOutputOBJ3(std::vector<glm::vec3> edgePoints);
-	Object LoOutputOBJ4(std::vector<glm::vec3> edgePoints);
+	Object LoOutputOBJ(std::vector<glm::vec3> edgePoints);
 	glm::mat4 ComputeQuadric(VertexRecord v0);
 
 	// Modification algorithms
@@ -68,8 +67,7 @@ public:
 	Object Snowflake();
 	Object CatmullClark();
 	Object DooSabin();
-	Object Loop3();
-	Object Loop4();
+	Object Loop();
 	Object QEM();
 
 public:
