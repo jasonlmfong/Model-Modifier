@@ -3,8 +3,8 @@
 
 ////////// helpers to build the Object //////////
 
-// create the obj file, in Catmull Clark style (for triangular meshes)
-Object Surface::CCOutputOBJ3(std::vector<glm::vec3> edgePoints)
+// create the obj file, in Catmull Clark style
+Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
 {
     // build new Object class (CC style)
     std::vector<glm::vec3> VertexPos;
@@ -14,90 +14,29 @@ Object Surface::CCOutputOBJ3(std::vector<glm::vec3> edgePoints)
 
     for (FaceRecord face : m_Faces)
     {
-        glm::vec3 vertA = m_Vertices[face.verticesIdx[0]].position;
-        glm::vec3 vertB = m_Vertices[face.verticesIdx[1]].position;
-        glm::vec3 vertC = m_Vertices[face.verticesIdx[2]].position;
+        int n = static_cast<int>(face.verticesIdx.size());
+        
+        std::vector<unsigned int> vertsIdx;
+        std::vector<unsigned int> edgesIdx;
+        for (int i = 0; i < n; i++)
+        {
+            glm::vec3 vert = m_Vertices[face.verticesIdx[i]].position;
+            vertsIdx.push_back(getVertIndex(vert, VertexPos, VertLookup));
 
-        glm::vec3 edgeAB = edgePoints[getEdgeIndex({ face.verticesIdx[0], face.verticesIdx[1] })];
-        glm::vec3 edgeBC = edgePoints[getEdgeIndex({ face.verticesIdx[1], face.verticesIdx[2] })];
-        glm::vec3 edgeCA = edgePoints[getEdgeIndex({ face.verticesIdx[2], face.verticesIdx[0] })];
+            glm::vec3 edge = edgePoints[getEdgeIndex({ face.verticesIdx[i], face.verticesIdx[(i + 1) % n] })];
+            edgesIdx.push_back(getVertIndex(edge, VertexPos, VertLookup));
+        }
 
-        glm::vec3 faceABC = face.facePoint;
+        glm::vec3 facePoint = face.facePoint;
+        unsigned int facePointIdx = getVertIndex(facePoint, VertexPos, VertLookup);
+            
+        // every n-gon turns into n quads
+        for (int i = 0; i < n; i++)
+        {
+            FaceIndices.push_back({ vertsIdx[i], edgesIdx[i], facePointIdx, edgesIdx[(i + n - 1) % n] });
+        }
 
-        // use vertex lookup to avoid creating duplicate vertices
-        unsigned int vertAIdx = getVertIndex(vertA, VertexPos, VertLookup);
-        unsigned int vertBIdx = getVertIndex(vertB, VertexPos, VertLookup);
-        unsigned int vertCIdx = getVertIndex(vertC, VertexPos, VertLookup);
-        unsigned int edgeABIdx = getVertIndex(edgeAB, VertexPos, VertLookup);
-        unsigned int edgeBCIdx = getVertIndex(edgeBC, VertexPos, VertLookup);
-        unsigned int edgeCAIdx = getVertIndex(edgeCA, VertexPos, VertLookup);
-        unsigned int faceABCIdx = getVertIndex(faceABC, VertexPos, VertLookup);
-
-        // my variation to return a triangle mesh: connect the original vertex with face point, so the quads will become 2 triangles
-        FaceIndices.push_back({ vertAIdx, edgeABIdx, faceABCIdx });
-        FaceIndices.push_back({ faceABCIdx, edgeCAIdx, vertAIdx });
-
-        FaceIndices.push_back({ vertBIdx, edgeBCIdx, faceABCIdx });
-        FaceIndices.push_back({ faceABCIdx, edgeABIdx, vertBIdx });
-
-        FaceIndices.push_back({ vertCIdx, edgeCAIdx, faceABCIdx });
-        FaceIndices.push_back({ faceABCIdx, edgeBCIdx, vertCIdx });
-
-        NumberPolygons[3] += 6;
-    }
-
-    Object Obj;
-    Obj.m_Min = m_Min; Obj.m_Max = m_Max;
-    Obj.m_VertexPos = VertexPos; Obj.m_FaceIndices = FaceIndices; Obj.m_TriFaceIndices = FaceIndices;
-    Obj.m_NumPolygons = NumberPolygons;
-
-    return Obj;
-}
-
-// create the obj file, in Catmull Clark style (for quad meshes)
-Object Surface::CCOutputOBJ4(std::vector<glm::vec3> edgePoints)
-{
-    // build new Object class (CC style)
-    std::vector<glm::vec3> VertexPos;
-    std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
-    std::vector<std::vector<unsigned int>> FaceIndices;
-    std::unordered_map<int, int> NumberPolygons;
-
-    for (FaceRecord face : m_Faces)
-    {
-        //for (int vertIdx = 0; vertIdx < face.verticesIdx.size(); vertIdx++)
-        //{
-
-        //}
-        glm::vec3 vertA = m_Vertices[face.verticesIdx[0]].position;
-        glm::vec3 vertB = m_Vertices[face.verticesIdx[1]].position;
-        glm::vec3 vertC = m_Vertices[face.verticesIdx[2]].position;
-        glm::vec3 vertD = m_Vertices[face.verticesIdx[3]].position;
-
-        glm::vec3 edgeAB = edgePoints[getEdgeIndex({ face.verticesIdx[0], face.verticesIdx[1] })];
-        glm::vec3 edgeBC = edgePoints[getEdgeIndex({ face.verticesIdx[1], face.verticesIdx[2] })];
-        glm::vec3 edgeCD = edgePoints[getEdgeIndex({ face.verticesIdx[2], face.verticesIdx[3] })];
-        glm::vec3 edgeDA = edgePoints[getEdgeIndex({ face.verticesIdx[3], face.verticesIdx[0] })];
-
-        glm::vec3 faceABCD = face.facePoint;
-
-        // use vertex lookup to avoid creating duplicate vertices
-        unsigned int vertAIdx = getVertIndex(vertA, VertexPos, VertLookup);
-        unsigned int vertBIdx = getVertIndex(vertB, VertexPos, VertLookup);
-        unsigned int vertCIdx = getVertIndex(vertC, VertexPos, VertLookup);
-        unsigned int vertDIdx = getVertIndex(vertD, VertexPos, VertLookup);
-        unsigned int edgeABIdx = getVertIndex(edgeAB, VertexPos, VertLookup);
-        unsigned int edgeBCIdx = getVertIndex(edgeBC, VertexPos, VertLookup);
-        unsigned int edgeCDIdx = getVertIndex(edgeCD, VertexPos, VertLookup);
-        unsigned int edgeDAIdx = getVertIndex(edgeDA, VertexPos, VertLookup);
-        unsigned int faceABCDIdx = getVertIndex(faceABCD, VertexPos, VertLookup);
-
-        FaceIndices.push_back({ vertAIdx, edgeABIdx, faceABCDIdx, edgeDAIdx });
-        FaceIndices.push_back({ vertBIdx, edgeBCIdx, faceABCDIdx, edgeABIdx });
-        FaceIndices.push_back({ vertCIdx, edgeCDIdx, faceABCDIdx, edgeBCIdx });
-        FaceIndices.push_back({ vertDIdx, edgeDAIdx, faceABCDIdx, edgeCDIdx });
-
-        NumberPolygons[4] += 4;
+        NumberPolygons[4] += n;
     }
 
     Object Obj;
@@ -105,6 +44,7 @@ Object Surface::CCOutputOBJ4(std::vector<glm::vec3> edgePoints)
     Obj.m_VertexPos = VertexPos; Obj.m_FaceIndices = FaceIndices;
     Obj.m_NumPolygons = NumberPolygons;
     Obj.TriangulateFaces();
+
     return Obj;
 }
 
@@ -112,7 +52,7 @@ Object Surface::CCOutputOBJ4(std::vector<glm::vec3> edgePoints)
 ////////// algorithms //////////
 
 // My own algorithm
-Object Surface::Beehive(int n)
+Object Surface::Beehive()
 {
     // calcuate edge points
     std::vector<glm::vec3> edgePoints(m_Edges.size());
@@ -149,14 +89,11 @@ Object Surface::Beehive(int n)
     }
 
     // build new Object class
-    if (n == 3)
-        return CCOutputOBJ3(edgePoints);
-    if (n == 4)
-        return CCOutputOBJ4(edgePoints);
+    return CCOutputOBJ(edgePoints);
 }
 
 // My own algorithm
-Object Surface::Snowflake(int n)
+Object Surface::Snowflake()
 {
     // calcuate edge points
     std::vector<glm::vec3> edgePoints(m_Edges.size());
@@ -193,14 +130,11 @@ Object Surface::Snowflake(int n)
     }
 
     // build new Object class
-    if (n == 3)
-        return CCOutputOBJ3(edgePoints);
-    if (n == 4)
-        return CCOutputOBJ4(edgePoints);
+    return CCOutputOBJ(edgePoints);
 }
 
 // Catmull Clark subdivision surface algorithm
-Object Surface::CatmullClark(int n)
+Object Surface::CatmullClark()
 {
     // calcuate edge points
     std::vector<glm::vec3> edgePoints(m_Edges.size());
@@ -256,8 +190,5 @@ Object Surface::CatmullClark(int n)
     }
 
     // build new Object class
-    if (n == 3)
-        return CCOutputOBJ3(edgePoints);
-    if (n == 4)
-        return CCOutputOBJ4(edgePoints);
+    return CCOutputOBJ(edgePoints);
 }
