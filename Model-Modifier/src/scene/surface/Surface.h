@@ -53,6 +53,7 @@ public:
 	// helper
 	glm::vec3 ComputeFaceNormal(FaceRecord face);
 	glm::vec3 ComputeFaceNormal(glm::vec3 pos0, glm::vec3 pos1, glm::vec3 pos2);
+	std::vector<glm::vec3> CatmulClarkEdgePoints();
 	Object CCOutputOBJ(std::vector<glm::vec3> edgePoints);
 	Object DSOutputOBJ(
 		std::vector<std::vector<glm::vec3>> newPointsPerFace,

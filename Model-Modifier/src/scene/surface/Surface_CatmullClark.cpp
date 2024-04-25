@@ -3,6 +3,29 @@
 
 ////////// helpers to build the Object //////////
 
+std::vector<glm::vec3> Surface::CatmulClarkEdgePoints()
+{
+    // calcuate edge points
+    unsigned int numEdges = m_Edges.size();
+    std::vector<glm::vec3> edgePoints(numEdges);
+    for (unsigned int i = 0; i < numEdges; i++)
+    {
+        EdgeRecord currEdge = m_Edges[i];
+        if (currEdge.adjFacesIdx.size() == 1) // boundary edge
+        {
+            // ME point
+            edgePoints[i] = currEdge.midEdgePoint;
+        }
+        else // edge borders 2 faces
+        {
+            // (AF + ME) / 2 point
+            edgePoints[i] = 0.5f * currEdge.midEdgePoint + 0.25f * (m_Faces[currEdge.adjFacesIdx[0]].facePoint + m_Faces[currEdge.adjFacesIdx[1]].facePoint);
+        }
+    }
+
+    return edgePoints;
+}
+
 // create the obj file, in Catmull Clark style
 Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
 {
@@ -54,25 +77,10 @@ Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
 // My own algorithm
 Object Surface::Beehive()
 {
-    // calcuate edge points
-    std::vector<glm::vec3> edgePoints(m_Edges.size());
-    for (int i = 0; i < edgePoints.size(); i++)
-    {
-        EdgeRecord currEdge = m_Edges[i];
-        if (currEdge.adjFacesIdx.size() == 1) // boundary edge
-        {
-            // ME point
-            edgePoints[i] = currEdge.midEdgePoint;
-        }
-        else // edge borders 2 faces
-        {
-            // (AF + ME) / 2 point
-            edgePoints[i] = 0.5f * currEdge.midEdgePoint + 0.25f * (m_Faces[currEdge.adjFacesIdx[0]].facePoint + m_Faces[currEdge.adjFacesIdx[1]].facePoint);
-        }
-    }
+    std::vector<glm::vec3> edgePoints = CatmulClarkEdgePoints();
 
     // update original vertex positions
-    for (int i = 0; i < m_Vertices.size(); i++)
+    for (unsigned int i = 0; i < m_Vertices.size(); i++)
     {
         VertexRecord currVert = m_Vertices[i];
 
@@ -95,25 +103,10 @@ Object Surface::Beehive()
 // My own algorithm
 Object Surface::Snowflake()
 {
-    // calcuate edge points
-    std::vector<glm::vec3> edgePoints(m_Edges.size());
-    for (int i = 0; i < edgePoints.size(); i++)
-    {
-        EdgeRecord currEdge = m_Edges[i];
-        if (currEdge.adjFacesIdx.size() == 1) // boundary edge
-        {
-            // ME point
-            edgePoints[i] = currEdge.midEdgePoint;
-        }
-        else // edge borders 2 faces
-        {
-            // (AF + ME) / 2 point
-            edgePoints[i] = 0.5f * currEdge.midEdgePoint + 0.25f * (m_Faces[currEdge.adjFacesIdx[0]].facePoint + m_Faces[currEdge.adjFacesIdx[1]].facePoint);
-        }
-    }
+    std::vector<glm::vec3> edgePoints = CatmulClarkEdgePoints();
 
     // update original vertex positions
-    for (int i = 0; i < m_Vertices.size(); i++)
+    for (unsigned int i = 0; i < m_Vertices.size(); i++)
     {
         VertexRecord currVert = m_Vertices[i];
 
@@ -136,31 +129,17 @@ Object Surface::Snowflake()
 // Catmull Clark subdivision surface algorithm
 Object Surface::CatmullClark()
 {
-    // calcuate edge points
-    std::vector<glm::vec3> edgePoints(m_Edges.size());
-    for (int i = 0; i < edgePoints.size(); i++)
-    {
-        EdgeRecord currEdge = m_Edges[i];
-        if (currEdge.adjFacesIdx.size() == 1) // boundary edge
-        {
-            // ME point
-            edgePoints[i] = currEdge.midEdgePoint;
-        }
-        else // edge borders 2 faces
-        {
-            // (AF + ME) / 2 point
-            edgePoints[i] = 0.5f * currEdge.midEdgePoint + 0.25f * (m_Faces[currEdge.adjFacesIdx[0]].facePoint + m_Faces[currEdge.adjFacesIdx[1]].facePoint);
-        }
-    }
+    std::vector<glm::vec3> edgePoints = CatmulClarkEdgePoints();
 
+    unsigned int numVertices = m_Vertices.size();
     // update original vertex positions
-    std::vector<glm::vec3> originalPoints(m_Vertices.size());
+    std::vector<glm::vec3> originalPoints(numVertices);
     // store the original positions
-    for (int i = 0; i < m_Vertices.size(); i++)
+    for (unsigned int i = 0; i < numVertices; i++)
     {
         originalPoints[i] = m_Vertices[i].position;
     }
-    for (int i = 0; i < m_Vertices.size(); i++)
+    for (unsigned int i = 0; i < numVertices; i++)
     {
         VertexRecord currVert = m_Vertices[i];
 
