@@ -22,7 +22,7 @@ Object::~Object()
 
 void customSplit(std::string str, char separator, std::vector<std::string>& strings) {
     int startIndex = 0, endIndex = 0;
-    for (int i = 0; i <= str.size(); i++)
+    for (unsigned int i = 0; i <= str.size(); i++)
     {
         // If we reached the end of the word or the end of the input.
         if (str[i] == separator || i == str.size())
@@ -58,7 +58,7 @@ void Object::loadOBJ(const char* filename)
             glm::vec3 v; s >> v.x; s >> v.y; s >> v.z;
             m_VertexPos.push_back(v);
 
-            for (int coord = 0; coord < 3; coord++) // update min and max
+            for (unsigned int coord = 0; coord < 3; coord++) // update min and max
             {
                 if (v[coord] > m_Max[coord])
                     m_Max[coord] = v[coord];
@@ -85,7 +85,7 @@ void Object::loadOBJ(const char* filename)
                 faceIndices.push_back(vertIdx);
             }
             m_FaceIndices.push_back(faceIndices);
-            m_NumPolygons[static_cast<int>(faceIndices.size())] += 1;
+            m_NumPolygons[static_cast<unsigned int>(faceIndices.size())] += 1;
         }
     }
 }
@@ -100,11 +100,11 @@ void Object::Rescale()
         longest = lengths.z;
     glm::vec3 ratios = lengths / longest;
 
-    for (int i = 0; i < m_VertexPos.size(); i++)
+    for (unsigned int i = 0; i < m_VertexPos.size(); i++)
     {
         glm::vec3 vert = m_VertexPos[i];
         glm::vec3 newVert { 0, 0, 0 };
-        for (int coord = 0; coord < 3; coord++)
+        for (unsigned int coord = 0; coord < 3; coord++)
         {
             newVert[coord] = ratios[coord] * ((vert[coord] - m_Min[coord]) * 2 / lengths[coord] - 1);
         }
@@ -129,17 +129,17 @@ void Object::TriangulateFaces()
 {
     std::vector<std::vector<unsigned int>> triFaces;
 
-    for (size_t i = 0; i < m_FaceIndices.size(); i++)
+    for (unsigned int i = 0; i < m_FaceIndices.size(); i++)
     {
         if (m_FaceIndices[i].size() == 3)
             triFaces.push_back(m_FaceIndices[i]);
         else if (m_FaceIndices[i].size() > 3)
         {
-            int sides = static_cast<int>(m_FaceIndices[i].size());
+            unsigned int sides = static_cast<unsigned int>(m_FaceIndices[i].size());
             std::vector<unsigned int> polygon = m_FaceIndices[i];
 
-            std::vector<std::vector<int>> triangulate = triangulatePolygonalFace(polygon, m_VertexPos);
-            for (std::vector<int> triangle : triangulate)
+            std::vector<std::vector<unsigned int>> triangulate = triangulatePolygonalFace(polygon, m_VertexPos);
+            for (std::vector<unsigned int> triangle : triangulate)
             {
                 triFaces.push_back({polygon[triangle[0]], polygon[triangle[1]] , polygon[triangle[2]] });
             }

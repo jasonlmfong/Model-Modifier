@@ -77,7 +77,7 @@ Surface::Surface(Object obj)
 
     for (std::vector<unsigned int> faceVertices : obj.m_FaceIndices)
     {
-        int n = static_cast<int>(faceVertices.size());
+        unsigned int n = static_cast<unsigned int>(faceVertices.size());
 
         // create face record to be stored
         FaceRecord newFace;
@@ -85,14 +85,14 @@ Surface::Surface(Object obj)
 
         // calculate the face points
         glm::vec3 vertexSum{0};
-        for (int j = 0; j < n; j++)
+        for (unsigned int j = 0; j < n; j++)
         {
             vertexSum += m_Vertices[faceVertices[j]].position;
         }
         newFace.facePoint = vertexSum / ((float)n);
 
         // get edges next to the current face
-        for (int i = 0; i < n; i++)
+        for (unsigned int i = 0; i < n; i++)
         {
             unsigned int startVertex = faceVertices[i];
             unsigned int endVertex = faceVertices[(i + 1) % n];
@@ -111,7 +111,7 @@ Surface::Surface(Object obj)
         m_Faces.push_back(newFace);
 
         // add face index to the connecting vertices and edges 
-        for (int i = 0; i < n; i++)
+        for (unsigned int i = 0; i < n; i++)
         {
             m_Vertices[faceVertices[i]].adjFacesIdx.push_back(faceIndex);
             m_Edges[newFace.edgesIdx[i]].adjFacesIdx.push_back(faceIndex);

@@ -9,4 +9,4 @@
 #include "PlaneProjection.h"
 
 // can assume faceIdx.size() > 3
-std::vector<std::vector<int>> triangulatePolygonalFace(std::vector<unsigned int> faceIdx, std::vector<glm::vec3> allVertices);
+std::vector<std::vector<unsigned int>> triangulatePolygonalFace(std::vector<unsigned int> faceIdx, std::vector<glm::vec3> allVertices);

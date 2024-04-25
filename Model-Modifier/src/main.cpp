@@ -83,7 +83,7 @@ int main()
 
     Mesh mesh(obj, currShadingType);
     // keep track of number of faces
-    int numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size());
+    unsigned int numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size());
 
     // build openGL objects using mesh
     VertexArray objectVA;
@@ -383,7 +383,7 @@ int main()
             {
                 obj = objects.findObj(currObject); // search for the object requested
                 mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+                numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
                 objectVA.Bind();
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -394,7 +394,7 @@ int main()
                 Surface BH(obj);
                 obj = BH.Beehive();
                 mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+                numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
                 objectVA.Bind();
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -405,7 +405,7 @@ int main()
                 Surface SF(obj);
                 obj = SF.Snowflake();
                 mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+                numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
                 objectVA.Bind();
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -416,7 +416,7 @@ int main()
                 Surface CC(obj);
                 obj = CC.CatmullClark();
                 mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+                numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
                 objectVA.Bind();
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -427,7 +427,7 @@ int main()
                 Surface DS(obj);
                 obj = DS.DooSabin();
                 mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+                numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
                 objectVA.Bind();
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -438,7 +438,7 @@ int main()
                 Surface Lo(obj);
                 obj = Lo.Loop();
                 mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+                numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
                 objectVA.Bind();
                 objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -449,7 +449,7 @@ int main()
             //    Surface GH(obj);
             //    obj = GH.QEM();
             //    mesh.Rebuild(obj); // rebuild mesh based on object info
-            //    numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+            //    numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
             //    objectVA.Bind();
             //    objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
@@ -500,7 +500,7 @@ int main()
                 {
                     ImGui::Indent();
 
-                    for (int l = 0; l < 3; l++)
+                    for (unsigned int l = 0; l < 3; l++)
                     {
                         ImGui::PushID(l);
                         ImGui::Text("Light #%d", l + 1);
@@ -589,7 +589,7 @@ int main()
                 std::string sstr = "Number of polygons: " + ss.str();
                 ImGui::Text(sstr.c_str());
 
-                for (const std::pair<int, int> numPolygon : mesh.m_Object.m_NumPolygons)
+                for (const std::pair<unsigned int, unsigned int> numPolygon : mesh.m_Object.m_NumPolygons)
                 {
                     std::stringstream sizeStringStream;
                     sizeStringStream << numPolygon.first;
@@ -658,7 +658,7 @@ int main()
             shader.SetUniform3fv("light_pos", 3, light.m_Pos);
             shader.SetUniform3fv("light_col", 3, light.m_Col); 
             ////////// cast bool to int /////////
-            for (int i = 0; i < 3; i++)
+            for (unsigned int i = 0; i < 3; i++)
             {
                 toggled[i] = light.m_LightsToggled[i];
             }
@@ -703,7 +703,7 @@ int main()
             obj = objects.findObj(currObject); // search for the object requested
             
             mesh.Rebuild(obj); // rebuild mesh based on object info
-            numFaces = static_cast<int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+            numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
             objectVA.Bind();
             objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);

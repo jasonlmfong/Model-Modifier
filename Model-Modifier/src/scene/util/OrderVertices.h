@@ -7,4 +7,4 @@
 
 
 // order vertices by counter clockwise angle
-std::vector<unsigned int> OrderPolygonVertices(std::vector<glm::vec2> planePolygonVertices, glm::vec2 centroid, int numVerts);
+std::vector<unsigned int> OrderPolygonVertices(std::vector<glm::vec2> planePolygonVertices, glm::vec2 centroid, unsigned int numVerts);

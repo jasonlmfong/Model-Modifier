@@ -16,7 +16,7 @@ void Mesh::BuildFaceNormals()
 {
     // build face normal vectors from obj
     m_FaceNormals.resize(m_Object.m_TriFaceIndices.size());
-    for (int i = 0; i < m_Object.m_TriFaceIndices.size(); i++)
+    for (unsigned int i = 0; i < m_Object.m_TriFaceIndices.size(); i++)
     {
         unsigned int ia = m_Object.m_TriFaceIndices[i][0];
         unsigned int ib = m_Object.m_TriFaceIndices[i][1];
@@ -33,7 +33,7 @@ void Mesh::BuildFaceNormals()
 
 void Mesh::BuildVerticesIndices()
 {
-    int numFaces = static_cast<unsigned int>(m_Object.m_TriFaceIndices.size());
+    unsigned int numFaces = static_cast<unsigned int>(m_Object.m_TriFaceIndices.size());
 
     // build output items to OpenGL
     if (m_ShadingType == FLAT) // flat shading
@@ -41,9 +41,9 @@ void Mesh::BuildVerticesIndices()
         // build out the VBO with x,y,z coords of vertices, and normal vectors
         m_OutNumVert = 2 * 3 * 3 * numFaces;
         m_OutVertices = new float[m_OutNumVert] {};
-        for (int i = 0; i < numFaces; i++)
+        for (unsigned int i = 0; i < numFaces; i++)
         {
-            for (int j = 0; j < 3; j++)
+            for (unsigned int j = 0; j < 3; j++)
             {
                 // ith face, jth corner, xyz coordinates and normals
                 m_OutVertices[18 * i + 6 * j + 0] = m_Object.m_VertexPos[m_Object.m_TriFaceIndices[i][j]].x;
@@ -57,7 +57,7 @@ void Mesh::BuildVerticesIndices()
         }
 
         // build out IBO indices
-        m_OutNumIdx = 3 * 3 * static_cast<unsigned int>(numFaces);
+        m_OutNumIdx = 3 * 3 * numFaces;
         m_OutIndices = new unsigned int[m_OutNumIdx];
         for (unsigned int i = 0; i < m_OutNumIdx; i++)
         {
@@ -68,11 +68,11 @@ void Mesh::BuildVerticesIndices()
     {
         // get vertex-face connectivity: get all faces that touch the a given vertex
         std::unordered_map<unsigned int, std::vector<unsigned int>> vertAdjFaces(m_Object.m_VertexPos.size());
-        for (int faceIdx = 0; faceIdx < numFaces; faceIdx++)
+        for (unsigned int faceIdx = 0; faceIdx < numFaces; faceIdx++)
         {
             std::vector<unsigned int> faceVertIdx = m_Object.m_TriFaceIndices[faceIdx];
             // add face index to the connecting vertices
-            for (int i = 0; i < 3; i++)
+            for (unsigned int i = 0; i < 3; i++)
             {
                 vertAdjFaces[faceVertIdx[i]].push_back(faceIdx);
             }
@@ -80,7 +80,7 @@ void Mesh::BuildVerticesIndices()
 
         // build mixed vertex normals by first getting current face normal, then average adjacent normals
         std::vector<std::vector<glm::vec3>> cornerVertexNormals(numFaces);
-        for (int currFace = 0; currFace < numFaces; currFace++)
+        for (unsigned int currFace = 0; currFace < numFaces; currFace++)
         {
             // get face normal
             glm::vec3 currFaceNormal = m_FaceNormals[currFace];
@@ -109,9 +109,9 @@ void Mesh::BuildVerticesIndices()
         // build out the VBO with x,y,z coords of vertices, and normal vectors
         m_OutNumVert = 2 * 3 * 3 * numFaces;
         m_OutVertices = new float[m_OutNumVert] {};
-        for (int i = 0; i < numFaces; i++)
+        for (unsigned int i = 0; i < numFaces; i++)
         {
-            for (int j = 0; j < 3; j++)
+            for (unsigned int j = 0; j < 3; j++)
             {
                 // ith face, jth corner, xyz coordinates and normals
                 m_OutVertices[18 * i + 6 * j + 0] = m_Object.m_VertexPos[m_Object.m_TriFaceIndices[i][j]].x;
@@ -125,7 +125,7 @@ void Mesh::BuildVerticesIndices()
         }
 
         // build out IBO indices
-        m_OutNumIdx = 3 * 3 * static_cast<unsigned int>(numFaces);
+        m_OutNumIdx = 3 * 3 * numFaces;
         m_OutIndices = new unsigned int[m_OutNumIdx];
         for (unsigned int i = 0; i < m_OutNumIdx; i++)
         {
@@ -136,19 +136,20 @@ void Mesh::BuildVerticesIndices()
     {
         // get vertex-face connectivity: get all faces that touch the a given vertex
         std::unordered_map<unsigned int, std::vector<unsigned int>> vertAdjFaces(m_Object.m_VertexPos.size());
-        for (int faceIdx = 0; faceIdx < numFaces; faceIdx++)
+        for (unsigned int faceIdx = 0; faceIdx < numFaces; faceIdx++)
         {
             std::vector<unsigned int> faceVertIdx = m_Object.m_TriFaceIndices[faceIdx];
             // add face index to the connecting vertices
-            for (int i = 0; i < 3; i++)
+            for (unsigned int i = 0; i < 3; i++)
             {
                 vertAdjFaces[faceVertIdx[i]].push_back(faceIdx);
             }
         }
 
         // build smooth vertex normals by average neighbouring faces normals
-        std::vector<glm::vec3> smoothVertexNormals(m_Object.m_VertexPos.size());
-        for (int i = 0; i < m_Object.m_VertexPos.size(); i++)
+        unsigned int numVertices = static_cast<unsigned int>(m_Object.m_VertexPos.size());
+        std::vector<glm::vec3> smoothVertexNormals(numVertices);
+        for (unsigned int i = 0; i < numVertices; i++)
         {
             glm::vec3 currPos = m_Object.m_VertexPos[i];
             glm::vec3 currVertNormal = glm::vec3(0, 0, 0);
@@ -163,9 +164,9 @@ void Mesh::BuildVerticesIndices()
         }
 
         // build out the VBO with x,y,z coords of vertices, and normal vectors
-        m_OutNumVert = 2 * 3 * static_cast<unsigned int>(m_Object.m_VertexPos.size());
+        m_OutNumVert = 2 * 3 * numVertices;
         m_OutVertices = new float[m_OutNumVert] {};
-        for (int i = 0; i < m_Object.m_VertexPos.size(); i++)
+        for (unsigned int i = 0; i < numVertices; i++)
         {
             // x value of the vertex
             m_OutVertices[6 * i + 0] = m_Object.m_VertexPos[i].x;
@@ -185,7 +186,7 @@ void Mesh::BuildVerticesIndices()
         // build out IBO indices
         m_OutNumIdx = 3 * numFaces;
         m_OutIndices = new unsigned int[m_OutNumIdx];
-        for (int i = 0; i < numFaces; i++)
+        for (unsigned int i = 0; i < numFaces; i++)
         {
             m_OutIndices[3 * i + 0] = m_Object.m_TriFaceIndices[i][0];
             m_OutIndices[3 * i + 1] = m_Object.m_TriFaceIndices[i][1];

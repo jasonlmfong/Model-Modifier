@@ -33,5 +33,5 @@ public:
 	std::vector<std::vector<unsigned int>> m_FaceIndices;
 	std::vector<std::vector<unsigned int>> m_TriFaceIndices;
 
-	std::unordered_map<int, int> m_NumPolygons;
+	std::unordered_map<unsigned int, unsigned int> m_NumPolygons;
 };

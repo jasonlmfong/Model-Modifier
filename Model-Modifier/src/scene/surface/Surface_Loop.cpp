@@ -9,15 +9,15 @@ Object Surface::LoOutputOBJ(std::vector<glm::vec3> edgePoints)
     std::vector<glm::vec3> VertexPos;
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
     std::vector<std::vector<unsigned int>> FaceIndices;
-    std::unordered_map<int, int> NumberPolygons;
+    std::unordered_map<unsigned int, unsigned int> NumberPolygons;
 
     for (FaceRecord face : m_Faces)
     {
-        int n = static_cast<int>(face.verticesIdx.size());
+        unsigned int n = static_cast<unsigned int>(face.verticesIdx.size());
 
         std::vector<unsigned int> vertsIdx;
         std::vector<unsigned int> edgesIdx;
-        for (int i = 0; i < n; i++)
+        for (unsigned int i = 0; i < n; i++)
         {
             glm::vec3 vert = m_Vertices[face.verticesIdx[i]].position;
             vertsIdx.push_back(getVertIndex(vert, VertexPos, VertLookup));
@@ -28,7 +28,7 @@ Object Surface::LoOutputOBJ(std::vector<glm::vec3> edgePoints)
 
         // every n-gon gets one n-gon inscribed inside, and gets n more triangles
         FaceIndices.push_back(edgesIdx);
-        for (int i = 0; i < n; i++)
+        for (unsigned int i = 0; i < n; i++)
         {
             FaceIndices.push_back({ vertsIdx[i], edgesIdx[i], edgesIdx[(i + n - 1) % n] });
         }
@@ -53,9 +53,10 @@ Object Surface::LoOutputOBJ(std::vector<glm::vec3> edgePoints)
 // Loop subdivision surface algorithm
 Object Surface::Loop()
 {
+    unsigned int numEdges = static_cast<unsigned int>(m_Edges.size());
     // make new (odd) vertices (per edge)
-    std::vector<glm::vec3> edgePoints(m_Edges.size());
-    for (int i = 0; i < edgePoints.size(); i++)
+    std::vector<glm::vec3> edgePoints(numEdges);
+    for (unsigned int i = 0; i < numEdges; i++)
     {
         EdgeRecord currEdge = m_Edges[i];
         if (currEdge.adjFacesIdx.size() == 1) // boundary edge
@@ -73,7 +74,7 @@ Object Surface::Loop()
     }
 
     // update old (even) vertices (per vertex)
-    for (int i = 0; i < m_Vertices.size(); i++)
+    for (unsigned int i = 0; i < m_Vertices.size(); i++)
     {
         VertexRecord vert = m_Vertices[i];
         glm::vec3 vertPos = vert.position;
@@ -83,7 +84,7 @@ Object Surface::Loop()
         {
             sumNeighbours += 2.0f * m_Edges[adjEdge].midEdgePoint - vertPos;
         }
-        int neighbours = static_cast<int>(vert.adjEdgesIdx.size());
+        unsigned int neighbours = static_cast<unsigned int>(vert.adjEdgesIdx.size());
         if (neighbours == 2)
             m_Vertices[i].position = 0.75f * vertPos + 0.125f * sumNeighbours;
         else

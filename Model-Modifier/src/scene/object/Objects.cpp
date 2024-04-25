@@ -9,7 +9,7 @@ Objects::~Objects()
 	m_Objects.clear();
 }
 
-Object Objects::findObj(int obj)
+Object Objects::findObj(unsigned int obj)
 {
 	auto search = m_Objects.find(obj);
 	if (search != m_Objects.end())

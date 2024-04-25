@@ -6,7 +6,7 @@
 std::vector<glm::vec3> Surface::CatmulClarkEdgePoints()
 {
     // calcuate edge points
-    unsigned int numEdges = m_Edges.size();
+    unsigned int numEdges = static_cast<unsigned int>(m_Edges.size());
     std::vector<glm::vec3> edgePoints(numEdges);
     for (unsigned int i = 0; i < numEdges; i++)
     {
@@ -33,15 +33,15 @@ Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
     std::vector<glm::vec3> VertexPos;
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
     std::vector<std::vector<unsigned int>> FaceIndices;
-    std::unordered_map<int, int> NumberPolygons;
+    std::unordered_map<unsigned int, unsigned int> NumberPolygons;
 
     for (FaceRecord face : m_Faces)
     {
-        int n = static_cast<int>(face.verticesIdx.size());
+        unsigned int n = static_cast<unsigned int>(face.verticesIdx.size());
         
         std::vector<unsigned int> vertsIdx;
         std::vector<unsigned int> edgesIdx;
-        for (int i = 0; i < n; i++)
+        for (unsigned int i = 0; i < n; i++)
         {
             glm::vec3 vert = m_Vertices[face.verticesIdx[i]].position;
             vertsIdx.push_back(getVertIndex(vert, VertexPos, VertLookup));
@@ -54,7 +54,7 @@ Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
         unsigned int facePointIdx = getVertIndex(facePoint, VertexPos, VertLookup);
             
         // every n-gon turns into n quads
-        for (int i = 0; i < n; i++)
+        for (unsigned int i = 0; i < n; i++)
         {
             FaceIndices.push_back({ vertsIdx[i], edgesIdx[i], facePointIdx, edgesIdx[(i + n - 1) % n] });
         }
@@ -131,7 +131,7 @@ Object Surface::CatmullClark()
 {
     std::vector<glm::vec3> edgePoints = CatmulClarkEdgePoints();
 
-    unsigned int numVertices = m_Vertices.size();
+    unsigned int numVertices = static_cast<unsigned int>(m_Vertices.size());
     // update original vertex positions
     std::vector<glm::vec3> originalPoints(numVertices);
     // store the original positions

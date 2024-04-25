@@ -13,15 +13,15 @@ Object Surface::DSOutputOBJ(
     std::vector<glm::vec3> VertexPos;
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
     std::vector<std::vector<unsigned int>> FaceIndices;
-    std::unordered_map<int, int> NumberPolygons;
+    std::unordered_map<unsigned int, unsigned int> NumberPolygons;
 
     // new face from old face (n-gon from n-gon)
-    for (int currFaceIdx = 0; currFaceIdx < m_Faces.size(); currFaceIdx++)
+    for (unsigned int currFaceIdx = 0; currFaceIdx < m_Faces.size(); currFaceIdx++)
     {
-        int n = static_cast<int>(newPointsPerFace[currFaceIdx].size());
+        unsigned int n = static_cast<unsigned int>(newPointsPerFace[currFaceIdx].size());
 
         std::vector<unsigned int> newFaceIdx;
-        for (int i = 0; i < n; i++)
+        for (unsigned int i = 0; i < n; i++)
         {
             // use vertex lookup to avoid creating duplicate vertices
             unsigned int vertIdx = getVertIndex(newPointsPerFace[currFaceIdx][i], VertexPos, VertLookup);
@@ -33,7 +33,7 @@ Object Surface::DSOutputOBJ(
     }
 
     // new face from old edge (always a quad face)
-    for (int currEdgeIdx = 0; currEdgeIdx < pointsPerEdge.size(); currEdgeIdx++)
+    for (unsigned int currEdgeIdx = 0; currEdgeIdx < pointsPerEdge.size(); currEdgeIdx++)
     {
         EdgeRecord currEdge = m_Edges[currEdgeIdx];
         // skip boundary edges, they cannot form a new face
@@ -41,7 +41,7 @@ Object Surface::DSOutputOBJ(
         {
             // build neighbour face normal to match later
             glm::vec3 avgFaceNormal{ 0 };
-            for (int adjFaces = 0; adjFaces < 2; adjFaces++)
+            for (unsigned int adjFaces = 0; adjFaces < 2; adjFaces++)
             {
                 avgFaceNormal += ComputeFaceNormal(m_Faces[currEdge.adjFacesIdx[adjFaces]]);
             }
@@ -73,7 +73,7 @@ Object Surface::DSOutputOBJ(
     }
 
     // new face from old vertex (n-gon for n faces the old vertex neighbours)
-    for (int currVertIdx = 0; currVertIdx < m_Vertices.size(); currVertIdx++)
+    for (unsigned int currVertIdx = 0; currVertIdx < m_Vertices.size(); currVertIdx++)
     {
         VertexRecord currVert = m_Vertices[currVertIdx];
         if (currVert.adjFacesIdx.size() < 3)
@@ -90,8 +90,8 @@ Object Surface::DSOutputOBJ(
         // get vertices for new face
         std::vector<glm::vec3> polyVertices;
         glm::vec3 centroid{ 0 };  // new facepoint
-        int numNewVerts = static_cast<int>(pointsPerVertex[currVertIdx].size());
-        for (int newVertIdx = 0; newVertIdx < numNewVerts; newVertIdx++)
+        unsigned int numNewVerts = static_cast<unsigned int>(pointsPerVertex[currVertIdx].size());
+        for (unsigned int newVertIdx = 0; newVertIdx < numNewVerts; newVertIdx++)
         {
             glm::vec3 currPoint = pointsPerVertex[currVertIdx][newVertIdx];
             polyVertices.push_back(currPoint);
@@ -113,7 +113,7 @@ Object Surface::DSOutputOBJ(
         if (glm::dot(vertFaceNormal, avgFaceNormal) > 0)
         {
             // not flipped, use the poylgon vertex ordering we have
-            for (int i = 0; i < numNewVerts; i++)
+            for (unsigned int i = 0; i < numNewVerts; i++)
             {
                 // use vertex lookup to avoid creating duplicate vertices
                 unsigned int vertIdx = getVertIndex(polyVertices[vertOrdering[i]], VertexPos, VertLookup);
@@ -124,7 +124,7 @@ Object Surface::DSOutputOBJ(
         else
         {
             // flipped normals, reverse the poylgon vertex ordering we have
-            for (int i = 0; i < numNewVerts; i++)
+            for (unsigned int i = 0; i < numNewVerts; i++)
             {
                 // use vertex lookup to avoid creating duplicate vertices
                 unsigned int vertIdx = getVertIndex(polyVertices[vertOrdering[numNewVerts - 1 - i]], VertexPos, VertLookup);
@@ -152,9 +152,10 @@ Object Surface::DSOutputOBJ(
 Object Surface::DooSabin()
 {
     // make new vertices and store original vertex connectivity
-    std::vector<std::vector<glm::vec3>> newPointsPerFace(m_Faces.size());
+    unsigned int numFaces =static_cast<unsigned int>(m_Faces.size());
+    std::vector<std::vector<glm::vec3>> newPointsPerFace(numFaces);
     std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerVertex;
-    for (int currFaceIdx = 0; currFaceIdx < m_Faces.size(); currFaceIdx++)
+    for (unsigned int currFaceIdx = 0; currFaceIdx < numFaces; currFaceIdx++)
     {
         FaceRecord currFace = m_Faces[currFaceIdx];
 
@@ -171,7 +172,7 @@ Object Surface::DooSabin()
     }
 
     std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerEdge;
-    for (int currEdgeIdx = 0; currEdgeIdx < m_Edges.size(); currEdgeIdx++)
+    for (unsigned int currEdgeIdx = 0; currEdgeIdx < m_Edges.size(); currEdgeIdx++)
     {
         EdgeRecord currEdge = m_Edges[currEdgeIdx];
         // skip boundary edges, they cannot form a new face

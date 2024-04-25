@@ -40,10 +40,10 @@ class Objects
 public:
     Objects();
 	~Objects();
-    Object findObj(int obj);
+    Object findObj(unsigned int obj);
 
 public:
-    std::unordered_map<int, const char*> m_Filepaths
+    std::unordered_map<unsigned int, const char*> m_Filepaths
     {
         { ANKYLOSAURUS, "res/objects/ankylosaurus.obj" },
         { ARMADILLO, "res/objects/armadillo.obj" },
@@ -75,5 +75,5 @@ public:
         { TORUS, "res/objects/torus.obj" },
         { TUBES, "res/objects/tubes.obj" },
     };
-    std::unordered_map<int, Object> m_Objects;
+    std::unordered_map<unsigned int, Object> m_Objects;
 };
