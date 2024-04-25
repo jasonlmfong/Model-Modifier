@@ -21,9 +21,9 @@ vec3 compute_light(vec3 lightpos, vec3 lightcol)
 	vec3 l = normalize(lightpos - view_pos);
 	vec3 h = normalize(v + l);
 	
-	float diffuse = max(0.0, dot(n, l));
-	float spec = max(0, dot(n, h));
-	float intensity = 0.6 * diffuse + 0.4 * spec;
+	float diff_intensity = max(0.0, dot(n, l));
+	float spec_intensity = max(0, dot(n, h));
+	float intensity = 0.6 * diff_intensity + 0.4 * spec_intensity;
 
  	if (intensity > 0.9) {
  		intensity = 1.1;
