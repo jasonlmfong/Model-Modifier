@@ -1,5 +1,7 @@
 # Model-Modifier
 
+![Sample smoothed star rendering](Model-Modifier/gallery/Screenshot_2024-4-25_202228-2.png)
+
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/jasonlmfong/Model-Modifier/blob/main/LICENSE)
 
 This repository contains my `C++17` and `OpenGL` implementation of a mesh viewer for `.obj` files, with various algorithms for interacting with the meshes, and various shading techniques.
@@ -58,34 +60,43 @@ This repository contains my `C++17` and `OpenGL` implementation of a mesh viewer
 
 ## Image Gallery
 
-![Sample armadillo rendering](Model-Modifier/gallery/Screenshot_2023-7-9_214740.png)
+<details>
+<summary>Comparison of different shading techniques</summary>
 
-> Armadillo mesh, Phong shader, 3 lights from different positions, not smoothened
+![Sample armadillo rendering 1](Model-Modifier/gallery/Screenshot_2024-4-25_181621.png)
+
+> Armadillo mesh, Blinn-Phong shader, not smoothened
+
+![Sample armadillo rendering 2](Model-Modifier/gallery/Screenshot_2024-4-25_181732.png)
+
+> Armadillo mesh, Cook-Torrance shader, not smoothened
+
+![Sample armadillo rendering 3](Model-Modifier/gallery/Screenshot_2024-4-25_181641.png)
+
+> Armadillo mesh, Cel shader, not smoothened
+
+</details>
 
 <details>
 <summary>Comparison of different subdivision surface algorithms</summary>
   
-![Sample cow rendering 1](Model-Modifier/gallery/Screenshot_2023-9-11_12505.png)
+![Sample cow rendering 1](Model-Modifier/gallery/Screenshot_2024-4-25_202723.png)
 
 > Cow mesh, Normal shader, not smoothened
 
-![Sample cow rendering 2](Model-Modifier/gallery/Screenshot_2023-9-11_125011.png)
+![Sample cow rendering 2](Model-Modifier/gallery/Screenshot_2024-4-25_202728.png)
 
 > Cow mesh, Normal shader, smoothened 1 time with Catmull-Clark subdivision
 
-![Sample cow rendering 3](Model-Modifier/gallery/Screenshot_2023-9-11_125016.png)
+![Sample cow rendering 3](Model-Modifier/gallery/Screenshot_2024-4-25_202735.png)
 
 > Cow mesh, Normal shader, smoothened 1 time with Doo-Sabin subdivision
 
-![Sample cow rendering 4](Model-Modifier/gallery/Screenshot_2023-9-11_125020.png)
+![Sample cow rendering 4](Model-Modifier/gallery/Screenshot_2024-4-25_202742.png)
 
 > Cow mesh, Normal shader, smoothened 1 time with Loop subdivision
 
 </details>
-
-![Sample smoothed star rendering](Model-Modifier/gallery/Screenshot_2023-7-16_141825.png)
-
-> Star mesh, Phong shader, 3 lights from different positions, smoothened many times with mixed subdivision
 
 ## Dependencies
 
