@@ -15,6 +15,7 @@ vec3 view_pos_normal;
 uniform vec3 light_pos[3];
 uniform vec3 light_col[3]; // light color
 uniform int light_toggled[3]; // light on/off
+uniform vec3 light_brightness; // light brightness
 
 uniform vec3 ambient; // ambient constant
 uniform vec3 diffuse; // diffuse constant
@@ -47,6 +48,6 @@ void main()
     for (int i = 0; i < 3; i++)
     {
         if (light_toggled[i] == 1)
-            total_color += compute_light(light_pos[i], light_col[i]);
+            total_color += compute_light(light_pos[i], light_col[i]) * light_brightness[i];
     }
 };

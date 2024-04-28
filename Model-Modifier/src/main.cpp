@@ -156,6 +156,7 @@ int main()
     {
         shader.SetUniform3fv("light_pos", 3, light.m_Pos);
         shader.SetUniform3fv("light_col", 3, light.m_Col);
+        shader.SetUniform3f("light_brightness", light.m_Brightness[0], light.m_Brightness[1], light.m_Brightness[2]);
 
         shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient);
         shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
@@ -509,6 +510,7 @@ int main()
                         {
                             ImGui::SliderFloat3("position", &light.m_Pos[3 * l], -10, 10);
                             ImGui::ColorEdit3("color", &light.m_Col[3 * l]);
+                            ImGui::SliderFloat("brightness", &light.m_Brightness[l], 0, 2);
 
                             ImGui::Spacing();
                         }
@@ -656,7 +658,8 @@ int main()
         if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH || currShader == CEL || currShader == COOKTORRANCE)
         {
             shader.SetUniform3fv("light_pos", 3, light.m_Pos);
-            shader.SetUniform3fv("light_col", 3, light.m_Col); 
+            shader.SetUniform3fv("light_col", 3, light.m_Col);
+            shader.SetUniform3f("light_brightness", light.m_Brightness[0], light.m_Brightness[1], light.m_Brightness[2]);
             ////////// cast bool to int /////////
             for (unsigned int i = 0; i < 3; i++)
             {
