@@ -478,9 +478,9 @@ int main()
             ImGui::RadioButton("Gourand shader", &nextShader, GOURAND);
             ImGui::RadioButton("Phong shader", &nextShader, PHONG);
             ImGui::RadioButton("Blinn-Phong shader", &nextShader, BLINNPHONG);
-            ImGui::RadioButton("Gooch shader", &nextShader, GOOCH);
-            ImGui::RadioButton("Cel shader", &nextShader, CEL);
             ImGui::RadioButton("Cook-Torrance shader", &nextShader, COOKTORRANCE);
+            ImGui::RadioButton("Cel shader", &nextShader, CEL);
+            ImGui::RadioButton("Gooch shader", &nextShader, GOOCH);
         
             if (nextShader == GOURAND || nextShader == PHONG || nextShader == BLINNPHONG || nextShader == GOOCH || nextShader == CEL || nextShader == COOKTORRANCE)
             {
@@ -492,7 +492,8 @@ int main()
                     ImGui::ColorEdit3("Ambient color", meshMat.m_Ambient);
                     ImGui::ColorEdit3("Diffuse color", meshMat.m_Diffuse);
                     ImGui::ColorEdit3("Specular color", meshMat.m_Specular);
-                    ImGui::SliderFloat("Shine constant", &meshMat.m_Shine, 10, 100);
+                    if (nextShader != COOKTORRANCE)
+                        ImGui::SliderFloat("Shine constant", &meshMat.m_Shine, 10, 100);
 
                     ImGui::Unindent();
                 }
