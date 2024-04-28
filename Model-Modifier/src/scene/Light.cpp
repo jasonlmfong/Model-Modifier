@@ -17,6 +17,13 @@ Light::Light()
 		1.0f, 0.466f, 1.0f, // pink
 		0.259f, 0.522f, 0.967f // blue
 	};
+
+	m_Brightness = new float[3]
+		{
+			1.0f,
+				2.0f,
+				1.5f
+		};
 }
 
 Light::~Light()
@@ -24,4 +31,5 @@ Light::~Light()
 	delete[] m_LightsToggled;
 	delete[] m_Pos;
 	delete[] m_Col;
+	delete[] m_Brightness;
 }

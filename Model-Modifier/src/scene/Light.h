@@ -13,4 +13,5 @@ public:
 	bool* m_LightsToggled;
 	float* m_Pos;
 	float* m_Col;
+	float* m_Brightness;
 };
