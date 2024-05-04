@@ -5,7 +5,7 @@ Object::Object()
 {
 }
 
-Object::Object(const char* filename)
+Object::Object(const std::string &filename)
 {
     loadOBJ(filename);
     if (m_NumPolygons.size() == 1 && m_NumPolygons.count(3) == 1)
@@ -36,7 +36,7 @@ void customSplit(std::string str, char separator, std::vector<std::string>& stri
     }
 }
 
-void Object::loadOBJ(const char* filename)
+void Object::loadOBJ(const std::string &filename)
 {
     // initialize the min and max values
     m_Min = glm::vec3{ 1000000, 1000000, 1000000 };
@@ -118,7 +118,7 @@ void Object::Destroy()
     m_FaceIndices.clear();
 }
 
-void Object::Reload(const char* filename)
+void Object::Reload(const std::string &filename)
 {
     Destroy();
     loadOBJ(filename);
