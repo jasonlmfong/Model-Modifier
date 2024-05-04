@@ -1,5 +1,7 @@
 #pragma once
 
+#include<vector>
+
 #include "../external/glm/ext/vector_float3.hpp"
 #include "../external/glm/geometric.hpp"
 
@@ -11,7 +13,7 @@ public:
 
 public:
 	bool* m_LightsToggled;
-	float* m_Pos;
-	float* m_Col;
-	float* m_Brightness;
+	std::vector<float> m_Pos;
+	std::vector<float> m_Col;
+	std::vector<float> m_Brightness;
 };
