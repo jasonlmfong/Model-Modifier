@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ctime>
+#include <vector>
 #include <unordered_map>
 
 #include "external/imgui/imgui.h"
@@ -135,11 +136,11 @@ int main()
 
     // lighting
     Light light = Light();
-    int* toggled = new int[3];
+    std::vector<int> toggled = {1, 0, 0};
 
     // Gooch variables
-    float* gooch_warm = new float[3] {1, 0.25, 0};
-    float* gooch_cool = new float[3] {0, 0.75, 1};
+    std::vector<float> gooch_warm = {1, 0.25, 0};
+    std::vector<float> gooch_cool = {0, 0.75, 1};
     float gooch_alpha = 0.2f;
     float gooch_beta = 0.2f;
 
@@ -154,19 +155,19 @@ int main()
     shader.SetUniformMat4f("u_Projection", projMatrix);
     if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH || currShader == CEL || currShader == COOKTORRANCE)
     {
-        shader.SetUniform3fv("light_pos", 3, light.m_Pos);
-        shader.SetUniform3fv("light_col", 3, light.m_Col);
+        shader.SetUniform3fv("light_pos", 3, light.m_Pos.data());
+        shader.SetUniform3fv("light_col", 3, light.m_Col.data());
         shader.SetUniform3f("light_brightness", light.m_Brightness[0], light.m_Brightness[1], light.m_Brightness[2]);
 
-        shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient);
-        shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
-        shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
+        shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient.data());
+        shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse.data());
+        shader.SetUniform3fv("specular", 1, meshMat.m_Specular.data());
         shader.SetUniform1f("shine", meshMat.m_Shine);
 
         if (currShader == GOOCH)
         {
-            shader.SetUniform3fv("warm", 1, gooch_warm);
-            shader.SetUniform3fv("cool", 1, gooch_cool);
+            shader.SetUniform3fv("warm", 1, gooch_warm.data());
+            shader.SetUniform3fv("cool", 1, gooch_cool.data());
             shader.SetUniform1f("alpha", gooch_alpha);
             shader.SetUniform1f("beta", gooch_beta);
         }
@@ -489,9 +490,9 @@ int main()
                 {
                     ImGui::Indent();
 
-                    ImGui::ColorEdit3("Ambient color", meshMat.m_Ambient);
-                    ImGui::ColorEdit3("Diffuse color", meshMat.m_Diffuse);
-                    ImGui::ColorEdit3("Specular color", meshMat.m_Specular);
+                    ImGui::ColorEdit3("Ambient color", meshMat.m_Ambient.data());
+                    ImGui::ColorEdit3("Diffuse color", meshMat.m_Diffuse.data());
+                    ImGui::ColorEdit3("Specular color", meshMat.m_Specular.data());
                     if (nextShader != COOKTORRANCE)
                         ImGui::SliderFloat("Shine constant", &meshMat.m_Shine, 10, 100);
 
@@ -509,8 +510,8 @@ int main()
                         ImGui::Checkbox("Toggle light", &light.m_LightsToggled[l]);
                         if (light.m_LightsToggled[l])
                         {
-                            ImGui::SliderFloat3("position", &light.m_Pos[3 * l], -10, 10);
-                            ImGui::ColorEdit3("color", &light.m_Col[3 * l]);
+                            ImGui::SliderFloat3("position", &light.m_Pos.data()[3 * l], -10, 10);
+                            ImGui::ColorEdit3("color", &light.m_Col.data()[3 * l]);
                             ImGui::SliderFloat("brightness", &light.m_Brightness[l], 0, 2);
 
                             ImGui::Spacing();
@@ -526,8 +527,8 @@ int main()
                     {
                         ImGui::Indent();
 
-                        ImGui::ColorEdit3("Warm color", gooch_warm);
-                        ImGui::ColorEdit3("Cool color", gooch_cool);
+                        ImGui::ColorEdit3("Warm color", gooch_warm.data());
+                        ImGui::ColorEdit3("Cool color", gooch_cool.data());
                         ImGui::SliderFloat("Alpha", &gooch_alpha, 0, 1);
                         ImGui::SliderFloat("Beta", &gooch_beta, 0, 1);
 
@@ -658,25 +659,25 @@ int main()
         shader.SetUniformMat4f("u_Projection", projMatrix);
         if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH || currShader == CEL || currShader == COOKTORRANCE)
         {
-            shader.SetUniform3fv("light_pos", 3, light.m_Pos);
-            shader.SetUniform3fv("light_col", 3, light.m_Col);
+            shader.SetUniform3fv("light_pos", 3, light.m_Pos.data());
+            shader.SetUniform3fv("light_col", 3, light.m_Col.data());
             shader.SetUniform3f("light_brightness", light.m_Brightness[0], light.m_Brightness[1], light.m_Brightness[2]);
             ////////// cast bool to int /////////
             for (unsigned int i = 0; i < 3; i++)
             {
-                toggled[i] = light.m_LightsToggled[i];
+                toggled[i] = static_cast<int>(light.m_LightsToggled[i]);
             }
-            shader.SetUniform1iv("light_toggled", 3, toggled); // upload the lights toggle option
+            shader.SetUniform1iv("light_toggled", 3, toggled.data()); // upload the lights toggle option
 
-            shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient);
-            shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse);
-            shader.SetUniform3fv("specular", 1, meshMat.m_Specular);
+            shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient.data());
+            shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse.data());
+            shader.SetUniform3fv("specular", 1, meshMat.m_Specular.data());
             shader.SetUniform1f("shine", meshMat.m_Shine);
 
             if (currShader == GOOCH)
             {
-                shader.SetUniform3fv("warm", 1, gooch_warm);
-                shader.SetUniform3fv("cool", 1, gooch_cool);
+                shader.SetUniform3fv("warm", 1, gooch_warm.data());
+                shader.SetUniform3fv("cool", 1, gooch_cool.data());
                 shader.SetUniform1f("alpha", gooch_alpha);
                 shader.SetUniform1f("beta", gooch_beta);
             }
@@ -741,8 +742,6 @@ int main()
     }
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
-
-    delete[] toggled;
 
     window.~Window();
     return 0;
