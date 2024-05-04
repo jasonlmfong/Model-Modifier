@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Window::Window(unsigned int width, unsigned int height, const char *title, bool isFullscreen)
+Window::Window(unsigned int width, unsigned int height, const std::string &title, bool isFullscreen)
     : m_ID(nullptr)
 {
     int result = Create(width, height, title, isFullscreen);
@@ -24,7 +24,7 @@ GLFWwindow *Window::GetID() const
     return m_ID;
 }
 
-int Window::Create(unsigned int width, unsigned int height, const char *title, bool isFullscreen)
+int Window::Create(unsigned int width, unsigned int height, const std::string &title, bool isFullscreen)
 {
     /* Initialize the library */
     if (!glfwInit())
@@ -38,7 +38,7 @@ int Window::Create(unsigned int width, unsigned int height, const char *title, b
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
-    m_ID = glfwCreateWindow(width, height, title, isFullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
+    m_ID = glfwCreateWindow(width, height, title.c_str(), isFullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
     if (!m_ID)
     {
         std::cout << "Failed to create window." << std::endl;

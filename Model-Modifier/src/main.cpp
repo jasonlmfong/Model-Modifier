@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ctime>
+#include <string>
 #include <vector>
 #include <unordered_map>
 
@@ -40,7 +41,7 @@ enum renderMode
     POINTCLOUD
 };
 
-void saveImage(const char* filepath, GLFWwindow* window) 
+void saveImage(const std::string &filepath, GLFWwindow *window) 
 {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
@@ -52,7 +53,7 @@ void saveImage(const char* filepath, GLFWwindow* window)
     glReadBuffer(GL_FRONT);
     glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer.data());
     stbi_flip_vertically_on_write(true);
-    stbi_write_png(filepath, width, height, 3, buffer.data(), stride);
+    stbi_write_png(filepath.c_str(), width, height, 3, buffer.data(), stride);
 }
 
 int main()

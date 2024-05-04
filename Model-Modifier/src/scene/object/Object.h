@@ -15,13 +15,13 @@ class Object
 {
 public:
 	Object();
-	Object(const char* filename);
+	Object(const std::string &filename);
 	~Object();
 
-	void loadOBJ(const char* filename);
+	void loadOBJ(const std::string &filename);
 	void Rescale();
 	void Destroy();
-	void Reload(const char* filename);
+	void Reload(const std::string &filename);
 
 	void TriangulateFaces();
 
