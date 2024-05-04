@@ -344,6 +344,7 @@
     <ClInclude Include="src\external\stb\stb_image_write.h" />
     <ClInclude Include="src\HeightMap.h" />
     <ClInclude Include="src\HeightMapUniform.h" />
+    <ClInclude Include="src\renderer\SaveImage.h" />
     <ClInclude Include="src\scene\Light.h" />
     <ClInclude Include="src\scene\Material.h" />
     <ClInclude Include="src\renderer\Input.h" />
