@@ -1,13 +1,9 @@
 #include "Camera.h"
 
 Camera::Camera(float pitch, float yaw, float distance)
-    : m_Pitch(pitch), m_Yaw(yaw), m_Dist(distance), m_FOV(65)
+    : m_Pitch(pitch), m_Yaw(yaw), m_Dist(distance)
 {
-    glm::vec3 position = GetPosOnSphere();
-    m_CameraPosition = position;
-    m_CameraFront = -position;
-
-    SetViewMatrix();
+    ResetView();
 }
 
 Camera::~Camera()

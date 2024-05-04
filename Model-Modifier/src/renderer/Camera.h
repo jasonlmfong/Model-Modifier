@@ -21,6 +21,7 @@ public:
 	float m_FOV;
 
 public:
+	Camera();
 	Camera(float pitch, float yaw, float distance);
 	~Camera();
 
