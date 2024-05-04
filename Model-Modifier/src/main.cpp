@@ -114,16 +114,14 @@ int main()
     float pitch = 0.3333f; // radians
     float radius = 3.0f;
     Camera camera(pitch, yaw, radius);
-    camera.ResetView();
 
     float rotationAngle = 0.0f; // rotation angle of the object mesh
     glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 projMatrix = glm::perspective(glm::radians(camera.m_FOV), aspectRatio, 0.1f, 1000.0f);
 
     // lighting
     Light light = Light();
-    std::vector<int> toggled = {1, 0, 0};
+    std::vector<int> toggled; toggled.resize(3);
 
     // Gooch variables
     std::vector<float> gooch_warm = {1, 0.25, 0};
@@ -137,33 +135,6 @@ int main()
 
     // upload uniforms
     shader.Bind();
-    shader.SetUniformMat4f("u_Model", modelMatrix);
-    shader.SetUniformMat4f("u_View", camera.GetViewMatrix());
-    shader.SetUniformMat4f("u_Projection", projMatrix);
-    if (currShader == GOURAND || currShader == PHONG || currShader == BLINNPHONG || currShader == GOOCH || currShader == CEL || currShader == COOKTORRANCE)
-    {
-        shader.SetUniform3fv("light_pos", 3, light.m_Pos.data());
-        shader.SetUniform3fv("light_col", 3, light.m_Col.data());
-        shader.SetUniform3f("light_brightness", light.m_Brightness[0], light.m_Brightness[1], light.m_Brightness[2]);
-
-        shader.SetUniform3fv("ambient", 1, meshMat.m_Ambient.data());
-        shader.SetUniform3fv("diffuse", 1, meshMat.m_Diffuse.data());
-        shader.SetUniform3fv("specular", 1, meshMat.m_Specular.data());
-        shader.SetUniform1f("shine", meshMat.m_Shine);
-
-        if (currShader == GOOCH)
-        {
-            shader.SetUniform3fv("warm", 1, gooch_warm.data());
-            shader.SetUniform3fv("cool", 1, gooch_cool.data());
-            shader.SetUniform1f("alpha", gooch_alpha);
-            shader.SetUniform1f("beta", gooch_beta);
-        }
-        if (currShader == COOKTORRANCE)
-        {
-            shader.SetUniform1f("metallic", metallic);
-            shader.SetUniform1f("roughness", roughness);
-        }
-    }
 
     // openGL settings
     glEnable(GL_DEPTH_TEST);
