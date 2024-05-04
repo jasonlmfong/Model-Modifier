@@ -133,7 +133,7 @@ void Shader::SetUniform1i(const std::string& name, const int &value) const
     glUniform1i(uniformLocation, value);
 }
 
-void Shader::SetUniform1iv(const std::string& name, const int count, const int* values) const
+void Shader::SetUniform1iv(const std::string& name, const unsigned int count, const int* values) const
 {
     GLint uniformLocation = GetUniformLocation(name);
     glUniform1iv(uniformLocation, count, values);
@@ -151,7 +151,7 @@ void Shader::SetUniform3f(const std::string& name, const float v0, const float v
     glUniform3f(uniformLocation, v0, v1, v2);
 }
 
-void Shader::SetUniform3fv(const std::string& name, const int count, const float* values) const
+void Shader::SetUniform3fv(const std::string& name, const unsigned int count, const float* values) const
 {
     GLint uniformLocation = GetUniformLocation(name);
     glUniform3fv(uniformLocation, count, values);
