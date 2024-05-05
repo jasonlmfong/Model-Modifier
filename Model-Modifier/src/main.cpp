@@ -275,11 +275,12 @@ int main()
         }
 
         // adjust FOV using vertical scroll
-        camera.m_FOV -= Input::GetScrollY() * 2.0f;
-        camera.m_FOV < 20.0f ? camera.m_FOV = 20.0f : NULL;
-        camera.m_FOV > 110.0f ? camera.m_FOV = 110.0f : NULL;
-        projMatrix = glm::perspective(glm::radians(camera.m_FOV), aspectRatio, 0.1f, 1000.0f);
-        Input::ResetScroll();
+        if (Input::GetScrollY() != 0)
+        {
+            camera.changeFOV(Input::GetScrollY());
+            projMatrix = glm::perspective(glm::radians(camera.m_FOV), aspectRatio, 0.1f, 1000.0f);
+            Input::ResetScroll();
+        }
 
         ////////// clearing per frame //////////
         glClearColor(0.80f, 0.90f, 0.96f, 1.00f);

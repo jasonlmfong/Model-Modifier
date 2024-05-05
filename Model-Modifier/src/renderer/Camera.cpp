@@ -20,7 +20,14 @@ void Camera::MoveCamera(glm::vec3 direction, float speed)
 void Camera::RotateCamera(float deltaPitch, float deltaYaw, float deltaDist)
 {
     GetYawPitchDist(); // set these properly first
-    m_Pitch += deltaPitch;
+    { // makes sure the pitch doesn't flip
+        if (m_Pitch + deltaPitch > 1.5f)
+            m_Pitch = 1.5f;
+        else if (m_Pitch + deltaPitch < -1.5f)
+            m_Pitch = -1.5f;
+        else
+            m_Pitch += deltaPitch;
+    }
     m_Yaw += deltaYaw;
     m_Dist += deltaDist;
 
@@ -29,6 +36,13 @@ void Camera::RotateCamera(float deltaPitch, float deltaYaw, float deltaDist)
     m_CameraFront = -position;
 
     SetViewMatrix();
+}
+
+void Camera::changeFOV(float scrollY)
+{
+    m_FOV -= scrollY * 2.0f;
+    m_FOV < 20.0f ? m_FOV = 20.0f : NULL;
+    m_FOV > 110.0f ? m_FOV = 110.0f : NULL;
 }
 
 glm::vec3 Camera::GetPosOnSphere()

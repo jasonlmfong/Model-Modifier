@@ -21,12 +21,12 @@ public:
 	float m_FOV;
 
 public:
-	Camera();
 	Camera(float pitch, float yaw, float distance);
 	~Camera();
 
 	void MoveCamera(glm::vec3 direction, float speed); 
 	void RotateCamera(float deltaPitch, float deltaYaw, float deltaDist);
+	void changeFOV(float scrollY);
 
 	glm::vec3 GetPosOnSphere();
 	void GetYawPitchDist();
