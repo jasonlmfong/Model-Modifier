@@ -24,7 +24,7 @@
 #include "scene/Light.h"
 #include "scene/surface/Surface.h"
 
-enum shader
+enum shaderEnum
 {
     GOURAND,
     NORMAL,
@@ -83,31 +83,32 @@ int main()
     // shaders
     std::string phongVertexPath = "res/shaders/phong.vert";
     std::string phongFragmentPath = "res/shaders/phong.frag";
-    Shader phongShader(phongVertexPath, phongFragmentPath);
-
+    ShaderProgram phongShader(phongVertexPath, phongFragmentPath);
+    
     std::string blinnPhongFragmentPath = "res/shaders/blinnPhong.frag";
-    Shader blinnPhongShader(phongVertexPath, blinnPhongFragmentPath);
+    ShaderProgram blinnPhongShader(phongVertexPath, blinnPhongFragmentPath);
 
     std::string normalVertexPath = "res/shaders/normal.vert";
     std::string normalFragmentPath = "res/shaders/normal.frag";
-    Shader normalShader(normalVertexPath, normalFragmentPath);
+    ShaderProgram normalShader(normalVertexPath, normalFragmentPath);
 
     std::string gourandVertexPath = "res/shaders/gourand.vert";
     std::string gourandFragmentPath = "res/shaders/gourand.frag";
-    Shader gourandShader(gourandVertexPath, gourandFragmentPath);
+    ShaderProgram gourandShader(gourandVertexPath, gourandFragmentPath);
 
     std::string goochFragmentPath = "res/shaders/gooch.frag";
-    Shader goochShader(phongVertexPath, goochFragmentPath);
+    ShaderProgram goochShader(phongVertexPath, goochFragmentPath);
 
     std::string celFragmentPath = "res/shaders/cel.frag";
-    Shader celShader(phongVertexPath, celFragmentPath);
+    ShaderProgram celShader(phongVertexPath, celFragmentPath);
 
     std::string cookTorranceFragmentPath = "res/shaders/cookTorrance.frag";
-    Shader cookTorranceShader(phongVertexPath, cookTorranceFragmentPath);
+    ShaderProgram cookTorranceShader(phongVertexPath, cookTorranceFragmentPath);
 
     int currShader = NORMAL;
     int nextShader;
-    Shader shader = normalShader;
+    ShaderProgram shader = normalShader;
+    shader.Bind();
 
     // camera setup
     float yaw = 1.5f; // radians
@@ -132,9 +133,6 @@ int main()
     // Cook-Torrance variables
     float metallic = 0.2f;
     float roughness = 0.3f;
-
-    // upload uniforms
-    shader.Bind();
 
     // openGL settings
     glEnable(GL_DEPTH_TEST);

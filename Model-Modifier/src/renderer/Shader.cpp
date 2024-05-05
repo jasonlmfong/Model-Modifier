@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 
-Shader::Shader(const std::string &vertexFilepath, const std::string &fragmentFilepath)
+ShaderProgram::ShaderProgram(const std::string &vertexFilepath, const std::string &fragmentFilepath)
 {
     std::string vertexSource, fragmentSource;
 
@@ -107,63 +107,63 @@ Shader::Shader(const std::string &vertexFilepath, const std::string &fragmentFil
     glDeleteShader(fragmentShader);
 }
 
-Shader::~Shader()
+ShaderProgram::~ShaderProgram()
 {
     glDeleteProgram(m_ID);
 }
 
-void Shader::Bind() const
+void ShaderProgram::Bind() const
 {
     glUseProgram(m_ID);
 }
 
-void Shader::Unbind() const
+void ShaderProgram::Unbind() const
 {
     glUseProgram(0);
 }
 
-GLuint Shader::GetID() const
+GLuint ShaderProgram::GetID() const
 {
     return m_ID;
 }
 
-void Shader::SetUniform1i(const std::string& name, const int &value) const
+void ShaderProgram::SetUniform1i(const std::string& name, const int &value) const
 {
     GLint uniformLocation = GetUniformLocation(name);
     glUniform1i(uniformLocation, value);
 }
 
-void Shader::SetUniform1iv(const std::string& name, const unsigned int count, const int* values) const
+void ShaderProgram::SetUniform1iv(const std::string& name, const unsigned int count, const int* values) const
 {
     GLint uniformLocation = GetUniformLocation(name);
     glUniform1iv(uniformLocation, count, values);
 }
 
-void Shader::SetUniform1f(const std::string& name, const float f) const
+void ShaderProgram::SetUniform1f(const std::string& name, const float f) const
 {
     GLint uniformLocation = GetUniformLocation(name);
     glUniform1f(uniformLocation, f);
 }
 
-void Shader::SetUniform3f(const std::string& name, const float v0, const float v1, const float v2) const
+void ShaderProgram::SetUniform3f(const std::string& name, const float v0, const float v1, const float v2) const
 {
     GLint uniformLocation = GetUniformLocation(name);
     glUniform3f(uniformLocation, v0, v1, v2);
 }
 
-void Shader::SetUniform3fv(const std::string& name, const unsigned int count, const float* values) const
+void ShaderProgram::SetUniform3fv(const std::string& name, const unsigned int count, const float* values) const
 {
     GLint uniformLocation = GetUniformLocation(name);
     glUniform3fv(uniformLocation, count, values);
 }
 
-void Shader::SetUniformMat4f(const std::string &name, const glm::mat4 &value) const
+void ShaderProgram::SetUniformMat4f(const std::string &name, const glm::mat4 &value) const
 {
     GLint uniformLocation = GetUniformLocation(name);
     glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, &value[0][0]);
 }
 
-GLint Shader::GetUniformLocation(const std::string &name) const
+GLint ShaderProgram::GetUniformLocation(const std::string &name) const
 {
     return glGetUniformLocation(m_ID, name.c_str());
 }
