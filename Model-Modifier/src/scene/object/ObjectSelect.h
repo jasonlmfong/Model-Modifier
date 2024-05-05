@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <unordered_map>
 
 #include "Object.h"
@@ -43,7 +44,7 @@ public:
     Object findObj(unsigned int obj);
 
 public:
-    std::unordered_map<unsigned int, const char*> m_Filepaths
+    std::unordered_map<unsigned int, const std::string> m_Filepaths
     {
         { ANKYLOSAURUS, "res/objects/ankylosaurus.obj" },
         { ARMADILLO, "res/objects/armadillo.obj" },
