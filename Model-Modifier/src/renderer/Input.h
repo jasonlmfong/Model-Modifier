@@ -19,7 +19,8 @@ public:
 private:
 	// Input events
 	static void SetCallbacks();
-	static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+	static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+	static void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset);
 	
 	static GLFWwindow* m_WindowID;
 	static float m_ScrollX;
