@@ -5,11 +5,11 @@
 #include "glad/glad.h"
 #include "../external/glm/glm.hpp"
 
-class Shader
+class ShaderProgram
 {
 public:
-	Shader(const std::string &vertexFilepath, const std::string &fragmentFilepath);
-	~Shader();
+	ShaderProgram(const std::string &vertexFilepath, const std::string &fragmentFilepath);
+	~ShaderProgram();
 
 	void Bind() const;
 	void Unbind() const;
