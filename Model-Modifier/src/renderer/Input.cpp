@@ -13,6 +13,7 @@ void Input::Init(GLFWwindow* window)
 void Input::SetCallbacks()
 {
     //glfwSetKeyCallback(m_WindowID, keyboard);
+    glfwSetFramebufferSizeCallback(m_WindowID, Input::FramebufferSizeCallback);
     glfwSetScrollCallback(m_WindowID, Input::ScrollCallback);
 }
 
@@ -42,8 +43,13 @@ void Input::ResetScroll()
     m_ScrollY = 0.0f;
 }
 
-void Input::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+void Input::FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
-	m_ScrollX = (float)xoffset;
-	m_ScrollY = (float)yoffset;
+    glViewport(0, 0, width, height);
+}
+
+void Input::ScrollCallback(GLFWwindow* window, double xOffset, double yOffset)
+{
+	m_ScrollX = (float)xOffset;
+	m_ScrollY = (float)yOffset;
 }
