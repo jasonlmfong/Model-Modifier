@@ -213,6 +213,9 @@ int main()
     float metallic = 0.2f;
     float roughness = 0.3f;
 
+    // Apply modification algorithm
+    bool ModifyModel = false;
+
     // openGL settings
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -325,67 +328,37 @@ int main()
             if (ImGui::Button("Original"))
             {
                 obj = objects.findObj(currObject); // search for the object requested
-                mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
-
-                objectVA.Bind();
-                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
-                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+                ModifyModel = true;
             }
             if (ImGui::Button("Beehive Surface"))
             {
                 Surface BH(obj);
                 obj = BH.Beehive();
-                mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
-
-                objectVA.Bind();
-                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
-                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+                ModifyModel = true;
             }
             if (ImGui::Button("SnowFlake Surface"))
             {
                 Surface SF(obj);
                 obj = SF.Snowflake();
-                mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
-
-                objectVA.Bind();
-                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
-                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+                ModifyModel = true;
             }
             if (ImGui::Button("Catmull Clark Subdivision Surface"))
             {
                 Surface CC(obj);
                 obj = CC.CatmullClark();
-                mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
-
-                objectVA.Bind();
-                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
-                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+                ModifyModel = true;
             }
             if (ImGui::Button("Doo Sabin Subdivision Surface"))
             {
                 Surface DS(obj);
                 obj = DS.DooSabin();
-                mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
-
-                objectVA.Bind();
-                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
-                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+                ModifyModel = true;
             }
             if (ImGui::Button("Loop Subdivision Surface"))
             {
                 Surface Lo(obj);
                 obj = Lo.Loop();
-                mesh.Rebuild(obj); // rebuild mesh based on object info
-                numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
-
-                objectVA.Bind();
-                objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
-                objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+                ModifyModel = true;
             }
             //if (ImGui::Button("Garland Heckbert Simplication Surface"))
             //{
@@ -648,12 +621,20 @@ int main()
 
             obj = objects.findObj(currObject); // search for the object requested
             
+            ModifyModel = true;
+        }
+
+        ////////// apply modification //////////
+        if (ModifyModel)
+        {
             mesh.Rebuild(obj); // rebuild mesh based on object info
             numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
 
             objectVA.Bind();
             objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
             objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
+
+            ModifyModel = false;
         }
 
         ////////// change render mode //////////
