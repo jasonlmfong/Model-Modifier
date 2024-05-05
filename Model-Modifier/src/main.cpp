@@ -42,6 +42,83 @@ enum renderMode
     POINTCLOUD
 };
 
+static void processKeyboardInput(GLFWwindow* window, Camera& camera, float deltaTime)
+{
+    // close the window
+    if (Input::IsKeyDown(GLFW_KEY_ESCAPE))
+    {
+        glfwSetWindowShouldClose(window, true);
+    }
+
+    // Move forward
+    if (Input::IsKeyDown(GLFW_KEY_W))
+    {
+        camera.MoveCamera(camera.GetCameraFront(), deltaTime * 5.0f);
+    }
+    // Move backward
+    if (Input::IsKeyDown(GLFW_KEY_S))
+    {
+        camera.MoveCamera(-camera.GetCameraFront(), deltaTime * 5.0f);
+    }
+    // Strafe left
+    if (Input::IsKeyDown(GLFW_KEY_A))
+    {
+        camera.MoveCamera(camera.GetCameraRight(), deltaTime * 5.0f);
+    }
+    // Strafe right
+    if (Input::IsKeyDown(GLFW_KEY_D))
+    {
+        camera.MoveCamera(-camera.GetCameraRight(), deltaTime * 5.0f);
+    }
+    // fly up
+    if (Input::IsKeyDown(GLFW_KEY_SPACE))
+    {
+        camera.MoveCamera(camera.GetCameraUp(), deltaTime * 5.0f);
+    }
+    // drop down
+    if (Input::IsKeyDown(GLFW_KEY_LEFT_CONTROL))
+    {
+        camera.MoveCamera(-camera.GetCameraUp(), deltaTime * 5.0f);
+    }
+
+    // move closer
+    if (Input::IsKeyDown(GLFW_KEY_K))
+    {
+        float deltaDist = -deltaTime;
+        camera.RotateCamera(0, 0, deltaDist);
+    }
+    // move further
+    if (Input::IsKeyDown(GLFW_KEY_J))
+    {
+        float deltaDist = deltaTime;
+        camera.RotateCamera(0, 0, deltaDist);
+    }
+    // rotate left
+    if (Input::IsKeyDown(GLFW_KEY_LEFT))
+    {
+        float deltaYaw = deltaTime;
+        camera.RotateCamera(0, deltaYaw, 0);
+    }
+    // rotate right
+    if (Input::IsKeyDown(GLFW_KEY_RIGHT))
+    {
+        float deltaYaw = -deltaTime;
+        camera.RotateCamera(0, deltaYaw, 0);
+    }
+    // rotate up
+    if (Input::IsKeyDown(GLFW_KEY_UP))
+    {
+        float deltaPitch = deltaTime;
+        camera.RotateCamera(deltaPitch, 0, 0);
+    }
+    // rotate down
+    if (Input::IsKeyDown(GLFW_KEY_DOWN))
+    {
+        float deltaPitch = -deltaTime;
+        camera.RotateCamera(deltaPitch, 0, 0);
+    }
+}
+
 int main()
 {
     unsigned int screenWidth = 1440;
@@ -180,79 +257,7 @@ int main()
         currentTime = (float) glfwGetTime();
         deltaTime = currentTime - lastTime;
 
-        // close the window
-        if (Input::IsKeyDown(GLFW_KEY_ESCAPE))
-        {
-            exit(0);
-        }
-
-        // Move forward
-        if (Input::IsKeyDown(GLFW_KEY_W))
-        {
-            camera.MoveCamera(camera.GetCameraFront(), deltaTime * 5.0f);
-        }
-        // Move backward
-        if (Input::IsKeyDown(GLFW_KEY_S))
-        {
-            camera.MoveCamera(-camera.GetCameraFront(), deltaTime * 5.0f);
-        }
-        // Strafe left
-        if (Input::IsKeyDown(GLFW_KEY_A))
-        {
-            camera.MoveCamera(camera.GetCameraRight(), deltaTime * 5.0f);
-        }
-        // Strafe right
-        if (Input::IsKeyDown(GLFW_KEY_D))
-        {
-            camera.MoveCamera(-camera.GetCameraRight(), deltaTime * 5.0f);
-        }
-        // fly up
-        if (Input::IsKeyDown(GLFW_KEY_SPACE))
-        {
-            camera.MoveCamera(camera.GetCameraUp(), deltaTime * 5.0f);
-        }
-        // drop down
-        if (Input::IsKeyDown(GLFW_KEY_LEFT_CONTROL))
-        {
-            camera.MoveCamera(-camera.GetCameraUp(), deltaTime * 5.0f);
-        }
-
-        // move closer
-        if (Input::IsKeyDown(GLFW_KEY_K))
-        {
-            float deltaDist = -deltaTime;
-            camera.RotateCamera(0, 0, deltaDist);
-        }
-        // move further
-        if (Input::IsKeyDown(GLFW_KEY_J))
-        {
-            float deltaDist = deltaTime;
-            camera.RotateCamera(0, 0, deltaDist);
-        }
-        // rotate left
-        if (Input::IsKeyDown(GLFW_KEY_LEFT))
-        {
-            float deltaYaw = deltaTime;
-            camera.RotateCamera(0, deltaYaw, 0);
-        }
-        // rotate right
-        if (Input::IsKeyDown(GLFW_KEY_RIGHT))
-        {
-            float deltaYaw = -deltaTime;
-            camera.RotateCamera(0, deltaYaw, 0);
-        }
-        // rotate up
-        if (Input::IsKeyDown(GLFW_KEY_UP))
-        {
-            float deltaPitch = deltaTime;
-            camera.RotateCamera(deltaPitch, 0, 0);
-        }
-        // rotate down
-        if (Input::IsKeyDown(GLFW_KEY_DOWN))
-        {
-            float deltaPitch = -deltaTime;
-            camera.RotateCamera(deltaPitch, 0, 0);
-        }
+        processKeyboardInput(windowID, camera, deltaTime);
         
         // mouse movement
         glfwGetCursorPos(windowID, &currXpos, &currYpos);
