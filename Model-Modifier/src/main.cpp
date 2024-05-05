@@ -24,6 +24,8 @@
 #include "scene/Light.h"
 #include "scene/surface/Surface.h"
 
+#include "ImguiSections.h"
+
 enum shaderEnum
 {
     GOURAND,
@@ -299,42 +301,19 @@ int main()
             if (ImGui::CollapsingHeader("Geometric objects"))
             {
                 ImGui::Indent();
-
-                ImGui::RadioButton("Crumbled", &nextObject, CRUMPLED);
-                ImGui::RadioButton("Cube", &nextObject, CUBE);
-                ImGui::RadioButton("Double torus", &nextObject, DOUBLETORUS);
-                ImGui::RadioButton("Fandisk", &nextObject, FANDISK);
-                ImGui::RadioButton("Icosahedron", &nextObject, ICOSA);
-                ImGui::RadioButton("Octahedron", &nextObject, OCTA);
-                ImGui::RadioButton("Oloid", &nextObject, OLOID);
-                ImGui::RadioButton("Sphere", &nextObject, SPHERE);
-                ImGui::RadioButton("Star", &nextObject, STAR);
-                ImGui::RadioButton("T-Shape", &nextObject, T);
-                ImGui::RadioButton("Torus", &nextObject, TORUS);
-                ImGui::RadioButton("Tubes", &nextObject, TUBES);
-
+                for (std::pair<unsigned int, const char *> displayName : geometricObjectNames)
+                {
+                    ImGui::RadioButton(displayName.second, &nextObject, displayName.first);
+                }
                 ImGui::Unindent();
             }
             if (ImGui::CollapsingHeader("Model objects"))
             {
                 ImGui::Indent();
-
-                ImGui::RadioButton("Ankylosaurus", &nextObject, ANKYLOSAURUS);
-                ImGui::RadioButton("Armadillo", &nextObject, ARMADILLO);
-                ImGui::RadioButton("Bob (Tri)", &nextObject, BOB);
-                ImGui::RadioButton("Bob (Quad)", &nextObject, BOB2);
-                ImGui::RadioButton("Bunny", &nextObject, BUNNY);
-                ImGui::RadioButton("Cow (Tri)", &nextObject, COW);
-                ImGui::RadioButton("Cow (Mixed)", &nextObject, COW2);
-                ImGui::RadioButton("Cow head", &nextObject, COWHEAD);
-                ImGui::RadioButton("Face", &nextObject, FACE);
-                ImGui::RadioButton("Gargoyle", &nextObject, GARGOYLE);
-                ImGui::RadioButton("Kitten", &nextObject, KITTEN);
-                ImGui::RadioButton("Shuttle", &nextObject, SHUTTLE);
-                ImGui::RadioButton("Suzanne", &nextObject, SUZANNE);
-                ImGui::RadioButton("Teapot", &nextObject, TEAPOT);
-                ImGui::RadioButton("Teddy", &nextObject, TEDDY);
-
+                for (std::pair<unsigned int, const char*> displayName : modelObjectNames)
+                {
+                    ImGui::RadioButton(displayName.second, &nextObject, displayName.first);
+                }
                 ImGui::Unindent();
             }
             ImGui::Unindent();
