@@ -1,15 +1,15 @@
-#include "Objects.h"
+#include "ObjectSelect.h"
 
-Objects::Objects()
+ObjectSelect::ObjectSelect()
 {
 }
 
-Objects::~Objects()
+ObjectSelect::~ObjectSelect()
 {
 	m_Objects.clear();
 }
 
-Object Objects::findObj(unsigned int obj)
+Object ObjectSelect::findObj(unsigned int obj)
 {
 	auto search = m_Objects.find(obj);
 	if (search != m_Objects.end())

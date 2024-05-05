@@ -78,9 +78,6 @@
     <ClCompile Include="src\scene\object\Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\object\Objects.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\scene\surface\Surface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -100,6 +97,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\util\OrderVertices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\object\ObjectSelect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1019,9 +1019,6 @@
     <ClInclude Include="src\scene\object\Object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\object\Objects.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\scene\surface\Surface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1035,6 +1032,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\util\OrderVertices.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\SaveImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\object\ObjectSelect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

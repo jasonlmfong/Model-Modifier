@@ -35,11 +35,11 @@ enum objectEnum
     TUBES,
 };
 
-class Objects
+class ObjectSelect
 {
 public:
-    Objects();
-	~Objects();
+    ObjectSelect();
+	~ObjectSelect();
     Object findObj(unsigned int obj);
 
 public:

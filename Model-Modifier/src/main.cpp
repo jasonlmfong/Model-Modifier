@@ -18,7 +18,7 @@
 #include "renderer/Camera.h"
 #include "renderer/SaveImage.h"
 #include "scene/object/Object.h"
-#include "scene/object/Objects.h"
+#include "scene/object/ObjectSelect.h"
 #include "scene/Mesh.h"
 #include "scene/Material.h"
 #include "scene/Light.h"
@@ -50,7 +50,7 @@ int main()
     Window window(screenWidth, screenHeight, "Model Modifier", NULL);
 
     // build object from obj file
-    Objects objects;
+    ObjectSelect objects;
     int currObject = BUNNY;
     int nextObject;
     Object obj = objects.findObj(currObject);
