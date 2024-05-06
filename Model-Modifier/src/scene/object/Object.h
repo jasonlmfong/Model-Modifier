@@ -25,6 +25,8 @@ public:
 
 	void TriangulateFaces();
 
+	void MakeTriangleMesh();
+
 public:
 	glm::vec3 m_Min;
 	glm::vec3 m_Max;
