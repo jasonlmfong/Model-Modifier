@@ -130,7 +130,7 @@ glm::vec3 Surface::ComputeFaceNormal(FaceRecord face)
     glm::vec3 pos0 = m_Vertices[face.verticesIdx[0]].position;
     glm::vec3 pos1 = m_Vertices[face.verticesIdx[1]].position;
     glm::vec3 pos2 = m_Vertices[face.verticesIdx[2]].position;
-    return glm::normalize(glm::cross(pos1 - pos0, pos2 - pos0));
+    return ComputeFaceNormal(pos0, pos1, pos2);
 }
 
 glm::vec3 Surface::ComputeFaceNormal(glm::vec3 pos0, glm::vec3 pos1, glm::vec3 pos2)
