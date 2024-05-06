@@ -1,8 +1,8 @@
 #pragma once
 
+#include <set>
 #include <vector>
 #include <unordered_map>
-#include <set>
 
 #include "../../external/glm/ext/vector_float3.hpp"
 #include "../../external/glm/ext/vector_uint2.hpp"
