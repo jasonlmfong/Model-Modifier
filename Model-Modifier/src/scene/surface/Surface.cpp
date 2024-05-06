@@ -130,28 +130,10 @@ glm::vec3 Surface::ComputeFaceNormal(FaceRecord face)
     glm::vec3 pos0 = m_Vertices[face.verticesIdx[0]].position;
     glm::vec3 pos1 = m_Vertices[face.verticesIdx[1]].position;
     glm::vec3 pos2 = m_Vertices[face.verticesIdx[2]].position;
-    return glm::normalize(glm::cross(pos1 - pos0, pos2 - pos0));
+    return ComputeFaceNormal(pos0, pos1, pos2);
 }
 
 glm::vec3 Surface::ComputeFaceNormal(glm::vec3 pos0, glm::vec3 pos1, glm::vec3 pos2)
 {
     return glm::normalize(glm::cross(pos1 - pos0, pos2 - pos0));
-}
-
-// computer quadric matrix by summing all K_p matrices of a vertice v0
-glm::mat4 Surface::ComputeQuadric(VertexRecord v0)
-{
-    glm::mat4 quadric{ 0.0f };
-    // for each neighbouring face, compute K_p
-    glm::vec3 position = v0.position;
-    for (unsigned int faceIdx : v0.adjFacesIdx)
-    {
-        FaceRecord face = m_Faces[faceIdx];
-        glm::vec3 faceNormal = ComputeFaceNormal(face);
-        glm::vec4 plane{ faceNormal, -glm::dot(faceNormal, position) }; // plane equation ax+by+cz+d = 0
-
-        quadric += glm::outerProduct(plane, plane); // K_p
-    }
-
-    return quadric;
 }

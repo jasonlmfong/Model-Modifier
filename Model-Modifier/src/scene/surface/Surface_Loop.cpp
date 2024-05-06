@@ -74,7 +74,8 @@ Object Surface::Loop()
     }
 
     // update old (even) vertices (per vertex)
-    for (unsigned int i = 0; i < m_Vertices.size(); i++)
+    unsigned int numVertices = static_cast<unsigned int>(m_Vertices.size());
+    for (unsigned int i = 0; i < numVertices; i++)
     {
         VertexRecord vert = m_Vertices[i];
         glm::vec3 vertPos = vert.position;
