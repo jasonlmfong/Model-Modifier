@@ -325,9 +325,15 @@ int main()
         if (ImGui::CollapsingHeader("Modify Model"))
         {
             ImGui::Indent();
+
             if (ImGui::Button("Original"))
             {
                 obj = objects.findObj(currObject); // search for the object requested
+                ModifyModel = true;
+            }
+            if (ImGui::Button("Triangulate Surface"))
+            {
+                obj.MakeTriangleMesh();
                 ModifyModel = true;
             }
             if (ImGui::Button("Beehive Surface"))

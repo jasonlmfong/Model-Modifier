@@ -148,3 +148,9 @@ void Object::TriangulateFaces()
 
     m_TriFaceIndices = triFaces;
 }
+
+void Object::MakeTriangleMesh()
+{
+    m_FaceIndices = m_TriFaceIndices;
+    m_NumPolygons = { {3, static_cast<unsigned int>(m_TriFaceIndices.size())} };
+}
