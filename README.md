@@ -3,8 +3,9 @@
 ![Sample smoothed star rendering](Model-Modifier/gallery/Screenshot_2024-4-25_202228-2.png)
 
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/jasonlmfong/Model-Modifier/blob/main/LICENSE)
+[![Build Status](https://github.com/jasonlmfong/Model-Modifier/actions/workflows/ci.yml/badge.svg)](https://github.com/jasonlmfong/Model-Modifier/actions/workflows/ci.yml)
 
-This repository contains my `C++17` and `OpenGL` implementation of a mesh viewer for `.obj` files, with various algorithms for interacting with the meshes, and various shading techniques.
+Model-Modifier is my `C++17` and `OpenGL` implementation of an interactive mesh renderer/viewer for `.obj` files, with various algorithms to apply to the meshes, and various shading techniques.
 
 ## Features
 
@@ -142,3 +143,11 @@ Here I try to list all sources wherever possible.
 | Suzanne      | [Blender](https://www.blender.org/)                                                                    |
 | Teapot       | [Martin Newell](https://users.cs.utah.edu/~dejohnso/models/teapot.html)                                |
 | Teddy        | Unknown                                                                                                |
+
+## Build
+
+Create the solution file by running:
+
+`cmake .`
+
+open the solution file however you like.
