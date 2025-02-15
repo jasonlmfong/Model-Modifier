@@ -1,0 +1,33 @@
+name: Build project
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  ci-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Configure CMake
+        uses: threeal/cmake-action@v2.1.0
+        with:
+          source-dir: .
+          build-dir: .
+          options: |
+            CMAKE_BUILD_TYPE=Release
+
+      - name: Build Solution with MSBuild
+        run: |
+          msbuild Model-Modifier.sln /p:Configuration=Release /p:Platform=x64
+        shell: cmd
