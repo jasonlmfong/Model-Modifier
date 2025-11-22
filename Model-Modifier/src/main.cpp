@@ -135,6 +135,10 @@ int main()
     Object obj = objects.findObj(currObject);
     Material meshMat;
 
+    // object triangle count (QEM)
+    int triCount = static_cast<int>(obj.m_TriFaceIndices.size());
+    int desiredTriCount = triCount;
+
     VertexBufferLayout layout;
     layout.Push<float>(3); // 3d coordinates
     layout.Push<float>(3); // normals
@@ -366,17 +370,17 @@ int main()
                 obj = Lo.Loop();
                 ModifyModel = true;
             }
-            //if (ImGui::Button("Garland Heckbert Simplication Surface"))
-            //{
-            //    Surface GH(obj);
-            //    obj = GH.QEM();
-            //    mesh.Rebuild(obj); // rebuild mesh based on object info
-            //    numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+            if (ImGui::Button("Garland Heckbert Simplification Surface"))
+            {
+                obj.MakeTriangleMesh(); // Triangulate first
+                Surface GH(obj);
+                obj = GH.QEM(desiredTriCount);
+                ModifyModel = true;
+            }
+            ImGui::Indent();
+            ImGui::SliderInt("Desired count", &desiredTriCount, triCount/5, triCount);
+            ImGui::Unindent();
 
-            //    objectVA.Bind();
-            //    objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);
-            //    objectIB.AssignData(mesh.m_OutIndices, mesh.m_OutNumIdx, DRAW_MODE::STATIC);
-            //}
             ImGui::Unindent();
         }
 
@@ -626,6 +630,7 @@ int main()
             currObject = nextObject;
 
             obj = objects.findObj(currObject); // search for the object requested
+            triCount = static_cast<int>(obj.m_TriFaceIndices.size()); desiredTriCount = triCount;
             
             ModifyModel = true;
         }
@@ -635,6 +640,7 @@ int main()
         {
             mesh.Rebuild(obj); // rebuild mesh based on object info
             numFaces = static_cast<unsigned int>(mesh.m_Object.m_FaceIndices.size()); // update number of faces
+            triCount = static_cast<int>(obj.m_TriFaceIndices.size()); desiredTriCount = triCount;
 
             objectVA.Bind();
             objectVB.AssignData(mesh.m_OutVertices, mesh.m_OutNumVert * sizeof(float), DRAW_MODE::STATIC);

@@ -23,8 +23,8 @@ Model-Modifier is my `C++17` and `OpenGL` implementation of an interactive mesh 
     - [x] [Catmull-Clark](https://en.wikipedia.org/wiki/Catmull%E2%80%93Clark_subdivision_surface)
     - [x] [Doo-Sabin](https://en.wikipedia.org/wiki/Doo%E2%80%93Sabin_subdivision_surface)
     - [x] [Loop](https://en.wikipedia.org/wiki/Loop_subdivision_surface)
-  - [ ] Simplification surface
-    - [ ] [QEM](https://www.cs.cmu.edu/~./garland/Papers/quadrics.pdf)
+  - [x] Simplification surface
+    - [x] [QEM](https://www.cs.cmu.edu/~./garland/Papers/quadrics.pdf)
 - [x] Shading options
   - [x] Flat shading (Per-face normals)
   - [x] Smooth shading (Per-vertex normals)
