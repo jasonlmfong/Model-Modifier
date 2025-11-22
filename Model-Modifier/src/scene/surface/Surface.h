@@ -3,6 +3,7 @@
 #include <set>
 #include <vector>
 #include <unordered_map>
+#include <queue>
 
 #include "../../external/glm/ext/vector_float3.hpp"
 #include "../../external/glm/ext/vector_uint2.hpp"
@@ -37,6 +38,24 @@ struct FaceRecord
 	std::vector<unsigned int> edgesIdx; // each face can have n edges
 };
 
+// QEM
+struct ValidPair
+{
+	unsigned int vertOne;
+	unsigned int vertTwo;
+	bool edge;
+	float error;
+	glm::vec3 newVert;
+};
+
+struct CompareValidPairs
+{
+	bool operator()(const ValidPair& a, const ValidPair& b) const
+	{
+		return a.error > b.error; // min heap
+	}
+};
+
 class Surface
 {
 public:
@@ -62,6 +81,10 @@ public:
 	);
 	Object LoOutputOBJ(std::vector<glm::vec3> edgePoints);
 	glm::mat4 ComputeQuadric(VertexRecord v0);
+	glm::mat4 BuildQuadricSolverMatrix(const glm::mat4& Quad);
+	void ComputeOptimalVertexAndError(ValidPair& validPair, const glm::mat4& quadric1, const glm::mat4& quadric2);
+	void UpdateAdjacencyIndices(std::vector<unsigned int>& adjFaces, const std::vector<unsigned int>& removedFaceIndices);
+	Object GHOutputOBJ();
 
 	// Modification algorithms
 	Object Beehive();
@@ -69,7 +92,7 @@ public:
 	Object CatmullClark();
 	Object DooSabin();
 	Object Loop();
-	Object QEM();
+	Object QEM(unsigned int desiredCount);
 
 public:
 	std::vector<VertexRecord> m_Vertices;
@@ -80,4 +103,6 @@ public:
 	glm::vec3 m_Max;
 
 	std::unordered_map<unsigned int, std::unordered_map<unsigned int, unsigned int>> m_EdgeIdxLookup;
+private:
+	std::priority_queue<ValidPair, std::vector<ValidPair>, CompareValidPairs> m_QuadricErrorHeap;
 };
