@@ -209,3 +209,10 @@ MigrationBackup/
 *.exe
 *.out
 *.app
+
+## CMake build
+CMakeFiles/
+*.vcxproj*
+cmake_install.cmake
+CMakeCache.txt
+*.sln
