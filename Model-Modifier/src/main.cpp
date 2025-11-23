@@ -380,6 +380,20 @@ int main()
             ImGui::Indent();
             ImGui::SliderInt("Desired count", &desiredTriCount, triCount/5, triCount);
             ImGui::Unindent();
+            if (ImGui::Button("Liu Rahimzadeh Zordan Simplification Surface"))
+            {
+                obj.MakeTriangleMesh(); // Triangulate first
+                Surface LRZ(obj);
+                static float alpha = 0.5f; // default balanced weight
+                obj = LRZ.LineQEM(desiredTriCount, alpha);
+                ModifyModel = true;
+            }
+            ImGui::Indent();
+            ImGui::SliderInt("Desired count", &desiredTriCount, triCount/5, triCount);
+            static float alpha = 0.5f;
+            ImGui::SliderFloat("Alpha (edge preservation)", &alpha, 0.0f, 1.0f);
+            ImGui::Text("0.0 = smooth, 0.5 = balanced, 1.0 = sharp edges");
+            ImGui::Unindent();
 
             ImGui::Unindent();
         }
