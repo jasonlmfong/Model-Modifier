@@ -46,6 +46,9 @@ struct ValidPair
 	bool edge;
 	float error;
 	glm::vec3 newVert;
+	// weight parameter balancing point vs line quadrics
+	// only for augmented version
+	float alpha;
 };
 
 struct CompareValidPairs
@@ -80,11 +83,16 @@ public:
 		std::unordered_map<unsigned int, std::vector<glm::vec3>> pointsPerEdge
 	);
 	Object LoOutputOBJ(std::vector<glm::vec3> edgePoints);
-	glm::mat4 ComputeQuadric(VertexRecord v0);
+	// Shared QEM helpers
+	glm::mat4 ComputePlaneQuadric(VertexRecord v0);
 	glm::mat4 BuildQuadricSolverMatrix(const glm::mat4& Quad);
 	void ComputeOptimalVertexAndError(ValidPair& validPair, const glm::mat4& quadric1, const glm::mat4& quadric2);
 	void UpdateAdjacencyIndices(std::vector<unsigned int>& adjFaces, const std::vector<unsigned int>& removedFaceIndices);
-	Object GHOutputOBJ();
+	Object QEMOutputOBJ();  // shared output builder for both QEM variants
+	// Line Quadric specific helpers
+	glm::vec3 ComputeVertexNormal(VertexRecord v0);
+	glm::mat4 ComputeLineQuadric(VertexRecord v0);
+	glm::mat4 ComputeWeightedQuadric(const glm::mat4& planeQuadric, const glm::mat4& lineQuadric, float alpha);
 
 	// Modification algorithms
 	Object Beehive();
@@ -93,6 +101,7 @@ public:
 	Object DooSabin();
 	Object Loop();
 	Object QEM(unsigned int desiredCount);
+	Object LineQEM(unsigned int desiredCount, float alpha = 0.5f);
 
 public:
 	std::vector<VertexRecord> m_Vertices;

@@ -485,6 +485,7 @@ set(Source_Files
     "src/scene/surface/Surface_CatmullClark.cpp"
     "src/scene/surface/Surface_DooSabin.cpp"
     "src/scene/surface/Surface_GarlandHeckbert.cpp"
+    "src/scene/surface/Surface_LiuRahimzadehZordan.cpp"
     "src/scene/surface/Surface_Loop.cpp"
     "src/scene/util/OrderVertices.cpp"
     "src/scene/util/PlaneProjection.cpp"

@@ -25,6 +25,7 @@ Model-Modifier is my `C++17` and `OpenGL` implementation of an interactive mesh 
     - [x] [Loop](https://en.wikipedia.org/wiki/Loop_subdivision_surface)
   - [x] Simplification surface
     - [x] [QEM](https://www.cs.cmu.edu/~./garland/Papers/quadrics.pdf)
+    - [x] [Line QEM](https://www.dgp.toronto.edu/~hsuehtil/pdf/lineQuadric.pdf)
 - [x] Shading options
   - [x] Flat shading (Per-face normals)
   - [x] Smooth shading (Per-vertex normals)
