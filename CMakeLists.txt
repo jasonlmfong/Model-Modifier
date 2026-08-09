@@ -59,28 +59,18 @@ if(MSVC)
 endif()
 
 ################################################################################
-# Nuget packages function stub.
+# OreRenderer dependency
 ################################################################################
-function(use_package TARGET PACKAGE VERSION)
-    message(WARNING "No implementation of use_package. Create yours. "
-                    "Package \"${PACKAGE}\" with version \"${VERSION}\" "
-                    "for target \"${TARGET}\" is ignored!")
-endfunction()
+include(FetchContent)
 
-################################################################################
-# Common utils
-################################################################################
-include(CMake/Utils.cmake)
+set(ORE_RENDERER_BUILD_DEMO OFF CACHE BOOL "" FORCE)
 
-################################################################################
-# Additional Global Settings(add specific info there)
-################################################################################
-include(CMake/GlobalSettingsInclude.cmake OPTIONAL)
-
-################################################################################
-# Use solution folders feature
-################################################################################
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+FetchContent_Declare(OreRenderer
+    GIT_REPOSITORY https://github.com/Ore-Software/OreRenderer.git
+    GIT_TAG        main
+    GIT_SHALLOW    TRUE
+)
+FetchContent_MakeAvailable(OreRenderer)
 
 ################################################################################
 # Sub-projects
