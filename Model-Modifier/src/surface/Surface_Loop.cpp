@@ -1,17 +1,15 @@
-# include "Surface.h"
+#include "Surface.h"
 
+////////// helpers to build the Mesh //////////
 
-////////// helpers to build the Object //////////
-
-Object Surface::LoOutputOBJ(std::vector<glm::vec3> edgePoints)
+static void LoWriteToMesh(Mesh& mesh, std::vector<glm::vec3>& edgePoints)
 {
-    // build new Object class (Loop style)
     std::vector<glm::vec3> VertexPos;
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
     std::vector<std::vector<unsigned int>> FaceIndices;
     std::unordered_map<unsigned int, unsigned int> NumberPolygons;
 
-    for (FaceRecord face : m_Faces)
+    for (FaceRecord& face : mesh.m_TopoFaces)
     {
         unsigned int n = static_cast<unsigned int>(face.verticesIdx.size());
 
@@ -19,11 +17,11 @@ Object Surface::LoOutputOBJ(std::vector<glm::vec3> edgePoints)
         std::vector<unsigned int> edgesIdx;
         for (unsigned int i = 0; i < n; i++)
         {
-            glm::vec3 vert = m_Vertices[face.verticesIdx[i]].position;
-            vertsIdx.push_back(getVertIndex(vert, VertexPos, VertLookup));
+            glm::vec3 vert = mesh.m_TopoVertices[face.verticesIdx[i]].position;
+            vertsIdx.push_back(mesh.GetVertIndex(vert, VertexPos, VertLookup));
 
-            glm::vec3 edge = edgePoints[getEdgeIndex({ face.verticesIdx[i], face.verticesIdx[(i + 1) % n] })];
-            edgesIdx.push_back(getVertIndex(edge, VertexPos, VertLookup));
+            glm::vec3 edge = edgePoints[mesh.GetEdgeIndex({ face.verticesIdx[i], face.verticesIdx[(i + 1) % n] })];
+            edgesIdx.push_back(mesh.GetVertIndex(edge, VertexPos, VertLookup));
         }
 
         // every n-gon gets one n-gon inscribed inside, and gets n more triangles
@@ -37,28 +35,27 @@ Object Surface::LoOutputOBJ(std::vector<glm::vec3> edgePoints)
         NumberPolygons[3] += n;
     }
 
-    // build object
-    Object Obj;
-    Obj.m_Min = m_Min; Obj.m_Max = m_Max;
-    Obj.m_VertexPos = VertexPos; Obj.m_FaceIndices = FaceIndices;
-    Obj.m_NumPolygons = NumberPolygons;
-    Obj.TriangulateFaces();
-
-    return Obj;
+    mesh.DestroyTopology();
+    mesh.DestroyRenderData();
+    mesh.m_VertexPos = std::move(VertexPos);
+    mesh.m_FaceIndices = std::move(FaceIndices);
+    mesh.m_NumPolygons = std::move(NumberPolygons);
+    mesh.TriangulateFaces();
 }
-
 
 ////////// algorithms //////////
 
 // Loop subdivision surface algorithm
-Object Surface::Loop()
+void SubdivideLoop(Mesh& mesh)
 {
-    unsigned int numEdges = static_cast<unsigned int>(m_Edges.size());
+    mesh.BuildTopology();
+
+    unsigned int numEdges = static_cast<unsigned int>(mesh.m_TopoEdges.size());
     // make new (odd) vertices (per edge)
     std::vector<glm::vec3> edgePoints(numEdges);
     for (unsigned int i = 0; i < numEdges; i++)
     {
-        EdgeRecord currEdge = m_Edges[i];
+        EdgeRecord currEdge = mesh.m_TopoEdges[i];
         if (currEdge.adjFacesIdx.size() == 1) // boundary edge
         {
             // ME point
@@ -67,33 +64,33 @@ Object Surface::Loop()
         else // edge borders 2 faces
         {
             // 3/8 face points + 2/8 edge point
-            edgePoints[i] = 0.375f * m_Faces[currEdge.adjFacesIdx[0]].facePoint +
-                0.375f * m_Faces[currEdge.adjFacesIdx[1]].facePoint +
+            edgePoints[i] = 0.375f * mesh.m_TopoFaces[currEdge.adjFacesIdx[0]].facePoint +
+                0.375f * mesh.m_TopoFaces[currEdge.adjFacesIdx[1]].facePoint +
                 0.25f * currEdge.midEdgePoint;
         }
     }
 
     // update old (even) vertices (per vertex)
-    unsigned int numVertices = static_cast<unsigned int>(m_Vertices.size());
+    unsigned int numVertices = static_cast<unsigned int>(mesh.m_TopoVertices.size());
     for (unsigned int i = 0; i < numVertices; i++)
     {
-        VertexRecord vert = m_Vertices[i];
+        VertexRecord vert = mesh.m_TopoVertices[i];
         glm::vec3 vertPos = vert.position;
         float alpha = 0.625f;
         glm::vec3 sumNeighbours{ 0 };
         for (unsigned int adjEdge : vert.adjEdgesIdx)
         {
-            sumNeighbours += 2.0f * m_Edges[adjEdge].midEdgePoint - vertPos;
+            sumNeighbours += 2.0f * mesh.m_TopoEdges[adjEdge].midEdgePoint - vertPos;
         }
         unsigned int neighbours = static_cast<unsigned int>(vert.adjEdgesIdx.size());
         if (neighbours == 2)
-            m_Vertices[i].position = 0.75f * vertPos + 0.125f * sumNeighbours;
+            mesh.m_TopoVertices[i].position = 0.75f * vertPos + 0.125f * sumNeighbours;
         else
         {
             float invNeigh = 1 / (float)neighbours;
-            m_Vertices[i].position = (1 - alpha) * sumNeighbours * invNeigh + alpha * vertPos;
+            mesh.m_TopoVertices[i].position = (1 - alpha) * sumNeighbours * invNeigh + alpha * vertPos;
         }
     }
 
-    return LoOutputOBJ(edgePoints);
+    LoWriteToMesh(mesh, edgePoints);
 }

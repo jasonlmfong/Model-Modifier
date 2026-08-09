@@ -1,16 +1,15 @@
 #include "Surface.h"
 
+////////// helpers to build the Mesh //////////
 
-////////// helpers to build the Object //////////
-
-std::vector<glm::vec3> Surface::CatmulClarkEdgePoints()
+static std::vector<glm::vec3> CatmullClarkEdgePoints(Mesh& mesh)
 {
     // calcuate edge points
-    unsigned int numEdges = static_cast<unsigned int>(m_Edges.size());
+    unsigned int numEdges = static_cast<unsigned int>(mesh.m_TopoEdges.size());
     std::vector<glm::vec3> edgePoints(numEdges);
     for (unsigned int i = 0; i < numEdges; i++)
     {
-        EdgeRecord currEdge = m_Edges[i];
+        EdgeRecord currEdge = mesh.m_TopoEdges[i];
         if (currEdge.adjFacesIdx.size() == 1) // boundary edge
         {
             // ME point
@@ -19,40 +18,39 @@ std::vector<glm::vec3> Surface::CatmulClarkEdgePoints()
         else // edge borders 2 faces
         {
             // (AF + ME) / 2 point
-            edgePoints[i] = 0.5f * currEdge.midEdgePoint + 0.25f * (m_Faces[currEdge.adjFacesIdx[0]].facePoint + m_Faces[currEdge.adjFacesIdx[1]].facePoint);
+            edgePoints[i] = 0.5f * currEdge.midEdgePoint + 0.25f * (mesh.m_TopoFaces[currEdge.adjFacesIdx[0]].facePoint + mesh.m_TopoFaces[currEdge.adjFacesIdx[1]].facePoint);
         }
     }
 
     return edgePoints;
 }
 
-// create the obj file, in Catmull Clark style
-Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
+// create the mesh, in Catmull Clark style
+static void CCWriteToMesh(Mesh& mesh, std::vector<glm::vec3>& edgePoints)
 {
-    // build new Object class (CC style)
     std::vector<glm::vec3> VertexPos;
     std::unordered_map<float, std::unordered_map<float, std::unordered_map<float, unsigned int>>> VertLookup;
     std::vector<std::vector<unsigned int>> FaceIndices;
     std::unordered_map<unsigned int, unsigned int> NumberPolygons;
 
-    for (FaceRecord face : m_Faces)
+    for (FaceRecord& face : mesh.m_TopoFaces)
     {
         unsigned int n = static_cast<unsigned int>(face.verticesIdx.size());
-        
+
         std::vector<unsigned int> vertsIdx;
         std::vector<unsigned int> edgesIdx;
         for (unsigned int i = 0; i < n; i++)
         {
-            glm::vec3 vert = m_Vertices[face.verticesIdx[i]].position;
-            vertsIdx.push_back(getVertIndex(vert, VertexPos, VertLookup));
+            glm::vec3 vert = mesh.m_TopoVertices[face.verticesIdx[i]].position;
+            vertsIdx.push_back(mesh.GetVertIndex(vert, VertexPos, VertLookup));
 
-            glm::vec3 edge = edgePoints[getEdgeIndex({ face.verticesIdx[i], face.verticesIdx[(i + 1) % n] })];
-            edgesIdx.push_back(getVertIndex(edge, VertexPos, VertLookup));
+            glm::vec3 edge = edgePoints[mesh.GetEdgeIndex({ face.verticesIdx[i], face.verticesIdx[(i + 1) % n] })];
+            edgesIdx.push_back(mesh.GetVertIndex(edge, VertexPos, VertLookup));
         }
 
         glm::vec3 facePoint = face.facePoint;
-        unsigned int facePointIdx = getVertIndex(facePoint, VertexPos, VertLookup);
-            
+        unsigned int facePointIdx = mesh.GetVertIndex(facePoint, VertexPos, VertLookup);
+
         // every n-gon turns into n quads
         for (unsigned int i = 0; i < n; i++)
         {
@@ -62,92 +60,94 @@ Object Surface::CCOutputOBJ(std::vector<glm::vec3> edgePoints)
         NumberPolygons[4] += n;
     }
 
-    Object Obj;
-    Obj.m_Min = m_Min; Obj.m_Max = m_Max;
-    Obj.m_VertexPos = VertexPos; Obj.m_FaceIndices = FaceIndices;
-    Obj.m_NumPolygons = NumberPolygons;
-    Obj.TriangulateFaces();
-
-    return Obj;
+    mesh.DestroyTopology();
+    mesh.DestroyRenderData();
+    mesh.m_VertexPos = std::move(VertexPos);
+    mesh.m_FaceIndices = std::move(FaceIndices);
+    mesh.m_NumPolygons = std::move(NumberPolygons);
+    mesh.TriangulateFaces();
 }
-
 
 ////////// algorithms //////////
 
 // My own algorithm
-Object Surface::Beehive()
+void SubdivideBeehive(Mesh& mesh)
 {
-    std::vector<glm::vec3> edgePoints = CatmulClarkEdgePoints();
+    mesh.BuildTopology();
+    std::vector<glm::vec3> edgePoints = CatmullClarkEdgePoints(mesh);
 
     // update original vertex positions
-    for (unsigned int i = 0; i < m_Vertices.size(); i++)
+    for (unsigned int i = 0; i < mesh.m_TopoVertices.size(); i++)
     {
-        VertexRecord currVert = m_Vertices[i];
+        VertexRecord currVert = mesh.m_TopoVertices[i];
 
         // calculate F: average of face points 
         glm::vec3 avgFacePosition{ 0 };
         for (unsigned int faceIdx : currVert.adjFacesIdx)
         {
-            avgFacePosition += m_Faces[faceIdx].facePoint;
+            avgFacePosition += mesh.m_TopoFaces[faceIdx].facePoint;
         }
         avgFacePosition /= 3 * static_cast<float>(currVert.adjFacesIdx.size());
 
         // update original vertex point to new position
-        m_Vertices[i].position = avgFacePosition;
+        mesh.m_TopoVertices[i].position = avgFacePosition;
     }
 
-    // build new Object class
-    return CCOutputOBJ(edgePoints);
+    // build new mesh
+    CCWriteToMesh(mesh, edgePoints);
 }
 
 // My own algorithm
-Object Surface::Snowflake()
+void SubdivideSnowflake(Mesh& mesh)
 {
-    std::vector<glm::vec3> edgePoints = CatmulClarkEdgePoints();
+    mesh.BuildTopology();
+    std::vector<glm::vec3> edgePoints = CatmullClarkEdgePoints(mesh);
 
     // update original vertex positions
-    for (unsigned int i = 0; i < m_Vertices.size(); i++)
+    for (unsigned int i = 0; i < mesh.m_TopoVertices.size(); i++)
     {
-        VertexRecord currVert = m_Vertices[i];
+        VertexRecord currVert = mesh.m_TopoVertices[i];
 
         // calculate F: average of face points 
         glm::vec3 avgFacePosition{ 0 };
         for (unsigned int faceIdx : currVert.adjFacesIdx)
         {
-            avgFacePosition += m_Faces[faceIdx].facePoint;
+            avgFacePosition += mesh.m_TopoFaces[faceIdx].facePoint;
         }
         avgFacePosition /= static_cast<float>(currVert.adjFacesIdx.size());
 
         // update original vertex point to new position
-        m_Vertices[i].position = avgFacePosition;
+        mesh.m_TopoVertices[i].position = avgFacePosition;
     }
 
-    // build new Object class
-    return CCOutputOBJ(edgePoints);
+    // build new mesh
+    CCWriteToMesh(mesh, edgePoints);
 }
 
 // Catmull Clark subdivision surface algorithm
-Object Surface::CatmullClark()
+void SubdivideCatmullClark(Mesh& mesh)
 {
-    std::vector<glm::vec3> edgePoints = CatmulClarkEdgePoints();
+    mesh.BuildTopology();
+    std::vector<glm::vec3> edgePoints = CatmullClarkEdgePoints(mesh);
 
-    unsigned int numVertices = static_cast<unsigned int>(m_Vertices.size());
+    unsigned int numVertices = static_cast<unsigned int>(mesh.m_TopoVertices.size());
     // update original vertex positions
     std::vector<glm::vec3> originalPoints(numVertices);
     // store the original positions
     for (unsigned int i = 0; i < numVertices; i++)
     {
-        originalPoints[i] = m_Vertices[i].position;
+        originalPoints[i] = mesh.m_TopoVertices[i].position;
     }
+
     for (unsigned int i = 0; i < numVertices; i++)
     {
-        VertexRecord currVert = m_Vertices[i];
+        VertexRecord currVert = mesh.m_TopoVertices[i];
 
         // calculate F: average of face points 
         glm::vec3 avgFacePosition{ 0 };
         for (unsigned int faceIdx : currVert.adjFacesIdx)
         {
-            avgFacePosition += m_Faces[faceIdx].facePoint;
+            avgFacePosition += mesh.m_TopoFaces[faceIdx].facePoint;
         }
         float numAdjFaces = static_cast<float>(currVert.adjFacesIdx.size());
         avgFacePosition /= numAdjFaces;
@@ -156,7 +156,7 @@ Object Surface::CatmullClark()
         glm::vec3 avgMidEdge{ 0 };
         for (unsigned int edgeIndex : currVert.adjEdgesIdx)
         {
-            EdgeRecord currEdge = m_Edges[edgeIndex];
+            EdgeRecord currEdge = mesh.m_TopoEdges[edgeIndex];
             avgMidEdge += 0.5f * (originalPoints[currEdge.endPoint1Idx] + originalPoints[currEdge.endPoint2Idx]);
         }
         avgMidEdge /= static_cast<float>(currVert.adjEdgesIdx.size());
@@ -165,9 +165,9 @@ Object Surface::CatmullClark()
         newPoint /= numAdjFaces;
 
         // update original vertex point to new position
-        m_Vertices[i].position = newPoint;
+        mesh.m_TopoVertices[i].position = newPoint;
     }
 
-    // build new Object class
-    return CCOutputOBJ(edgePoints);
+    // build new mesh
+    CCWriteToMesh(mesh, edgePoints);
 }

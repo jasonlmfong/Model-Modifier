@@ -1,12 +1,18 @@
 #include "Surface.h"
 
+#include <algorithm>
+#include <set>
+#include <queue>
+#include <cmath>
+
+using namespace SurfaceDetail;
 
 ////////// helpers for the LRZ algorithm //////////
 
 // compute line quadric by constructing quadric matrices from edges adjacent to vertex
 // note this is not the same as the paper, we sum over adjacent edges instead of using vertex normal
 // the proper implementation is below
-glm::mat4 Surface::ComputeLineQuadric(VertexRecord v0)
+static glm::mat4 ComputeLineQuadric(const Mesh& mesh, VertexRecord v0)
 {
     glm::mat4 lineQuadric{ 0.0f };
     glm::vec3 position = v0.position;
@@ -14,21 +20,21 @@ glm::mat4 Surface::ComputeLineQuadric(VertexRecord v0)
     // for each adjacent edge, create a line constraint
     for (unsigned int edgeIdx : v0.adjEdgesIdx)
     {
-        if (edgeIdx >= m_Edges.size()) continue;
+        if (edgeIdx >= mesh.m_TopoEdges.size()) continue;
 
-        EdgeRecord edge = m_Edges[edgeIdx];
+        EdgeRecord edge = mesh.m_TopoEdges[edgeIdx];
 
         // get the other endpoint of the edge
         glm::vec3 otherPos;
-        if (edge.endPoint1Idx < m_Vertices.size() && edge.endPoint2Idx < m_Vertices.size())
+        if (edge.endPoint1Idx < mesh.m_TopoVertices.size() && edge.endPoint2Idx < mesh.m_TopoVertices.size())
         {
-            if (m_Vertices[edge.endPoint1Idx].position == position)
+            if (mesh.m_TopoVertices[edge.endPoint1Idx].position == position)
             {
-                otherPos = m_Vertices[edge.endPoint2Idx].position;
+                otherPos = mesh.m_TopoVertices[edge.endPoint2Idx].position;
             }
             else
             {
-                otherPos = m_Vertices[edge.endPoint1Idx].position;
+                otherPos = mesh.m_TopoVertices[edge.endPoint1Idx].position;
             }
         }
         else
@@ -107,24 +113,25 @@ glm::mat4 Surface::ComputeLineQuadric(VertexRecord v0)
 //     return lineQuadric;
 // }
 
-glm::mat4 Surface::ComputeWeightedQuadric(const glm::mat4& planeQuadric, const glm::mat4& lineQuadric, float alpha)
+static glm::mat4 ComputeWeightedQuadric(const glm::mat4& planeQuadric, const glm::mat4& lineQuadric, float alpha)
 {
     return planeQuadric + alpha * lineQuadric;
 }
 
-
 ////////// algorithms //////////
 
 // Liu Rahimzadeh Zordan QEM simplification with line quadric constraints
-Object Surface::LineQEM(unsigned int desiredCount, float alpha)
+void SimplifyLiuRahimzadehZordan(Mesh& mesh, unsigned int desiredCount, float alpha)
 {
-    unsigned int numVertices = static_cast<unsigned int>(m_Vertices.size());
+    mesh.BuildTopology();
+
+    unsigned int numVertices = static_cast<unsigned int>(mesh.m_TopoVertices.size());
 
     // identify boundary edges (edges with only one adjacent face)
     std::set<unsigned int> boundaryEdges;
-    for (unsigned int i = 0; i < m_Edges.size(); i++)
+    for (unsigned int i = 0; i < mesh.m_TopoEdges.size(); i++)
     {
-        if (m_Edges[i].adjFacesIdx.size() == 1)
+        if (mesh.m_TopoEdges[i].adjFacesIdx.size() == 1)
         {
             boundaryEdges.insert(i);
         }
@@ -137,24 +144,24 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
 
     for (unsigned int i = 0; i < numVertices; i++)
     {
-        glm::mat4 planeQuadric = ComputePlaneQuadric(m_Vertices[i]);
-        glm::mat4 lineQuadric = ComputeLineQuadric(m_Vertices[i]);
+        glm::mat4 planeQuadric = ComputePlaneQuadric(mesh, mesh.m_TopoVertices[i]);
+        glm::mat4 lineQuadric = ComputeLineQuadric(mesh, mesh.m_TopoVertices[i]);
 
         // add penalty quadric for boundary vertices to point quadric
-        for (unsigned int edgeIdx : m_Vertices[i].adjEdgesIdx)
+        for (unsigned int edgeIdx : mesh.m_TopoVertices[i].adjEdgesIdx)
         {
             if (boundaryEdges.find(edgeIdx) != boundaryEdges.end())
             {
                 // Create constraint plane perpendicular to the boundary edge
-                EdgeRecord& edge = m_Edges[edgeIdx];
-                glm::vec3 v1 = m_Vertices[edge.endPoint1Idx].position;
-                glm::vec3 v2 = m_Vertices[edge.endPoint2Idx].position;
+                EdgeRecord& edge = mesh.m_TopoEdges[edgeIdx];
+                glm::vec3 v1 = mesh.m_TopoVertices[edge.endPoint1Idx].position;
+                glm::vec3 v2 = mesh.m_TopoVertices[edge.endPoint2Idx].position;
                 glm::vec3 edgeDir = glm::normalize(v2 - v1);
 
                 // for a boundary edge, create a perpendicular constraint with face normal of the adjacent face
-                if (!edge.adjFacesIdx.empty() && edge.adjFacesIdx[0] < m_Faces.size())
+                if (!edge.adjFacesIdx.empty() && edge.adjFacesIdx[0] < mesh.m_TopoFaces.size())
                 {
-                    glm::vec3 faceNormal = ComputeFaceNormal(m_Faces[edge.adjFacesIdx[0]]);
+                    glm::vec3 faceNormal = mesh.ComputeFaceNormal(mesh.m_TopoFaces[edge.adjFacesIdx[0]]);
                     glm::vec3 perpendicular = glm::normalize(glm::cross(edgeDir, faceNormal));
                     glm::vec4 constraintPlane{ perpendicular, -glm::dot(perpendicular, v1) };
                     planeQuadric += BOUNDARY_WEIGHT * glm::outerProduct(constraintPlane, constraintPlane);
@@ -169,7 +176,7 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
     const float THRESHOLD = 0.05f;
 
     // select all valid pairs
-    std::vector<std::set<unsigned int>> vertexPairLookup; // maintain vertex pairs
+    std::vector<std::set<unsigned int>> vertexPairLookup;
     vertexPairLookup.resize(numVertices);
 
     std::vector<ValidPair> validPairs;
@@ -177,8 +184,8 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
     {
         for (unsigned int secondV = firstV + 1; secondV < numVertices; secondV++)
         {
-            auto searchx = m_EdgeIdxLookup.find(firstV);
-            if (searchx != m_EdgeIdxLookup.end())
+            auto searchx = mesh.m_EdgeIdxLookup.find(firstV);
+            if (searchx != mesh.m_EdgeIdxLookup.end())
             {
                 // search if ending vertex in our lookup
                 auto searchy = searchx->second.find(secondV);
@@ -188,28 +195,22 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
                     vertexPairLookup[firstV].insert(static_cast<unsigned int>(validPairs.size()));
                     vertexPairLookup[secondV].insert(static_cast<unsigned int>(validPairs.size()));
                     // found edge, add to valid pairs
-                    ValidPair newPair{}; 
-                    newPair.vertOne = firstV; 
-                    newPair.vertTwo = secondV; 
-                    newPair.edge = true;
-                    newPair.alpha = alpha;
+                    ValidPair newPair{};
+                    newPair.vertOne = firstV; newPair.vertTwo = secondV; newPair.edge = true; newPair.alpha = alpha;
                     validPairs.push_back(newPair);
                 }
             }
             // not found, check if the edges are close (distance smaller than threshold)
-            glm::vec3 firstPos = m_Vertices[firstV].position;
-            glm::vec3 secondPos = m_Vertices[secondV].position;
+            glm::vec3 firstPos = mesh.m_TopoVertices[firstV].position;
+            glm::vec3 secondPos = mesh.m_TopoVertices[secondV].position;
             if (glm::distance(firstPos, secondPos) < THRESHOLD)
             {
                 // add the pair idx to the vertices
                 vertexPairLookup[firstV].insert(static_cast<unsigned int>(validPairs.size()));
                 vertexPairLookup[secondV].insert(static_cast<unsigned int>(validPairs.size()));
                 // add to valid pairs
-                ValidPair newPair{}; 
-                newPair.vertOne = firstV; 
-                newPair.vertTwo = secondV; 
-                newPair.edge = false;
-                newPair.alpha = alpha;
+                ValidPair newPair{};
+                newPair.vertOne = firstV; newPair.vertTwo = secondV; newPair.edge = false; newPair.alpha = alpha;
                 validPairs.push_back(newPair);
             }
             // else, do nothing, not a valid pair
@@ -219,15 +220,14 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
     // compute the new point and error associated for each valid pair
     for (ValidPair& validPair : validPairs)
     {
-        ComputeOptimalVertexAndError(
+        ComputeOptimalVertexAndError(mesh,
             validPair,
             ComputeWeightedQuadric(planeQuadricLookup[validPair.vertOne], lineQuadricLookup[validPair.vertOne], alpha),
-            ComputeWeightedQuadric(planeQuadricLookup[validPair.vertTwo], lineQuadricLookup[validPair.vertTwo], alpha)
-        );
+            ComputeWeightedQuadric(planeQuadricLookup[validPair.vertTwo], lineQuadricLookup[validPair.vertTwo], alpha));
     }
 
     // create a min-heap to store all the valid pairs, ordered by error cost
-    m_QuadricErrorHeap = std::priority_queue<ValidPair, std::vector<ValidPair>, CompareValidPairs>(validPairs.begin(), validPairs.end());
+    std::priority_queue<ValidPair, std::vector<ValidPair>, CompareValidPairs> quadricErrorHeap(validPairs.begin(), validPairs.end());
 
     // track which pairs have been contracted to avoid processing stale duplicates
     std::set<std::pair<unsigned int, unsigned int>> contractedPairs;
@@ -236,11 +236,11 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
     std::set<unsigned int> deletedVertices;
 
     // iteratively remove the validpair with the lowest cost, until numFaces == desiredCount
-    unsigned int numFaces = static_cast<unsigned int>(m_Faces.size());
-    while (numFaces > desiredCount && !m_QuadricErrorHeap.empty())
+    unsigned int numFaces = static_cast<unsigned int>(mesh.m_TopoFaces.size());
+    while (numFaces > desiredCount && !quadricErrorHeap.empty())
     {
-        ValidPair leastCost = m_QuadricErrorHeap.top();
-        m_QuadricErrorHeap.pop();
+        ValidPair leastCost = quadricErrorHeap.top();
+        quadricErrorHeap.pop();
 
         // skip if either vertex has been deleted/merged
         if (deletedVertices.find(leastCost.vertOne) != deletedVertices.end() ||
@@ -267,49 +267,49 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
 
         // store original face normals BEFORE any modifications, used to compare later
         std::set<unsigned int> facesToUpdate;
-        facesToUpdate.insert(m_Vertices[leastCost.vertTwo].adjFacesIdx.begin(), m_Vertices[leastCost.vertTwo].adjFacesIdx.end());
-        facesToUpdate.insert(m_Vertices[leastCost.vertOne].adjFacesIdx.begin(), m_Vertices[leastCost.vertOne].adjFacesIdx.end());
+        facesToUpdate.insert(mesh.m_TopoVertices[leastCost.vertTwo].adjFacesIdx.begin(), mesh.m_TopoVertices[leastCost.vertTwo].adjFacesIdx.end());
+        facesToUpdate.insert(mesh.m_TopoVertices[leastCost.vertOne].adjFacesIdx.begin(), mesh.m_TopoVertices[leastCost.vertOne].adjFacesIdx.end());
 
         std::unordered_map<unsigned int, glm::vec3> originalNormals;
         for (unsigned int faceIdx : facesToUpdate)
         {
-            if (faceIdx < m_Faces.size())
+            if (faceIdx < mesh.m_TopoFaces.size())
             {
-                originalNormals[faceIdx] = ComputeFaceNormal(m_Faces[faceIdx]);
+                originalNormals[faceIdx] = mesh.ComputeFaceNormal(mesh.m_TopoFaces[faceIdx]);
             }
         }
 
         // contract the current pair
         // move vertOne to the new position, and merge all references to vertTwo into vertOne
-        m_Vertices[leastCost.vertOne].position = leastCost.newVert;
+        mesh.m_TopoVertices[leastCost.vertOne].position = leastCost.newVert;
 
         // merge all faces, edges from vertTwo into vertOne
-        for (unsigned int faceIdx : m_Vertices[leastCost.vertTwo].adjFacesIdx)
+        for (unsigned int faceIdx : mesh.m_TopoVertices[leastCost.vertTwo].adjFacesIdx)
         {
-            if (std::find(m_Vertices[leastCost.vertOne].adjFacesIdx.begin(), 
-                         m_Vertices[leastCost.vertOne].adjFacesIdx.end(), faceIdx) 
-                == m_Vertices[leastCost.vertOne].adjFacesIdx.end())
+            if (std::find(mesh.m_TopoVertices[leastCost.vertOne].adjFacesIdx.begin(),
+                         mesh.m_TopoVertices[leastCost.vertOne].adjFacesIdx.end(), faceIdx)
+                == mesh.m_TopoVertices[leastCost.vertOne].adjFacesIdx.end())
             {
-                m_Vertices[leastCost.vertOne].adjFacesIdx.push_back(faceIdx);
+                mesh.m_TopoVertices[leastCost.vertOne].adjFacesIdx.push_back(faceIdx);
             }
         }
 
-        for (unsigned int edgeIdx : m_Vertices[leastCost.vertTwo].adjEdgesIdx)
+        for (unsigned int edgeIdx : mesh.m_TopoVertices[leastCost.vertTwo].adjEdgesIdx)
         {
-            if (std::find(m_Vertices[leastCost.vertOne].adjEdgesIdx.begin(), 
-                         m_Vertices[leastCost.vertOne].adjEdgesIdx.end(), edgeIdx) 
-                == m_Vertices[leastCost.vertOne].adjEdgesIdx.end())
+            if (std::find(mesh.m_TopoVertices[leastCost.vertOne].adjEdgesIdx.begin(),
+                         mesh.m_TopoVertices[leastCost.vertOne].adjEdgesIdx.end(), edgeIdx)
+                == mesh.m_TopoVertices[leastCost.vertOne].adjEdgesIdx.end())
             {
-                m_Vertices[leastCost.vertOne].adjEdgesIdx.push_back(edgeIdx);
+                mesh.m_TopoVertices[leastCost.vertOne].adjEdgesIdx.push_back(edgeIdx);
             }
         }
 
         // update all faces that reference vertTwo to reference vertOne instead
         for (unsigned int faceIdx : facesToUpdate)
         {
-            if (faceIdx < m_Faces.size())
+            if (faceIdx < mesh.m_TopoFaces.size())
             {
-                FaceRecord& face = m_Faces[faceIdx];
+                FaceRecord& face = mesh.m_TopoFaces[faceIdx];
 
                 // check if this face contains BOTH vertices - if so, it will become degenerate
                 bool containsVertOne = std::find(face.verticesIdx.begin(), face.verticesIdx.end(), leastCost.vertOne) != face.verticesIdx.end();
@@ -331,7 +331,7 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
                 if (containsVertOne != containsVertTwo)
                 {
                     // calculate new normal after vertex update
-                    glm::vec3 newNormal = ComputeFaceNormal(face);
+                    glm::vec3 newNormal = mesh.ComputeFaceNormal(face);
 
                     // validate that both normals are non-zero before comparing
                     float originalLength = glm::length(originalNormal);
@@ -340,11 +340,8 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
                     if (originalLength > 1e-6f && newLength > 1e-6f)
                     {
                         // normalize for accurate dot product comparison
-                        glm::vec3 origNormalized = originalNormal / originalLength;
-                        glm::vec3 newNormalized = newNormal / newLength;
-
                         // if new normal is opposite to original, flip the face to preserve orientation
-                        if (glm::dot(newNormalized, origNormalized) < 0.0f)
+                        if (glm::dot(originalNormal / originalLength, newNormal / newLength) < 0.0f)
                         {
                             std::reverse(face.verticesIdx.begin(), face.verticesIdx.end());
                         }
@@ -354,9 +351,9 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
         }
 
         // update all edges that reference vertTwo to reference vertOne instead
-        for (unsigned int edgeIdx : m_Vertices[leastCost.vertTwo].adjEdgesIdx)
+        for (unsigned int edgeIdx : mesh.m_TopoVertices[leastCost.vertTwo].adjEdgesIdx)
         {
-            EdgeRecord& edge = m_Edges[edgeIdx];
+            EdgeRecord& edge = mesh.m_TopoEdges[edgeIdx];
             if (edge.endPoint1Idx == leastCost.vertTwo)
             {
                 edge.endPoint1Idx = leastCost.vertOne;
@@ -370,11 +367,11 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
         // remove degenerate faces
         std::vector<unsigned int> removedFaceIndices;
 
-        for (unsigned int i = 0; i < m_Faces.size(); i++)
+        for (unsigned int i = 0; i < mesh.m_TopoFaces.size(); i++)
         {
             // check if face has duplicate vertices (degenerate after vertex merge)
-            std::set<unsigned int> uniqueVerts(m_Faces[i].verticesIdx.begin(), m_Faces[i].verticesIdx.end());
-            if (uniqueVerts.size() < m_Faces[i].verticesIdx.size())
+            std::set<unsigned int> uniqueVerts(mesh.m_TopoFaces[i].verticesIdx.begin(), mesh.m_TopoFaces[i].verticesIdx.end());
+            if (uniqueVerts.size() < mesh.m_TopoFaces[i].verticesIdx.size())
             {
                 removedFaceIndices.push_back(i);
             }
@@ -383,22 +380,22 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
         // remove faces in reverse order to maintain indices
         for (auto it = removedFaceIndices.rbegin(); it != removedFaceIndices.rend(); ++it)
         {
-            m_Faces.erase(m_Faces.begin() + *it);
+            mesh.m_TopoFaces.erase(mesh.m_TopoFaces.begin() + *it);
         }
 
         // update all vertex adjacency lists
-        for (VertexRecord& vertex : m_Vertices)
+        for (VertexRecord& vertex : mesh.m_TopoVertices)
         {
             UpdateAdjacencyIndices(vertex.adjFacesIdx, removedFaceIndices);
         }
 
         // update all edge adjacency lists
-        for (EdgeRecord& edge : m_Edges)
+        for (EdgeRecord& edge : mesh.m_TopoEdges)
         {
             UpdateAdjacencyIndices(edge.adjFacesIdx, removedFaceIndices);
         }
 
-        numFaces = static_cast<unsigned int>(m_Faces.size());
+        numFaces = static_cast<unsigned int>(mesh.m_TopoFaces.size());
 
         // update both point and line quadrics for the merged vertex
         planeQuadricLookup[leastCost.vertOne] = planeQuadricLookup[leastCost.vertOne] + planeQuadricLookup[leastCost.vertTwo];
@@ -423,7 +420,7 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
             unsigned int otherVert = (validPair.vertOne == leastCost.vertOne) ? validPair.vertTwo : validPair.vertOne;
 
             // recalculate error for this pair
-            ComputeOptimalVertexAndError(
+            ComputeOptimalVertexAndError(mesh,
                 validPair,
                 ComputeWeightedQuadric(planeQuadricLookup[leastCost.vertOne], lineQuadricLookup[leastCost.vertOne], alpha),
                 ComputeWeightedQuadric(planeQuadricLookup[otherVert], lineQuadricLookup[otherVert], alpha)
@@ -433,7 +430,7 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
             if (deletedVertices.find(validPair.vertOne) == deletedVertices.end() &&
                 deletedVertices.find(validPair.vertTwo) == deletedVertices.end())
             {
-                m_QuadricErrorHeap.push(validPair);
+                quadricErrorHeap.push(validPair);
             }
         }
 
@@ -475,7 +472,7 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
             vertexPairLookup[leastCost.vertOne].insert(pairIdx);
 
             // recalculate error for this pair
-            ComputeOptimalVertexAndError(
+            ComputeOptimalVertexAndError(mesh,
                 validPair,
                 ComputeWeightedQuadric(planeQuadricLookup[leastCost.vertOne], lineQuadricLookup[leastCost.vertOne], alpha),
                 ComputeWeightedQuadric(planeQuadricLookup[otherVert], lineQuadricLookup[otherVert], alpha)
@@ -485,10 +482,10 @@ Object Surface::LineQEM(unsigned int desiredCount, float alpha)
             if (deletedVertices.find(validPair.vertOne) == deletedVertices.end() &&
                 deletedVertices.find(validPair.vertTwo) == deletedVertices.end())
             {
-                m_QuadricErrorHeap.push(validPair);
+                quadricErrorHeap.push(validPair);
             }
         }
     }
 
-    return QEMOutputOBJ();
+    WriteTopologyToMesh(mesh);
 }
